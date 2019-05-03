@@ -1,0 +1,10 @@
+{
+	"Salidas": [
+		{"GPIO": 23, "nombre": "Pulsador", "inicio": "off" }
+	],
+	"Entradas": [
+		{"GPIO": 13, "nombre": "P. abierta", "tipo": "INPUT_PULLDOWN"},
+		{"GPIO": 12, "nombre": "P. cerrada", "tipo": "INPUT_PULLDOWN" }
+	]
+}
+

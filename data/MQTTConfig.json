@@ -1,0 +1,11 @@
+{ 
+"IPBroker": "10.68.1.100", 
+"puerto": 1883, 
+"usuarioMQTT": "usuario", 
+"passwordMQTT": "password", 
+"ID_MQTT": "garaje32/puerta", 
+"topicRoot": "casa", 
+"keepAlive": 0,
+"publicarEntradas": 1,
+"publicarSalidas": 0
+}

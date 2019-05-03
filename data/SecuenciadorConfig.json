@@ -1,0 +1,66 @@
+{
+	"estadoInicial": 1,
+	"Planes":[
+		{
+		"id_plan": 1, 
+		"salida": 0,
+		"intervalos": [
+			{"id":  0, "valor": 2755},
+			{"id":  1, "valor": 240 },
+			{"id":  2, "valor": 1365},
+			{"id":  3, "valor": 819 },
+			{"id":  4, "valor": 1911},
+			{"id":  5, "valor": 273 },
+			{"id":  6, "valor": 4053},
+			{"id":  7, "valor": 3968},
+			{"id":  8, "valor": 1755},
+			{"id":  9, "valor": 2745},
+			{"id": 10, "valor": 2755},
+			{"id": 11, "valor": 240 },
+			{"id": 12, "valor": 1365},
+			{"id": 13, "valor": 819 },
+			{"id": 14, "valor": 1911},
+			{"id": 15, "valor": 273 },
+			{"id": 16, "valor": 4053},
+			{"id": 17, "valor": 3968},
+			{"id": 18, "valor": 1755},
+			{"id": 19, "valor": 2745},
+			{"id": 20, "valor": 2755},
+			{"id": 21, "valor": 240 },
+			{"id": 22, "valor": 1365},
+			{"id": 23, "valor": 819 }			
+			]	
+		},
+		{
+		"id_plan": 2, 
+		"salida": 12,
+		"intervalos": [
+			{"id":  0, "valor": 240 },
+			{"id":  1, "valor": 240 },
+			{"id":  2, "valor": 240 },
+			{"id":  3, "valor": 273 },
+			{"id":  4, "valor": 273 },
+			{"id":  5, "valor": 819 },
+			{"id":  6, "valor": 819 },
+			{"id":  7, "valor": 819 },
+			{"id":  8, "valor": 1365},
+			{"id":  9, "valor": 1365},
+			{"id": 10, "valor": 1365},
+			{"id": 11, "valor": 1755},
+			{"id": 12, "valor": 1755},
+			{"id": 13, "valor": 1911},
+			{"id": 14, "valor": 1911},
+			{"id": 15, "valor": 2745},
+			{"id": 16, "valor": 2745},
+			{"id": 17, "valor": 2755},
+			{"id": 18, "valor": 2755},
+			{"id": 19, "valor": 2755},
+			{"id": 20, "valor": 3968},
+			{"id": 21, "valor": 3968},
+			{"id": 22, "valor": 4053},
+			{"id": 23, "valor": 4053}
+			]	
+		}
+	]
+}
+
