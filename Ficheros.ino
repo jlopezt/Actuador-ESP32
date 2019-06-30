@@ -5,9 +5,30 @@
 /*                                              */
 /************************************************/
 
-
 /************************************************/
 /* Recupera los datos de configuracion          */
+/* de un archivo, si hay bloqyueo de            */
+/* configuracion, devuelve KO                   */
+/************************************************/
+boolean leeFicheroConfig(String nombre, String &contenido)
+  {
+  if(candado) return false; //la utima configuracion fue mal, los ficheros no valen. Tomamos configuracion pro defecto en todos los modulos
+  return (leeFichero(nombre, contenido));  
+  }
+
+/************************************************/
+/* Salva los datos de configuracion             */
+/* de un archivo, si hay bloqyueo de            */
+/* configuracion, devuelve KO                   */
+/************************************************/
+boolean salvaFicheroConfig(String nombreFichero, String nombreFicheroBak, String contenidoFichero)
+  {
+  if(candado) return false; //la utima configuracion fue mal, los ficheros no valen. Tomamos configuracion pro defecto en todos los modulos
+  return (salvaFichero(nombreFichero, nombreFicheroBak, contenidoFichero));  
+  }
+
+/************************************************/
+/* Recupera los datos de                        */
 /* de un archivo cualquiera                     */
 /************************************************/
 boolean leeFichero(String nombre, String &contenido)
@@ -17,40 +38,42 @@ boolean leeFichero(String nombre, String &contenido)
   Serial.println("Inicio de lectura de fichero " + nombre);
 
   //inicializo el sistema de ficheros
-  if (SPIFFS.begin(true)) 
+  if (!SPIFFS.begin(true)) 
     {
-    Serial.println("------------------------------mounted file system---------------------------------");
-    if (SPIFFS.exists(nombre)) 
+    Serial.println("No se puede inicializar el sistema de ficheros");
+    return (false);
+    }
+  
+  Serial.println("------------------------------mounted file system---------------------------------");
+  if (SPIFFS.exists(nombre)) 
+    {
+    //file exists, reading and loading
+    Serial.printf("Encontrado fichero de configuracion %s.\n",nombre.c_str());
+    File configFile = SPIFFS.open(nombre, "r");
+    if (configFile) 
       {
-      //file exists, reading and loading
-      Serial.printf("Encontrado fichero de configuracion %s.\n",nombre.c_str());
-      File configFile = SPIFFS.open(nombre, "r");
-      if (configFile) 
-        {
-        Serial.printf("Abierto fichero de configuracion %s.\n",configFile.name());
-        size_t size = configFile.size();
+      Serial.printf("Abierto fichero de configuracion %s.\n",configFile.name());
+      size_t size = configFile.size();
 
-        // Allocate a buffer to store contents of the file.
-        char *buff=NULL;
-        buff=(char *)malloc(size+1);
+      // Allocate a buffer to store contents of the file.
+      char *buff=NULL;
+      buff=(char *)malloc(size+1);
 
-        configFile.readBytes(buff, size);
-        buff[size]=0;//pongo el fin de cadena
+      configFile.readBytes(buff, size);
+      buff[size]=0;//pongo el fin de cadena
         
-        contenido=String(buff);
-        Serial.printf("Contenido del fichero: #%s#\n",contenido.c_str());
-        free(buff);
-        leido=true;
+      contenido=String(buff);
+      Serial.printf("Contenido del fichero: #%s#\n",contenido.c_str());
+      free(buff);
+      leido=true;
         
-        configFile.close();//cierro el fichero
-        Serial.println("Cierro el fichero");
-        }//la de abrir el fichero de configuracion del WiFi
-        else Serial.println("Fichero no se puede abrir");
-      }//la de existe fichero
-      else Serial.println("Fichero no existe");
-    Serial.println("---------------------------------------unmounted file system------------------------");
-    }//La de abrir el sistema de ficheros
-  else Serial.println("No se puede inicializar el sistema de ficheros");
+      configFile.close();//cierro el fichero
+      Serial.println("Cierro el fichero");
+      }//la de abrir el fichero de configuracion del WiFi
+      else Serial.println("Fichero no se puede abrir");
+    }//la de existe fichero
+    else Serial.println("Fichero no existe");
+  Serial.println("---------------------------------------unmounted file system------------------------");
   
   return leido;
   }
@@ -63,43 +86,45 @@ boolean salvaFichero(String nombreFichero, String nombreFicheroBak, String conte
   boolean salvado=false;
     
   //inicializo el sistema de ficheros
-  if (SPIFFS.begin(true)) 
+  if (!SPIFFS.begin(true)) 
     {
-    Serial.println("-------------------------------mounted file system--------------------------------");
-  
-    //file exists, reading and loading
-    if(SPIFFS.exists(nombreFichero.c_str())) 
-      {
-      if(nombreFicheroBak!="")
-        {
-        Serial.printf("El fichero %s ya existe, sera copiara con el nombre %s.\n",nombreFichero.c_str(),nombreFicheroBak.c_str());
-          
-        if(SPIFFS.exists(nombreFicheroBak.c_str())) SPIFFS.remove(nombreFicheroBak.c_str());  
-        SPIFFS.rename(nombreFichero.c_str(),nombreFicheroBak.c_str());  
-        }
-      else Serial.printf("El fichero %s ya existe, sera sobreescrito.\n",nombreFichero.c_str());
-      }
+    Serial.println("No se puede inicializar el sistema de ficheros");
+    return (false);
+    }  
 
-    Serial.print("Nombre fichero: ");
-    Serial.println(nombreFichero.c_str());
-    Serial.print("Contenido fichero: ");
-    Serial.println(contenidoFichero.c_str());
-    
-    File newFile = SPIFFS.open(nombreFichero.c_str(), FILE_WRITE);//abro el fichero, si existe lo borra
-    if (newFile) 
+  Serial.println("-------------------------------mounted file system--------------------------------");
+  
+  //file exists, reading and loading
+  if(SPIFFS.exists(nombreFichero.c_str())) 
+    {
+    if(nombreFicheroBak!="")
       {
-      Serial.printf("Abierto fichero %s.\nGuardo contenido:\n#%s#\n",newFile.name(),contenidoFichero.c_str());
-  
-      newFile.print(contenidoFichero);
-      newFile.close();//cierro el fichero
-      Serial.println("Cierro el fichero");
-      salvado=true;
+      Serial.printf("El fichero %s ya existe, sera copiara con el nombre %s.\n",nombreFichero.c_str(),nombreFicheroBak.c_str());
+        
+      if(SPIFFS.exists(nombreFicheroBak.c_str())) SPIFFS.remove(nombreFicheroBak.c_str());  
+      SPIFFS.rename(nombreFichero.c_str(),nombreFicheroBak.c_str());  
       }
-    else Serial.println("El fichero no se pudo abrir para escritura.\n");
+    else Serial.printf("El fichero %s ya existe, sera sobreescrito.\n",nombreFichero.c_str());
+    }
+
+  Serial.print("Nombre fichero: ");
+  Serial.println(nombreFichero.c_str());
+  Serial.print("Contenido fichero: ");
+  Serial.println(contenidoFichero.c_str());
+   
+  File newFile = SPIFFS.open(nombreFichero.c_str(), FILE_WRITE);//abro el fichero, si existe lo borra
+  if (newFile) 
+    {
+    Serial.printf("Abierto fichero %s.\nGuardo contenido:\n#%s#\n",newFile.name(),contenidoFichero.c_str());
   
-    Serial.println("------------------------------unmounted file system---------------------------------");
-    }//La de abrir el sistema de ficheros
-  else Serial.println("No se puede inicializar el sistema de ficheros");
+    newFile.print(contenidoFichero);
+    newFile.close();//cierro el fichero
+    Serial.println("Cierro el fichero");
+    salvado=true;
+    }
+  else Serial.println("El fichero no se pudo abrir para escritura.\n");
+  
+  Serial.println("------------------------------unmounted file system---------------------------------");
       
   return salvado;
   }
@@ -113,23 +138,91 @@ boolean borraFichero(String nombreFichero)
   boolean borrado=false;
   
   //inicializo el sistema de ficheros
-  if (SPIFFS.begin(true)) 
+  if (!SPIFFS.begin(true)) 
     {
-    Serial.println("--------------------------------------mounted file system-------------------------\n");  
-    //file exists, reading and loading
-    if(!SPIFFS.exists(nombreFichero)) Serial.println("El fichero " + nombreFichero + " no existe.");
-    else
+    Serial.println("No se puede inicializar el sistema de ficheros");
+    return (false);
+    }  
+
+  Serial.println("--------------------------------------mounted file system-------------------------\n");  
+  //file exists, reading and loading
+  if(!SPIFFS.exists(nombreFichero)) Serial.println("El fichero " + nombreFichero + " no existe.");
+  else
+    {
+    if (SPIFFS.remove(nombreFichero)) 
       {
-      if (SPIFFS.remove(nombreFichero)) 
-        {
-        borrado=true;
-        Serial.println("El fichero " + nombreFichero + " ha sido borrado.");
-        }
-      else Serial.println("No se pudo borrar el fichero " + nombreFichero + ".");
-      }  
-    Serial.println("--------------------------------unmounted file system-------------------------------");
-    }//La de abrir el sistema de ficheros  
-  else Serial.println("No se puede inicializar el sistema de ficheros");
+      borrado=true;
+      Serial.println("El fichero " + nombreFichero + " ha sido borrado.");
+      }
+    else Serial.println("No se pudo borrar el fichero " + nombreFichero + ".");
+    }  
+  Serial.println("--------------------------------unmounted file system-------------------------------");
 
   return borrado;
   }  
+
+/************************************************/
+/* Recupera los ficheros almacenados en el      */
+/* dispositivo. Devuelve una cadena separada    */
+/* por SEPARADOR                                */
+/************************************************/
+boolean listaFicheros(String &contenido)
+  {   
+  contenido="";
+   
+  if (!SPIFFS.begin(true)) 
+    {
+    Serial.println("No se puede inicializar el sistema de ficheros");
+    return (false);
+    }
+ 
+  File root = SPIFFS.open("/");
+  File file = root.openNextFile();
+ 
+  while(file)
+    {
+    Serial.print("FILE: ");
+    Serial.println(file.name());
+
+    contenido += String(file.name());
+    contenido += SEPARADOR;
+      
+    file = root.openNextFile();
+    }
+    
+  return (true);
+  }  
+
+/************************************************/
+/* Devuelve si existe o no un fichero en el     */
+/* dispositivo                                  */
+/************************************************/
+boolean existeFichero(String nombre)
+  {  
+  if (!SPIFFS.begin(true)) 
+    {
+    Serial.println("No se puede inicializar el sistema de ficheros");
+    return (false);
+    }
+
+  return (SPIFFS.exists(nombre));
+  }
+
+
+/************************************************/
+/* Formatea el sistemas de ficheros del         */
+/* dispositivo                                  */
+/************************************************/
+boolean formatearFS(void)
+  {  
+  if (!SPIFFS.begin(true)) 
+    {
+    Serial.println("No se puede inicializar el sistema de ficheros");
+    return (false);
+    }
+
+  return (SPIFFS.format());
+  }
+
+
+  

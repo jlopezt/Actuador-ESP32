@@ -102,21 +102,16 @@ int recuperaDatosEntradasSalidas(boolean debug)
 
   if (debug) Serial.println("Recupero configuracion de archivo...");
   
-  if(leeFichero(ENTRADAS_SALIDAS_CONFIG_FILE, cad)) 
-    {
-    if(parseaConfiguracionEntradasSalidas(cad)) return OK;
-    }
-  else
+  if(!leeFicheroConfig(ENTRADAS_SALIDAS_CONFIG_FILE, cad)) 
     {
     //Confgiguracion por defecto
-    Serial.printf("No existe fichero de configuracion de E/S\n");
-    cad="{\"Salidas\":[{\"id\":\"0\",\"GPIO\":23,\"nombre\":\"Pulsador\",\"inicio\":\"off\"} ],\"Entradas\":[{\"id\":\"0\",\"GPIO\":1,\"nombre\":\"P.abierta\",\"tipo\":\"INPUT\"}]}";
-    salvaFichero(ENTRADAS_SALIDAS_CONFIG_FILE, ENTRADAS_SALIDAS_CONFIG_BAK_FILE, cad);
-    Serial.printf("Fichero de configuracion de E/S creado por defecto\n");
-    if(parseaConfiguracionEntradasSalidas(cad)) return OK;
+    Serial.printf("No existe fichero de configuracion de E/S\n");    
+    cad="{\"Salidas\": [],\"Entradas\": []}";
+    //salvo la config por defecto
+    if(salvaFicheroConfig(ENTRADAS_SALIDAS_CONFIG_FILE, ENTRADAS_SALIDAS_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion de E/S creado por defecto\n");
     }      
     
-  return KO;
+  return parseaConfiguracionEntradasSalidas(cad);
   }
 
 /*********************************************/
@@ -124,7 +119,7 @@ int recuperaDatosEntradasSalidas(boolean debug)
 /* configuracio de los reles                 */
 /*********************************************/
 boolean parseaConfiguracionEntradasSalidas(String contenido)
-  {  
+  { 
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
   

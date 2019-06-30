@@ -11,7 +11,7 @@
 /***************************** Defines *****************************/
 //Defines generales
 #define NOMBRE_FAMILIA   "Actuador/Secuenciador (E/S)"
-#define VERSION          "4.2.2 (ESP32 OTA|MQTT|Logic+|Secuenciador)"
+#define VERSION          "4.3.0 (ESP32 OTA|MQTT|Logic+|Secuenciador|FicherosWeb)"
 #define SEPARADOR        '|'
 #define SUBSEPARADOR     '#'
 #define KO               -1
@@ -19,6 +19,7 @@
 #define MAX_VUELTAS      UINT16_MAX// 32767 
 
 //Ficheros de configuracion
+#define FICHERO_CANDADO                  "/Candado"
 #define GLOBAL_CONFIG_FILE               "/Config.json"
 #define GLOBAL_CONFIG_BAK_FILE           "/Config.json.bak"
 #define ENTRADAS_SALIDAS_CONFIG_FILE     "/EntradasSalidasConfig.json"
@@ -61,9 +62,10 @@ IPAddress IPGateway;
 //Indica si el rele se activa con HIGH o LOW
 int nivelActivo=HIGH; //Se activa con HIGH por defecto
 
-String nombre_dispoisitivo(NOMBRE_FAMILIA);//Nombre del dispositivo, por defecto el de la familia
+String nombre_dispositivo;//(NOMBRE_FAMILIA);//Nombre del dispositivo, por defecto el de la familia
 uint16_t vuelta = MAX_VUELTAS-100;//0; //vueltas de loop
 int debugGlobal=0; //por defecto desabilitado
+boolean candado=false; //Candado de configuracion. true implica que la ultima configuracion fue mal
 /***************************** variables globales *****************************/
 
 void setup()
@@ -78,6 +80,20 @@ void setup()
   Serial.println("*                                                             *");    
   Serial.println("***************************************************************");
 
+  //Compruebo si existe candado, si existe la ultima configuracion fue mal
+  if(existeFichero(FICHERO_CANDADO)) 
+    {
+    Serial.printf("Candado puesto. Configuracion por defecto");
+    candado=true; 
+    }
+  else
+    {
+    candado=false;
+    //Genera candado
+    if(salvaFichero(FICHERO_CANDADO,"","+++")) Serial.println("Candado creado");
+    else Serial.println("ERROR - No se pudo crear el candado");
+    }
+    
   //Configuracion general
   Serial.printf("\n\nInit Config -----------------------------------------------------------------------\n");
   inicializaConfiguracion(debugGlobal);
@@ -114,6 +130,10 @@ void setup()
   Serial.println("\n\nInit Ordenes ----------------------------------------------------------------------\n");  
   inicializaOrden();//Inicializa los buffers de recepcion de ordenes desde PC
 
+  //Si ha llegado hasta aqui, todo ha ido bien y borro el candado
+  if(borraFichero(FICHERO_CANDADO))Serial.println("Candado borrado");
+  else Serial.println("ERROR - No se pudo borrar el candado");
+  
   Serial.printf("\n\n");
   Serial.println("***************************************************************");
   Serial.println("*                                                             *");
@@ -166,31 +186,28 @@ boolean inicializaConfiguracion(boolean debug)
   if (debug) Serial.println("Recupero configuracion de archivo...");
 
   //cargo el valores por defecto
+  nombre_dispositivo=String(NOMBRE_FAMILIA); //Nombre del dispositivo, por defecto el de la familia
   IPActuador.fromString("0.0.0.0");
   nivelActivo=LOW;  
   
-  if(leeFichero(GLOBAL_CONFIG_FILE, cad)) parseaConfiguracionGlobal(cad);
-  else 
+  if(!leeFicheroConfig(GLOBAL_CONFIG_FILE, cad))
     {
     Serial.printf("No existe fichero de configuracion global\n");
-    cad="{\"NivelActivo\":0,\"IPActuador\": \"10.68.1.78\",\"IPGateway\":\"10.68.1.1\"}"; //config por defecto
-    salvaFichero(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad); //salvo la config por defecto
-    Serial.printf("Fichero de configuracion global creado por defecto\n");
-    if(leeFichero(GLOBAL_CONFIG_FILE, cad)) parseaConfiguracionGlobal(cad);
-    else
-      {
-      Serial.printf("No se pudo recuperar el fichero recien guardado...\n");  
-      cad="{\"NivelActivo\":0,\"IPActuador\": \"10.68.1.78\",\"IPGateway\":\"10.68.1.1\"}"; //config por defecto        
-      parseaConfiguracionGlobal(cad);
-      }
+    cad="{\"nombre_dispositivo\": \"" + String(NOMBRE_FAMILIA) + "\",\"NivelActivo\":0,\"IPActuador\": \"0.0.0.0\",\"IPGateway\":\"0.0.0.0\"}"; //config por defecto    
+    //salvo la config por defecto
+    if(salvaFicheroConfig(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion global creado por defecto\n"); 
     }
 
-  return true;
+  return parseaConfiguracionGlobal(cad);
   }
 
 /*********************************************/
 /* Parsea el json leido del fichero de       */
 /* configuracio global                       */
+/*  auto date = obj.get<char*>("date");
+    auto high = obj.get<int>("high");
+    auto low = obj.get<int>("low");
+    auto text = obj.get<char*>("text");
 /*********************************************/
 boolean parseaConfiguracionGlobal(String contenido)
   {  
@@ -202,13 +219,19 @@ boolean parseaConfiguracionGlobal(String contenido)
     {
     Serial.println("parsed json");
 //******************************Parte especifica del json a leer********************************
-    IPActuador.fromString((const char *)json["IPActuador"]); 
-    IPGateway.fromString((const char *)json["IPGateway"]);
+    if (json.containsKey("nombre_dispositivo")) nombre_dispositivo=((const char *)json["nombre_dispositivo"]);    
+    if(nombre_dispositivo==NULL) nombre_dispositivo=String(NOMBRE_FAMILIA);
+
+    if (json.containsKey("IPActuador")) IPActuador.fromString((const char *)json["IPActuador"]); 
+    if (json.containsKey("IPGateway")) IPGateway.fromString((const char *)json["IPGateway"]);
     
-    if((int)json["NivelActivo"]==0) nivelActivo=LOW;
-    else nivelActivo=HIGH;
+    if (json.containsKey("NivelActivo")) 
+      {
+      if((int)json["NivelActivo"]==0) nivelActivo=LOW;
+      else nivelActivo=HIGH;
+      }
     
-    Serial.printf("Configuracion leida:\nNivelActivo: %i\nIP actuador: %s\nIP Gateway: %s\n", nivelActivo, IPActuador.toString().c_str(),IPGateway.toString().c_str());
+    Serial.printf("Configuracion leida:\nNombre dispositivo: %s\nNivelActivo: %i\nIP actuador: %s\nIP Gateway: %s\n",nombre_dispositivo.c_str(),nivelActivo,IPActuador.toString().c_str(),IPGateway.toString().c_str());
 //************************************************************************************************
     return true;
     }
@@ -226,7 +249,7 @@ String generaJsonConfiguracionNivelActivo(String configActual, int nivelAct)
   if(configActual=="") 
     {
     Serial.println("No existe el fichero. Se genera uno nuevo");
-    return "{\"NivelActivo\": \"" + String(nivelAct) + "\", \"IPPrimerTermometro\": \"10.68.1.62\",\"IPGateway\":\"10.68.1.1\"}";
+    return "{\"nombre_dispositivo\": \"Nombre dispositivo\", \"NivelActivo\": \"" + String(nivelAct) + "\", \"IPPrimerTermometro\": \"10.68.1.62\",\"IPGateway\":\"10.68.1.1\"}";
     }
     
   DynamicJsonBuffer jsonBuffer;
@@ -236,10 +259,8 @@ String generaJsonConfiguracionNivelActivo(String configActual, int nivelAct)
     {
     Serial.println("parsed json");          
 
-//******************************Parte especifica del json a leer********************************
+//******************************Parte especifica del json a modificar*****************************
     json["NivelActivo"]=nivelAct;
-//    json["IPPrimerTermometro"]=IPSatelites[0].toString().c_str();
-//    json["IPGateway"]=IPGateway.toString().c_str();   
 //************************************************************************************************
 
     json.printTo(salida);//pinto el json que he creado

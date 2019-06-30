@@ -165,6 +165,10 @@ void inicializaOrden(void)
   comandos[i].descripcion="Devuelve informacion del hardware";
   comandos[i++].p_func_comando=func_comando_info;
   
+  comandos[i].comando="flist";
+  comandos[i].descripcion="Lista los ficheros en el sistema de ficheros";
+  comandos[i++].p_func_comando=func_comando_flist;
+
   comandos[i].comando="fexist";
   comandos[i].descripcion="Indica si existe un fichero en el sistema de ficheros";
   comandos[i++].p_func_comando=func_comando_fexist;
@@ -276,9 +280,9 @@ void func_comando_nivelActivo(int iParametro, char* sParametro, float fParametro
 
     String cad="";
     
-    if(!leeFichero(GLOBAL_CONFIG_FILE, cad)) Serial.println("No se pudo leer el fichero");
+    if(!leeFicheroConfig(GLOBAL_CONFIG_FILE, cad)) Serial.println("No se pudo leer el fichero");
     cad=generaJsonConfiguracionNivelActivo(cad, nivelActivo);
-    if(!salvaFichero(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad)) Serial.println("No se pudo salvar el fichero");      
+    if(!salvaFicheroConfig(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad)) Serial.println("No se pudo salvar el fichero");      
     }
   Serial.printf("\nNivel activo: %i\n",nivelActivo);  
   }  
@@ -347,6 +351,17 @@ void func_comando_info(int iParametro, char* sParametro, float fParametro)//"inf
   Serial.printf("-----------------------------------------------\n");
   }  
 
+void func_comando_flist(int iParametro, char* sParametro, float fParametro)//"fexist")
+  {
+  String contenido="";  
+  if(listaFicheros(contenido)) 
+    {
+    contenido.replace("|","\n");
+    Serial.printf("Contendio del sistema de ficheros:\n %s\n",contenido.c_str());
+    }
+  else Serial.printf("Ha habido un problema.....\n");
+  }
+
 void func_comando_fexist(int iParametro, char* sParametro, float fParametro)//"fexist")
   {
   if (sParametro=="") Serial.println("Es necesario indicar un nombre de fichero");
@@ -390,7 +405,7 @@ void func_comando_fremove(int iParametro, char* sParametro, float fParametro)//"
 
 void func_comando_format(int iParametro, char* sParametro, float fParametro)//"format")
   {     
-  if (SPIFFS.format()) Serial.println("Sistema de ficheros formateado");
+  if (formatearFS()) Serial.println("Sistema de ficheros formateado");
   else Serial.println("Error al formatear el sistema de ficheros");
   } 
 

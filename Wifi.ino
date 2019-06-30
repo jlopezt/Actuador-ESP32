@@ -42,7 +42,7 @@ void miSaveConfigCallback(void)
   Serial.print("Password : ");
   Serial.println(WiFi.psk());   
 
-  if(!leeFichero(WIFI_CONFIG_FILE, cad)) Serial.println("No se pudo leer el fichero");
+  if(!leeFicheroConfig(WIFI_CONFIG_FILE, cad)) Serial.println("No se pudo leer el fichero");
   cad=generaJsonConfiguracionWifi(cad, WiFi.SSID(),WiFi.psk());
   if(!salvaFichero(WIFI_CONFIG_FILE, WIFI_CONFIG_BAK_FILE, cad)) Serial.println("No se pudo salvar el fichero");  
   Serial.println("---------------------Fin salvando configuracion---------------");
@@ -75,18 +75,16 @@ boolean recuperaDatosWiFi(boolean debug)
   //cargo el valores por defecto
   ////////No aplican en este caso
     
-  if(leeFichero(WIFI_CONFIG_FILE, cad)) parseaConfiguracionWifi(cad);
-  else
+  if(!leeFicheroConfig(WIFI_CONFIG_FILE, cad)) 
     {
     //Confgiguracion por defecto
     Serial.printf("No existe fichero de configuracion WiFi\n");
-    cad="{\"wifi\": [ {\"ssid\": \"BASE0\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE1\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE2\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE-1\",\"password\": \"11223344556677889900abcdef\"}]}";
-    salvaFichero(WIFI_CONFIG_FILE, WIFI_CONFIG_BAK_FILE, cad);
-    Serial.printf("Fichero de configuracion WiFi creado por defecto\n");
-    parseaConfiguracionWifi(cad);
+    //cad="{\"wifi\": [ {\"ssid\": \"BASE0\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE1\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE2\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE-1\",\"password\": \"11223344556677889900abcdef\"}]}";
+    cad="{\"wifi\": []}";
+    if(salvaFicheroConfig(WIFI_CONFIG_FILE, WIFI_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion WiFi creado por defecto\n");
     }
 
-  return true;
+  return(parseaConfiguracionWifi(cad));
   }
 
 /*********************************************/
@@ -169,7 +167,7 @@ boolean conectaAutodetect(boolean debug)
   Serial.println("\n Entrando...");
   
   //WiFiManagerParameter(const char *id, const char *placeholder, const char *defaultValue, int length, const char *custom);    
-  WiFiManagerParameter Nombre_Parametro("1","dispositivo",nombre_dispoisitivo.c_str(),MAX_LONG_NOMBRE_DISPOSITIVO+1,"Nombre del dispositivo");
+  WiFiManagerParameter Nombre_Parametro("1","dispositivo",nombre_dispositivo.c_str(),MAX_LONG_NOMBRE_DISPOSITIVO+1,"Nombre del dispositivo");
   Serial.println(Nombre_Parametro.getID());
   Serial.println(Nombre_Parametro.getValue());
   Serial.println(Nombre_Parametro.getPlaceholder());
@@ -185,7 +183,7 @@ boolean conectaAutodetect(boolean debug)
   //Si se ha configurado IP fija
   if (wifiIPFija!=(0,0,0,0)) wifiManager.setSTAStaticIPConfig(wifiIPFija,wifiGW,wifiNet);//Preparo la IP fija (IPAddress ip, IPAddress gw, IPAddress sn) 
 
-  if (!wifiManager.startConfigPortal(("AP_"+nombre_dispoisitivo).c_str())) 
+  if (!wifiManager.startConfigPortal(("AP_"+nombre_dispositivo).c_str())) 
     {
     Serial.println("failed to connect and hit timeout");
     ESP.restart();

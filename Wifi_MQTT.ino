@@ -22,7 +22,7 @@
 #define WILL_TOPIC  "will"
 #define WILL_QOS    1
 #define WILL_RETAIN false
-#define WILL_MSG    ("¡"+ID_MQTT+" caido!").c_str() //"vueltas: " + vuelta
+#define WILL_MSG    ("¡"+ID_MQTT+" caido!").c_str()
 
 //Definicion de variables globales
 IPAddress IPBroker; //IP del bus MQTT
@@ -81,18 +81,16 @@ boolean recuperaDatosMQTT(boolean debug)
   publicarEntradas=1; 
   publicarSalidas=1;    
 
-  if(leeFichero(MQTT_CONFIG_FILE, cad)) return parseaConfiguracionMQTT(cad);
-  else
+  if(!leeFicheroConfig(MQTT_CONFIG_FILE, cad)) 
     {
     //Confgiguracion por defecto
     Serial.printf("No existe fichero de configuracion MQTT\n");
-    cad="{\"IPBroker\": \"10.68.1.100\", \"puerto\": 1883, \"usuarioMQTT\": \"usuario\", \"passwordMQTT\": \"password\",  \"ID_MQTT\": \"garaje32/puerta\",  \"topicRoot\":  \"casa\",  \"keepAlive\": 0, \"publicarEntradas\": 1, \"publicarSalidas\": 0}";
-    salvaFichero(MQTT_CONFIG_FILE, MQTT_CONFIG_BAK_FILE, cad);
-    Serial.printf("Fichero de configuracion MQTT creado por defecto\n");
-    parseaConfiguracionWifi(cad);
+    //cad="{\"IPBroker\": \"10.68.1.100\", \"puerto\": 1883, \"usuarioMQTT\": \"usuario\", \"passwordMQTT\": \"password\",  \"ID_MQTT\": \"garaje32/puerta\",  \"topicRoot\":  \"casa\",  \"keepAlive\": 0, \"publicarEntradas\": 1, \"publicarSalidas\": 0}";
+    cad="{\"IPBroker\": \"0.0.0.0\", \"puerto\": 1883, \"usuarioMQTT\": \"usuario\", \"passwordMQTT\": \"password\",  \"ID_MQTT\": \"" + String(NOMBRE_FAMILIA) + "\",  \"topicRoot\":  \"" + NOMBRE_FAMILIA + "\",  \"keepAlive\": 0, \"publicarEntradas\": 0, \"publicarSalidas\": 0}";
+    if(salvaFicheroConfig(MQTT_CONFIG_FILE, MQTT_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion MQTT creado por defecto\n");    
     }
 
-  return false;
+  return parseaConfiguracionMQTT(cad);
   }  
 
 /*********************************************/
@@ -189,7 +187,9 @@ void callbackMQTT(char* topic, byte* payload, unsigned int length)
 boolean conectaMQTT(void)  
   {
   int8_t intentos=0;
-  
+
+  if(IPBroker==IPAddress(0,0,0,0)) return (false);
+    
   while (!clienteMQTT.connected()) 
     {    
     if(debugGlobal) Serial.println("No conectado, intentando conectar.");
@@ -211,6 +211,7 @@ boolean conectaMQTT(void)
     if(debugGlobal) Serial.printf("Error al conectar al broker. Estado: %s\n",stateTexto().c_str());
     delay(500);      
     }
+  return true;
   }
 
 /********************************************/
@@ -249,7 +250,7 @@ void atiendeMQTT(boolean debug)
     String topic=topicKeepAlive;  
     String payload=String(millis());
   
-      if(enviarMQTT(topic, payload)) if(debug)Serial.println("Enviado json al broker con exito.");
+    if(enviarMQTT(topic, payload)) if(debug)Serial.println("Enviado json al broker con exito.");
     else if(debug)Serial.println("¡¡Error al enviar json al broker!!");
     }
     
