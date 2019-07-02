@@ -1,5 +1,4 @@
 {
-	"NivelActivo":0,
-	"IPActuador": "10.68.1.78",
-	"IPGateway":"10.68.1.1"
+	"nombre_dispositivo": "Puerta garaje",
+	"NivelActivo":0
 }

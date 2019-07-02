@@ -18,11 +18,11 @@
 #define TIME_OUT 30000
 #define DELAY 1000
 
-IPAddress wifiIPFija(0, 0, 0, 0);//0.0.0.0 significa que no hay IP fija
-IPAddress wifiNet(255, 255, 255, 0);
-IPAddress wifiGW(0, 0, 0, 0);//(10, 68, 1, 1);
-IPAddress wifiDNS1(8, 8, 8, 8);//los de google
-IPAddress wifiDNS2(8, 8, 4, 4);
+IPAddress wifiIP(0, 0, 0, 0);//0.0.0.0 significa que no hay IP fija
+IPAddress wifiNet(0, 0, 0, 0);
+IPAddress wifiGW(0, 0, 0, 0);
+IPAddress wifiDNS1(0, 0, 0, 0);
+IPAddress wifiDNS2(0, 0, 0, 0);
 
 const char* ssid;
 const char* password;
@@ -68,19 +68,19 @@ boolean recuperaDatosWiFi(boolean debug)
   String cad="";
   if (debug) Serial.println("Recupero configuracion de archivo...");
 
-  //cargo valores ya leidos
-  wifiIPFija=IPActuador;//Configuro la IP que se leyo en la configuracion general
-  wifiGW=IPGateway;//Configuro la IP que se leyo en la configuracion general
-
   //cargo el valores por defecto
-  ////////No aplican en este caso
-    
+  wifiIP=(0,0,0,0);
+  wifiGW=(0,0,0,0);
+  wifiNet=(0,0,0,0);
+  wifiDNS1=(0,0,0,0);
+  wifiDNS2=(0,0,0,0);
+   
   if(!leeFicheroConfig(WIFI_CONFIG_FILE, cad)) 
     {
     //Confgiguracion por defecto
     Serial.printf("No existe fichero de configuracion WiFi\n");
     //cad="{\"wifi\": [ {\"ssid\": \"BASE0\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE1\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE2\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE-1\",\"password\": \"11223344556677889900abcdef\"}]}";
-    cad="{\"wifi\": []}";
+    cad="{\"wifiIP\": \"0.0.0.0\",\"wifiGW\":\"0.0.0.0\",\"wifiNet\": \"0.0.0.0\",\"wifiDNS1\":\"0.0.0.0\",\"wifiDNS2\": \"0.0.0.0\",\"wifi\": []}";
     if(salvaFicheroConfig(WIFI_CONFIG_FILE, WIFI_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion WiFi creado por defecto\n");
     }
 
@@ -99,8 +99,14 @@ boolean parseaConfiguracionWifi(String contenido)
     {
     Serial.println("parsed json");
 //******************************Parte especifica del json a leer********************************
-    JsonArray& wifi = json["wifi"];
+    if (json.containsKey("wifiIP")) wifiIP.fromString((const char *)json["wifiIP"]); 
+    if (json.containsKey("wifiGW")) wifiGW.fromString((const char *)json["wifiGW"]);
+    if (json.containsKey("wifiNet")) wifiNet.fromString((const char *)json["wifiNet"]); 
+    if (json.containsKey("wifiDNS1")) wifiDNS1.fromString((const char *)json["wifiDNS1"]);
+    if (json.containsKey("wifiDNS2")) wifiDNS2.fromString((const char *)json["wifiDNS2"]);
+    Serial.printf("Configuracion leida:\nIP actuador: %s\nIP Gateway: %s\nIPSubred: %s\nIP DNS1: %s\nIP DNS2: %s\n",wifiIP.toString().c_str(),wifiGW.toString().c_str(),wifiNet.toString().c_str(),wifiDNS1.toString().c_str(),wifiDNS2.toString().c_str());    
 
+    JsonArray& wifi = json["wifi"];
     for(uint8_t i=0;i<wifi.size();i++)
       {
       const char* wifi_ssid = wifi[i]["ssid"];
@@ -119,10 +125,10 @@ boolean inicializaWifi(boolean debug)
   if(recuperaDatosWiFi(debug))
     {
     //Configuro la IP fija
-    if (wifiIPFija!=(0,0,0,0) && wifiGW!=(0,0,0,0))
+    if (wifiIP!=(0,0,0,0) && wifiGW!=(0,0,0,0))
       {
-      Serial.printf("Datos WiFi: IP fija-> %s, GW-> %s, subnet-> %s, DNS1-> %s, DNS2-> %s\n",wifiIPFija.toString().c_str(), wifiGW.toString().c_str(), wifiNet.toString().c_str(), wifiDNS1.toString().c_str(), wifiDNS2.toString().c_str());
-      WiFi.config(wifiIPFija, wifiGW, wifiNet, wifiDNS1, wifiDNS2);
+      Serial.printf("Datos WiFi: IP fija-> %s, GW-> %s, subnet-> %s, DNS1-> %s, DNS2-> %s\n",wifiIP.toString().c_str(), wifiGW.toString().c_str(), wifiNet.toString().c_str(), wifiDNS1.toString().c_str(), wifiDNS2.toString().c_str());
+      WiFi.config(wifiIP, wifiGW, wifiNet, wifiDNS1, wifiDNS2);
       }
     else Serial.println("No hay IP fija");
 
@@ -181,7 +187,7 @@ boolean conectaAutodetect(boolean debug)
   //wifiManager.setAPCallback(miAPCallback);//llamada cuando se actie el portal de configuracion
   
   //Si se ha configurado IP fija
-  if (wifiIPFija!=(0,0,0,0)) wifiManager.setSTAStaticIPConfig(wifiIPFija,wifiGW,wifiNet);//Preparo la IP fija (IPAddress ip, IPAddress gw, IPAddress sn) 
+  if (wifiIP!=(0,0,0,0)) wifiManager.setSTAStaticIPConfig(wifiIP,wifiGW,wifiNet);//Preparo la IP fija (IPAddress ip, IPAddress gw, IPAddress sn) 
 
   if (!wifiManager.startConfigPortal(("AP_"+nombre_dispositivo).c_str())) 
     {

@@ -1,11 +1,11 @@
 /************************************************************************************************
-Servicio                       URL                             Formato entrada Formato salida                                            Comentario                                            Ejemplo peticion                      Ejemplo respuesta
-Estado de los reles            http://IPActuador/estado        N/A             <id_0>#<nombre_0>#<estado_0>|<id_1>#<nombre_1>#<estado_1> Devuelve el id de cada rele y su estado               http://IPActuador/estado              1#1|2#0
-Activa rele                    http://IPActuador/activaRele    id=<id>         <id>#<estado>                                             Activa el rele indicado y devuelve el estado leido    http://IPActuador/activaRele?id=1     1|1
-Desactivarele                  http://IPActuador/desactivaRele id=<id>         <id>#<estado>                                             Desactiva el rele indicado y devuelve el estado leido http://IPActuador/desactivaRele?id=0  0|0
-Test                           http://IPActuador/test          N/A             HTML                                                      Verifica el estado del Actuadot   
-Reinicia el actuador           http://IPActuador/restart
-Informacion del Hw del sistema http://IPActuador/info
+Servicio                       URL                     Formato entrada Formato salida                                            Comentario                                            Ejemplo peticion              Ejemplo respuesta
+Estado de los reles            http://IP/estado        N/A             <id_0>#<nombre_0>#<estado_0>|<id_1>#<nombre_1>#<estado_1> Devuelve el id de cada rele y su estado               http://IP/estado              1#1|2#0
+Activa rele                    http://IP/activaRele    id=<id>         <id>#<estado>                                             Activa el rele indicado y devuelve el estado leido    http://IP/activaRele?id=1     1|1
+Desactivarele                  http://IP/desactivaRele id=<id>         <id>#<estado>                                             Desactiva el rele indicado y devuelve el estado leido http://IP/desactivaRele?id=0  0|0
+Test                           http://IP/test          N/A             HTML                                                      Verifica el estado del Actuadot   
+Reinicia el actuador           http://IP/restart
+Informacion del Hw del sistema http://IP/info
 ************************************************************************************************/
 
 //Configuracion de los servicios web
@@ -385,15 +385,28 @@ void handleListaFicheros(void)
     Serial.printf("contenido inicial= %s\n",contenido.c_str());      
     //busco el primer separador
     to=contenido.indexOf(SEPARADOR); 
-    
+
+    cad +="<style> table{border-collapse: collapse;} th, td{border: 1px solid black; padding: 10px; text-align: left;}</style>";
     cad += "<TABLE>";
     while(to!=-1)
       {
       fichero=contenido.substring(0, to);//cojo el principio como el fichero
       contenido=contenido.substring(to+1); //la cadena ahora es desde el separador al final del fichero anterior
       to=contenido.indexOf(SEPARADOR); //busco el siguiente separador
-      
-      cad += "<TR><TD><a href=\"manageFichero?nombre="+ fichero +"\" target=\"_blank\">" + fichero + "</a></TD></TR>\n";           
+
+      cad += "<TR><TD>" + fichero + "</TD>";           
+      cad += "<TD>";
+      cad += "<form action=\"manageFichero\" target=\"_blank\">";
+      cad += "    <input type=\"hidden\" name=\"nombre\" value=\"" + fichero + "\">";
+      cad += "    <input type=\"submit\" value=\"editar\">";
+      cad += "</form>";
+      cad += "</TD><TD>";
+      cad += "<form action=\"borraFichero\" target=\"_blank\">";
+      cad += "    <input type=\"hidden\" name=\"nombre\" value=\"" + fichero + "\">";
+      cad += "    <input type=\"submit\" value=\"borrar\">";
+      cad += "</form>";
+      cad += "</TD></TR>";
+      //cad += "<TR><TD><a href=\"borraFichero?nombre="+ fichero +"\" target=\"_blank\">borrar</a></TD><TD><a href=\"manageFichero?nombre="+ fichero +"\" target=\"_blank\">" + fichero + "</a></TD></TR>\n";           
       }
     cad += "</TABLE>\n";
     cad += "<BR>";

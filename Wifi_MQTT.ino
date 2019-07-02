@@ -72,7 +72,7 @@ boolean recuperaDatosMQTT(boolean debug)
 
   //cargo el valores por defecto
   IPBroker.fromString("0.0.0.0");
-  ID_MQTT="actuador2"; //ID del modulo en su conexion al broker
+  ID_MQTT=String(NOMBRE_FAMILIA); //ID del modulo en su conexion al broker
   puertoBroker=0;
   usuarioMQTT="";
   passwordMQTT="";
@@ -269,7 +269,7 @@ void enviaDatos(boolean debug)
     if(enviarMQTT("entradas", payload)) if(debug)Serial.println("Enviado json al broker con exito.");
     else if(debug)Serial.println("¡¡Error al enviar json al broker!!");
     }
-  else Serial.printf("No publico entradas. Publicar entradas es %i\n",publicarEntradas);
+  else if(debug)Serial.printf("No publico entradas. Publicar entradas es %i\n",publicarEntradas);
   //******************************************SALIDAS******************************************
   if(publicarSalidas==1)
     {
@@ -278,7 +278,7 @@ void enviaDatos(boolean debug)
     if(enviarMQTT("salidas", payload)) if(debug)Serial.println("Enviado json al broker con exito.");
     else if(debug)Serial.println("¡¡Error al enviar json al broker!!");  
     }  
-  else Serial.printf("No publico salidas. Publicar salidas es %i\n",publicarSalidas);  
+  else if(debug)Serial.printf("No publico salidas. Publicar salidas es %i\n",publicarSalidas);  
   }
 
 /******************************* UTILIDADES *************************************/

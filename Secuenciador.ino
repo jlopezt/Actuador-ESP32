@@ -42,7 +42,7 @@ void inicializaSecuenciador()
     } 
         
   //leo la configuracion del fichero
-  if(recuperaDatosSecuenciador(debugGlobal)==KO) Serial.println("Configuracion del secuenciador por defecto");
+  if(!recuperaDatosSecuenciador(debugGlobal)) Serial.println("Configuracion del secuenciador por defecto");
   else
     { 
     //compruebo si la salida asociada a cada plan esta configurada
@@ -63,7 +63,7 @@ void inicializaSecuenciador()
     }
   }
 
-int recuperaDatosSecuenciador(boolean debug)
+boolean recuperaDatosSecuenciador(boolean debug)
   {
   String cad="";
 
@@ -73,7 +73,8 @@ int recuperaDatosSecuenciador(boolean debug)
     {
     //Confgiguracion por defecto
     Serial.printf("No existe fichero de configuracion del secuenciador\n");
-    cad="{ \"estadoInicial\": 1, \"Planes\":[ {\"id_plan\": 1, \"salida\": 1, \"intervalos\": [{\"id\":  0, \"valor\": 0},{\"id\":  1, \"valor\": 1}, {\"id\":  2, \"valor\": 0}, {\"id\":  3, \"valor\": 1}, {\"id\":  4, \"valor\": 0}, {\"id\":  5, \"valor\": 1}, {\"id\":  6, \"valor\": 0}, {\"id\":  7, \"valor\": 1}, {\"id\":  8, \"valor\": 0}, {\"id\":  9, \"valor\": 1}, {\"id\": 10, \"valor\": 0}, {\"id\": 11, \"valor\": 1},{\"id\":  12, \"valor\": 0},{\"id\":  13, \"valor\": 1}, {\"id\":  14, \"valor\": 0}, {\"id\":  15, \"valor\": 1}, {\"id\":  16, \"valor\": 0}, {\"id\":  17, \"valor\": 1}, {\"id\":  18, \"valor\": 0}, {\"id\":  19, \"valor\": 1}, {\"id\":  20, \"valor\": 0}, {\"id\":  21, \"valor\": 1}, {\"id\": 22, \"valor\": 0}, {\"id\": 23, \"valor\": 1} ] } ] }";
+    //cad="{ \"estadoInicial\": 0, \"Planes\":[ {\"id_plan\": 1, \"salida\": 1, \"intervalos\": [{\"id\":  0, \"valor\": 0},{\"id\":  1, \"valor\": 1}, {\"id\":  2, \"valor\": 0}, {\"id\":  3, \"valor\": 1}, {\"id\":  4, \"valor\": 0}, {\"id\":  5, \"valor\": 1}, {\"id\":  6, \"valor\": 0}, {\"id\":  7, \"valor\": 1}, {\"id\":  8, \"valor\": 0}, {\"id\":  9, \"valor\": 1}, {\"id\": 10, \"valor\": 0}, {\"id\": 11, \"valor\": 1},{\"id\":  12, \"valor\": 0},{\"id\":  13, \"valor\": 1}, {\"id\":  14, \"valor\": 0}, {\"id\":  15, \"valor\": 1}, {\"id\":  16, \"valor\": 0}, {\"id\":  17, \"valor\": 1}, {\"id\":  18, \"valor\": 0}, {\"id\":  19, \"valor\": 1}, {\"id\":  20, \"valor\": 0}, {\"id\":  21, \"valor\": 1}, {\"id\": 22, \"valor\": 0}, {\"id\": 23, \"valor\": 1} ] } ] }";
+    cad="{\"estadoInicial\": 0,\"Planes\":[]}";
     if(salvaFicheroConfig(SECUENCIADOR_CONFIG_FILE, SECUENCIADOR_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion del secuenciador creado por defecto\n");
     }      
     

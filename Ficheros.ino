@@ -6,6 +6,20 @@
 /************************************************/
 
 /************************************************/
+/* Inicializa el sistema de ficheros del modulo */
+/************************************************/
+boolean inicializaFicheros(int debug)
+{
+  //inicializo el sistema de ficheros
+  if (!SPIFFS.begin(true)) 
+    {
+    Serial.println("No se puede inicializar el sistema de ficheros");
+    return (false);
+    }
+  return (true);
+}
+
+/************************************************/
 /* Recupera los datos de configuracion          */
 /* de un archivo, si hay bloqyueo de            */
 /* configuracion, devuelve KO                   */
@@ -37,14 +51,6 @@ boolean leeFichero(String nombre, String &contenido)
   
   Serial.println("Inicio de lectura de fichero " + nombre);
 
-  //inicializo el sistema de ficheros
-  if (!SPIFFS.begin(true)) 
-    {
-    Serial.println("No se puede inicializar el sistema de ficheros");
-    return (false);
-    }
-  
-  Serial.println("------------------------------mounted file system---------------------------------");
   if (SPIFFS.exists(nombre)) 
     {
     //file exists, reading and loading
@@ -73,7 +79,6 @@ boolean leeFichero(String nombre, String &contenido)
       else Serial.println("Fichero no se puede abrir");
     }//la de existe fichero
     else Serial.println("Fichero no existe");
-  Serial.println("---------------------------------------unmounted file system------------------------");
   
   return leido;
   }
@@ -84,22 +89,13 @@ boolean leeFichero(String nombre, String &contenido)
 boolean salvaFichero(String nombreFichero, String nombreFicheroBak, String contenidoFichero)
   {
   boolean salvado=false;
-    
-  //inicializo el sistema de ficheros
-  if (!SPIFFS.begin(true)) 
-    {
-    Serial.println("No se puede inicializar el sistema de ficheros");
-    return (false);
-    }  
 
-  Serial.println("-------------------------------mounted file system--------------------------------");
-  
   //file exists, reading and loading
   if(SPIFFS.exists(nombreFichero.c_str())) 
     {
     if(nombreFicheroBak!="")
       {
-      Serial.printf("El fichero %s ya existe, sera copiara con el nombre %s.\n",nombreFichero.c_str(),nombreFicheroBak.c_str());
+      Serial.printf("El fichero %s ya existe, se copiara con el nombre %s.\n",nombreFichero.c_str(),nombreFicheroBak.c_str());
         
       if(SPIFFS.exists(nombreFicheroBak.c_str())) SPIFFS.remove(nombreFicheroBak.c_str());  
       SPIFFS.rename(nombreFichero.c_str(),nombreFicheroBak.c_str());  
@@ -123,8 +119,6 @@ boolean salvaFichero(String nombreFichero, String nombreFicheroBak, String conte
     salvado=true;
     }
   else Serial.println("El fichero no se pudo abrir para escritura.\n");
-  
-  Serial.println("------------------------------unmounted file system---------------------------------");
       
   return salvado;
   }
@@ -136,15 +130,7 @@ boolean salvaFichero(String nombreFichero, String nombreFicheroBak, String conte
 boolean borraFichero(String nombreFichero)
   {
   boolean borrado=false;
-  
-  //inicializo el sistema de ficheros
-  if (!SPIFFS.begin(true)) 
-    {
-    Serial.println("No se puede inicializar el sistema de ficheros");
-    return (false);
-    }  
 
-  Serial.println("--------------------------------------mounted file system-------------------------\n");  
   //file exists, reading and loading
   if(!SPIFFS.exists(nombreFichero)) Serial.println("El fichero " + nombreFichero + " no existe.");
   else
@@ -156,7 +142,6 @@ boolean borraFichero(String nombreFichero)
       }
     else Serial.println("No se pudo borrar el fichero " + nombreFichero + ".");
     }  
-  Serial.println("--------------------------------unmounted file system-------------------------------");
 
   return borrado;
   }  
@@ -169,13 +154,7 @@ boolean borraFichero(String nombreFichero)
 boolean listaFicheros(String &contenido)
   {   
   contenido="";
-   
-  if (!SPIFFS.begin(true)) 
-    {
-    Serial.println("No se puede inicializar el sistema de ficheros");
-    return (false);
-    }
- 
+
   File root = SPIFFS.open("/");
   File file = root.openNextFile();
  
@@ -199,12 +178,6 @@ boolean listaFicheros(String &contenido)
 /************************************************/
 boolean existeFichero(String nombre)
   {  
-  if (!SPIFFS.begin(true)) 
-    {
-    Serial.println("No se puede inicializar el sistema de ficheros");
-    return (false);
-    }
-
   return (SPIFFS.exists(nombre));
   }
 
@@ -215,14 +188,6 @@ boolean existeFichero(String nombre)
 /************************************************/
 boolean formatearFS(void)
   {  
-  if (!SPIFFS.begin(true)) 
-    {
-    Serial.println("No se puede inicializar el sistema de ficheros");
-    return (false);
-    }
-
   return (SPIFFS.format());
   }
-
-
   
