@@ -316,6 +316,10 @@ void func_comando_restart(int iParametro, char* sParametro, float fParametro)//"
 void func_comando_info(int iParametro, char* sParametro, float fParametro)//"info")
   {
   Serial.printf("\n-----------------info logica-----------------\n");
+  Serial.printf("Uptime: %lu segundos\n", (esp_timer_get_time()/(unsigned long)1000000)); //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años
+  Serial.printf("-----------------------------------------------\n");  
+
+  Serial.printf("\n-----------------info logica-----------------\n");
   Serial.printf("IP: %s\n", String(getIP(debugGlobal)).c_str());
   Serial.printf("nivelActivo: %s\n", String(nivelActivo).c_str());  
   for(int8_t i=0;i<MAX_RELES;i++) Serial.printf("Rele %i | nombre: %s | estado: %i\n", i,nombreRele(i).c_str(), estadoRele(i));

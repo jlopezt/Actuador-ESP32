@@ -306,6 +306,12 @@ void handleInfo(void)
   String cad=cabeceraHTML;
   cad += "<h1>" + nombre_dispositivo + "</h1>";
 
+  cad+= "<BR>-----------------Uptime---------------------<BR>";
+  char tempcad[20]="";
+  sprintf(tempcad,"%lu", (esp_timer_get_time()/(unsigned long)1000000)); //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años  
+  cad += "Uptime: " + String(tempcad) + " segundos"; //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años
+  cad += "<BR>-----------------------------------------------<BR>";  
+
   cad+= "<BR>-----------------info logica-----------------<BR>";
   cad += "IP: " + String(getIP(debugGlobal));
   cad += "<BR>";  

@@ -27,7 +27,7 @@ IPAddress wifiDNS2(0, 0, 0, 0);
 const char* ssid;
 const char* password;
 
-WiFiMulti MiWiFiMulti; //ESP8266WiFiMulti WiFiMulti;
+WiFiMulti MiWiFiMulti;
 
 boolean conectado=false; //Si el portal de configuracion devolvio OK a la conexion
 
@@ -231,10 +231,20 @@ boolean conectaMultibase(boolean debug)
   return TRUE; //se ha conectado y sale con OK
   }
 
-String getIP(int debug)
-  {  
-  return WiFi.localIP().toString();
-  }
+/**********************************************************************/
+/*            Devuelve la IP configurada en el dispositivo            */
+/**********************************************************************/ 
+String getIP(int debug) { return WiFi.localIP().toString();}
+
+/*********************************************************************/
+/*       Devuelve el nombre de la red a la que se ha conectado       */
+/*********************************************************************/ 
+String nombreSSID(void) {return WiFi.SSID();}  
+
+/*********************************************************************/
+/*             Watchdog de control para la conexion WiFi             */
+/*********************************************************************/ 
+void WifiWD(void) {if(WiFi.status() != WL_CONNECTED) ESP.restart();}
 
 /**********************************************************************/
 /* Salva la configuracion de las bases wifi conectada en formato json */
@@ -288,9 +298,3 @@ String generaJsonConfiguracionWifi(String configActual, String ssid, String pass
   return salida;  
   }
 
-String nombreSSID(void) {return WiFi.SSID();}  
-
-void WifiWD(void)
-  {
-  if(WiFi.status() != WL_CONNECTED) ESP.restart();
-  }
