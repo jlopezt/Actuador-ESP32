@@ -209,10 +209,6 @@ void inicializaOrden(void)
   comandos[i].descripcion="Activa/desactiva el modo debug";
   comandos[i++].p_func_comando=func_comando_debug;
 
-  comandos[i].comando="enviarKeepAlive";
-  comandos[i].descripcion="Activa/desactiva el envio de Kepp Alive MQTT";
-  comandos[i++].p_func_comando=func_comando_enviarKeepAlive;
-  
   comandos[i].comando="ES";
   comandos[i].descripcion="Entradas y Salidas";
   comandos[i++].p_func_comando=func_comando_ES;
@@ -361,7 +357,7 @@ void func_comando_flist(int iParametro, char* sParametro, float fParametro)//"fe
   if(listaFicheros(contenido)) 
     {
     contenido.replace("|","\n");
-    Serial.printf("Contendio del sistema de ficheros:\n %s\n",contenido.c_str());
+    Serial.printf("Contendio del sistema de ficheros:\n%s\n",contenido.c_str());
     }
   else Serial.printf("Ha habido un problema.....\n");
   }
@@ -447,14 +443,6 @@ void func_comando_debug(int iParametro, char* sParametro, float fParametro)//"de
   else Serial.println("debugGlobal esta off");
   }
 
-void func_comando_enviarKeepAlive(int iParametro, char* sParametro, float fParametro)//"debug")
-  {
-  if(iParametro!=0) enviarKeepAlive=1;
-  else  enviarKeepAlive=0;
-
-  Serial.printf("enviarKeepAlive=%i\n",enviarKeepAlive);
-  }
-
 void func_comando_ES(int iParametro, char* sParametro, float fParametro)//"debug")
   {
   Serial.println("Entradas");  
@@ -483,7 +471,7 @@ void func_comando_estSec(int iParametro, char* sParametro, float fParametro)//"d
 
 void func_comando_MQTTConfig(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  Serial.printf("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nIP Puerto del broker: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nEnviar KeepAlive: %i\nPublicar entradas: %i\nPublicar salidas: %i\nWill topic: %s\nWill msg: %s\nCelan session: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),puertoBroker,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),enviarKeepAlive,publicarEntradas,publicarSalidas,(topicRoot+"/"+String(WILL_TOPIC)).c_str(),String(WILL_MSG).c_str(), CLEAN_SESSION);
+  Serial.printf("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nIP Puerto del broker: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\nWill topic: %s\nWill msg: %s\nCelan session: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),puertoBroker,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),publicarEntradas,publicarSalidas,(topicRoot+"/"+String(WILL_TOPIC)).c_str(),String(WILL_MSG).c_str(), CLEAN_SESSION);
   }  
 
 void func_comando_Salidas(int iParametro, char* sParametro, float fParametro)//"debug")

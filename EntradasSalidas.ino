@@ -4,7 +4,6 @@
 /*                                       */
 /*****************************************/
 
-
 //Definicion de pines
 #define MAX_PINES        7 //numero de pines disponibles para entradas y salidas
 #define MAX_ENTRADAS     4 //numero maximo de reles soportado
@@ -19,6 +18,8 @@
 #ifndef CONFIGURADO 
 #define CONFIGURADO     1
 #endif
+
+#define TOPIC_MENSAJES "mensajes"
 
 //definicion de los tipos de dataos para las entradas y salidas
 //Salidas
@@ -40,11 +41,56 @@ typedef struct{
   int8_t estado;
   String tipo;        //Puede ser INPUT, INPUT_PULLUP, No valido!!-->INPUT_PULLDOWN
   int8_t pin;
+  String nombreEstados[2];  //Son entradas binarias, solo puede haber 2 mensajes. El 0 nombre del estado en valor 0 y el 1 nombre del estado en valor 1
+  String mensajes[2]; //Son entradas binarias, solo puede haber 2 mensajes. El 0 cuando pasa a 0 y el 1 cuando pasa a 1
   }entrada_t; 
 entrada_t entradas[MAX_ENTRADAS];
 
 /************************************** Funciones de configuracion ****************************************/
-void inicializaEntradasSalidas()
+/*********************************************/
+/* Inicializa los valores de los registros de*/
+/* las entradas y recupera la configuracion  */
+/*********************************************/
+void inicializaEntradas(void)
+  {  
+  //Entradas
+  for(int8_t i=0;i<MAX_ENTRADAS;i++)
+    {
+    //inicializo la parte logica
+    entradas[i].configurada=NO_CONFIGURADO ;//la inicializo a no configurada
+    entradas[i].nombre="No configurado";
+    entradas[i].estado=0;    
+    entradas[i].tipo="INPUT";
+    entradas[i].pin=-1;
+    entradas[i].nombreEstados[0]="0";
+    entradas[i].nombreEstados[1]="1";
+    entradas[i].mensajes[0]="";
+    entradas[i].mensajes[1]="";
+    }
+
+  //leo la configuracion del fichero
+  if(!recuperaDatosEntradas(debugGlobal)) Serial.println("Configuracion de los reles por defecto");
+  else
+    { 
+    //Entradas
+    for(int8_t i=0;i<MAX_ENTRADAS;i++)
+      {
+      if(entradas[i].configurada==CONFIGURADO)
+        {  
+        Serial.printf("Nombre entrada[%i]=%s | pin entrada: %i | tipo: %s\n",i,entradas[i].nombre.c_str(),entradas[i].pin,entradas[i].tipo.c_str());
+        if(entradas[i].tipo=="INPUT_PULLUP") pinMode(entradas[i].pin, INPUT_PULLUP);
+        else if(entradas[i].tipo=="INPUT_PULLDOWN") pinMode(entradas[i].pin, INPUT_PULLDOWN);
+        else pinMode(entradas[i].pin, INPUT); //PULLUP
+        }
+      }
+    }  
+  }
+
+/*********************************************/
+/* Inicializa los valores de los registros de*/
+/* las salidas y recupera la configuracion   */
+/*********************************************/
+void inicializaSalidas(void)
   {  
   //Salidas
   for(int8_t i=0;i<MAX_RELES;i++)
@@ -58,67 +104,137 @@ void inicializaEntradasSalidas()
     reles[i].finPulso=0;
     reles[i].inicio=0;
     }
-  //Entradas
-  for(int8_t i=0;i<MAX_ENTRADAS;i++)
-    {
-    //inicializo la parte logica
-    entradas[i].configurada=NO_CONFIGURADO ;//la inicializo a no configurada
-    entradas[i].nombre="No configurado";
-    entradas[i].estado=0;    
-    entradas[i].tipo="INPUT";
-    entradas[i].pin=-1;
-    }
          
   //leo la configuracion del fichero
-  if(recuperaDatosEntradasSalidas(debugGlobal)==KO) Serial.println("Configuracion de los reles por defecto");
+  if(!recuperaDatosSalidas(debugGlobal)) Serial.println("Configuracion de los reles por defecto");
   else
     {  
     //Salidas
     for(int8_t i=0;i<MAX_RELES;i++)
-      {      
-      pinMode(reles[i].pin, OUTPUT); //es salida
-      
-      reles[i].estado=reles[i].inicio;  
-      if(reles[i].inicio==1) digitalWrite(reles[i].pin, nivelActivo);  //lo inicializo a apagado
-      else digitalWrite(reles[i].pin, !nivelActivo);  //lo inicializo a apagado 
-      }
-    //Entradas
-    for(int8_t i=0;i<MAX_ENTRADAS;i++)
-      {
-      if(entradas[i].tipo!="INPUT_PULLUP") pinMode(entradas[i].pin, INPUT_PULLUP);
-      else if(entradas[i].tipo!="INPUT_PULLDOWN") pinMode(entradas[i].pin, INPUT_PULLDOWN);
-      else pinMode(entradas[i].pin, INPUT); //PULLUP
-      }
+      {    
+      if(reles[i].configurado==CONFIGURADO) 
+        {   
+        pinMode(reles[i].pin, OUTPUT); //es salida
 
-    //E/S configuradas
-    for(int i;i<MAX_RELES;i++) if(reles[i].configurado==CONFIGURADO) Serial.printf("Nombre rele[%i]=%s | pin rele: %i | inicio: %i\n",i,reles[i].nombre.c_str(),reles[i].pin,reles[i].inicio);
-    for(int i;i<MAX_ENTRADAS;i++) if(entradas[i].configurada==CONFIGURADO) Serial.printf("Nombre entrada[%i]=%s | pin entrada: %i\n",i,entradas[i].nombre.c_str(),entradas[i].pin);
+        //parte logica
+        reles[i].estado=reles[i].inicio;  
+        //parte fisica
+        if(reles[i].inicio==1) digitalWrite(reles[i].pin, nivelActivo);  //lo inicializo a apagado
+        else digitalWrite(reles[i].pin, !nivelActivo);  //lo inicializo a apagado 
+        
+        Serial.printf("Nombre rele[%i]=%s | pin rele: %i | inicio: %i\n",i,reles[i].nombre.c_str(),reles[i].pin,reles[i].inicio);
+        }      
+      }
     }  
   }
 
-int recuperaDatosEntradasSalidas(boolean debug)
+/*********************************************/
+/* Lee el fichero de configuracion de las    */
+/* entradas o genera conf por defecto        */
+/*********************************************/
+boolean recuperaDatosEntradas(int debug)
+  {
+  String cad="";
+
+  if (debug) Serial.println("Recupero configuracion de archivo...");
+
+  if(!leeFicheroConfig(ENTRADAS_CONFIG_FILE, cad)) 
+    {
+    //Confgiguracion por defecto
+    Serial.printf("No existe fichero de configuracion de Entradas\n");    
+    cad="{\"Entradas\": []}";
+    //salvo la config por defecto
+    //if(salvaFicheroConfig(ENTRADAS_CONFIG_FILE, ENTRADAS_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion de Entradas creado por defecto\n");
+    }      
+  return parseaConfiguracionEntradas(cad);
+  }
+
+/*********************************************/
+/* Lee el fichero de configuracion de las    */
+/* salidas o genera conf por defecto         */
+/*********************************************/
+boolean recuperaDatosSalidas(int debug)
   {
   String cad="";
 
   if (debug) Serial.println("Recupero configuracion de archivo...");
   
-  if(!leeFicheroConfig(ENTRADAS_SALIDAS_CONFIG_FILE, cad)) 
+  if(!leeFicheroConfig(SALIDAS_CONFIG_FILE, cad)) 
     {
     //Confgiguracion por defecto
-    Serial.printf("No existe fichero de configuracion de E/S\n");    
-    cad="{\"Salidas\": [],\"Entradas\": []}";
+    Serial.printf("No existe fichero de configuracion de Salidas\n");    
+    cad="{\"Salidas\": []}";
     //salvo la config por defecto
-    if(salvaFicheroConfig(ENTRADAS_SALIDAS_CONFIG_FILE, ENTRADAS_SALIDAS_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion de E/S creado por defecto\n");
+    //if(salvaFicheroConfig(SALIDAS_CONFIG_FILE, SALIDAS_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion de Salidas creado por defecto\n");
     }      
     
-  return parseaConfiguracionEntradasSalidas(cad);
+  return parseaConfiguracionSalidas(cad);
   }
 
 /*********************************************/
 /* Parsea el json leido del fichero de       */
-/* configuracio de los reles                 */
+/* configuracio de las entradas              */
 /*********************************************/
-boolean parseaConfiguracionEntradasSalidas(String contenido)
+boolean parseaConfiguracionEntradas(String contenido)
+  {
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
+
+  json.printTo(Serial);
+  if (!json.success()) return false;
+
+  Serial.println("\nparsed json");
+//******************************Parte especifica del json a leer********************************
+  JsonArray& Entradas = json["Entradas"];
+
+  int8_t max;
+  max=(Entradas.size()<MAX_ENTRADAS?Entradas.size():MAX_ENTRADAS);
+  for(int8_t i=0;i<max;i++)
+    { 
+    entradas[i].configurada=CONFIGURADO; //Cambio el valor para configurarla  
+    entradas[i].nombre=String((const char *)Entradas[i]["nombre"]);
+    entradas[i].tipo=String((const char *)Entradas[i]["tipo"]);
+    entradas[i].pin=atoi(Entradas[i]["GPIO"]);
+    JsonObject& entrada = json["Entradas"][i];
+    if(entrada.containsKey("Estados"))
+      {
+      int8_t est_max=entrada["Estados"].size();//maximo de mensajes en el JSON
+      if (est_max>2) est_max=2;                     //Si hay mas de 2, solo leo 2
+      for(int8_t e=0;e<est_max;e++)  
+        {
+        if (entrada["Estados"][e]["valor"]==e) entradas[i].nombreEstados[e]=String((const char *)entrada["Estados"][e]["texto"]);
+        }
+      }
+    if(entrada.containsKey("Mensajes"))
+      {
+      int8_t men_max=entrada["Mensajes"].size();//maximo de mensajes en el JSON
+      if (men_max>2) men_max=2;                     //Si hay mas de 2, solo leo 2
+      for(int8_t m=0;m<men_max;m++)  
+        {
+        if (entrada["Mensajes"][m]["valor"]==m) entradas[i].mensajes[m]=String((const char *)entrada["Mensajes"][m]["texto"]);
+        }
+      }
+    }
+
+  Serial.printf("Entradas:\n"); 
+  for(int8_t i=0;i<MAX_ENTRADAS;i++) 
+    {
+    Serial.printf("%02i: %s| pin: %i| configurado= %i| tipo=%s\n",i,entradas[i].nombre.c_str(),entradas[i].pin,entradas[i].configurada,entradas[i].tipo.c_str());
+    Serial.printf("Mensajes:\n");
+    for(int8_t m=0;m<2;m++) 
+      {
+      Serial.printf("Mensaje[%02i]: %s\n",m,entradas[i].mensajes[m].c_str());     
+      }    
+    }
+//************************************************************************************************
+  return true; 
+  }
+
+/*********************************************/
+/* Parsea el json leido del fichero de       */
+/* configuracio de las salidas               */
+/*********************************************/
+boolean parseaConfiguracionSalidas(String contenido)
   { 
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
@@ -126,10 +242,9 @@ boolean parseaConfiguracionEntradasSalidas(String contenido)
   json.printTo(Serial);
   if (!json.success()) return false;
         
-  Serial.println("parsed json");
+  Serial.println("\nparsed json");
 //******************************Parte especifica del json a leer********************************
   JsonArray& Salidas = json["Salidas"];
-  JsonArray& Entradas = json["Entradas"];
 
   int8_t max;
   max=(Salidas.size()<MAX_RELES?Salidas.size():MAX_RELES);
@@ -143,19 +258,8 @@ boolean parseaConfiguracionEntradasSalidas(String contenido)
     else reles[i].inicio=0;   
     }
     
-  max=(Entradas.size()<MAX_ENTRADAS?Entradas.size():MAX_ENTRADAS);
-  for(int8_t i=0;i<max;i++)
-    { 
-    entradas[i].configurada=CONFIGURADO; //Cambio el valor para configurarla  
-    entradas[i].nombre=String((const char *)Entradas[i]["nombre"]);
-    entradas[i].tipo=String((const char *)Entradas[i]["tipo"]);
-    entradas[i].pin=atoi(Entradas[i]["GPIO"]);
-    }
-
   Serial.printf("Salidas:\n"); 
-  for(int8_t i=0;i<MAX_RELES;i++) Serial.printf("%02i: %s| pin: %i| configurado= %i\n",i,reles[i].nombre.c_str(),reles[i].pin,reles[i].configurado); 
-  Serial.printf("Entradas:\n"); 
-  for(int8_t i=0;i<MAX_ENTRADAS;i++) Serial.printf("%02i: %s| pin: %i| configurado= %i| tipo=%s\n",i,entradas[i].nombre.c_str(),entradas[i].pin,entradas[i].configurada,entradas[i].tipo.c_str());
+  for(int8_t i=0;i<MAX_RELES;i++) Serial.printf("%01i: %s| pin: %i| configurado= %i\n",i,reles[i].nombre.c_str(),reles[i].pin,reles[i].configurado); 
 //************************************************************************************************
   return true; 
   }
@@ -359,10 +463,28 @@ void consultaEntradas(bool debug)
     {
     if(entradas[i].configurada==CONFIGURADO) 
       {
+      int8_t valor_inicial=  entradas[i].estado;
       entradas[i].estado=digitalRead(entradas[i].pin); //si la entrada esta configurada
-      //Serial.printf("Entrada %i en pin %i leido %i\n",i,entradas[i].pin,entradas[i].estado);
+      
+      if(valor_inicial!=entradas[i].estado) enviaMensajeEntrada(i,entradas[i].estado);
       }
     }   
+  }
+
+/*************************************************/
+/*                                               */
+/* Envia un mensaje MQTT para que se publique un */
+/* audio en un GHN                               */
+/*                                               */
+/*************************************************/
+void enviaMensajeEntrada(int8_t id_entrada, int8_t estado)
+  {
+  String mensaje="";
+  Serial.printf("Envia mensaje para la entrada con id %i y por cambiar a estado %i. Mensaje: %s\n\n",id_entrada,estado,entradas[id_entrada].mensajes[estado].c_str());
+
+  mensaje="{\"origen\": \"" + entradas[id_entrada].nombre + "\",\"mensaje\":\"" + entradas[id_entrada].mensajes[estado] + "\"}";
+  
+  enviarMQTT(TOPIC_MENSAJES, mensaje);
   }
 
 /*************************************************/

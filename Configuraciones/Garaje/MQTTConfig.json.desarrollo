@@ -1,11 +1,11 @@
 { 
-	"IPBroker": "10.68.1.100", 
+	"IPBroker": "10.68.0.100", 
 	"puerto": 1883, 
 	"timeReconnectMQTT": 500, 
 	"usuarioMQTT": "usuario", 
 	"passwordMQTT": "password", 
 	"ID_MQTT": "garaje/puerta", 
-	"topicRoot": "casa", 
+	"topicRoot": "casaPre", 
 	"publicarEntradas": 1,
-	"publicarSalidas": 1
+	"publicarSalidas": 0
 }

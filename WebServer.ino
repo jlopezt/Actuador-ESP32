@@ -9,19 +9,61 @@ Informacion del Hw del sistema http://IP/info
 ************************************************************************************************/
 
 //Configuracion de los servicios web
-#define PUERTO_WEBSERVER  80
+#define PUERTO_WEBSERVER 80
 
 //Includes
-#include <WebServer.h> //#include <ESP8266WebServer.h>
-// Tapado en la migracion a ESP32#include <ESP8266mDNS.h>
+#include <WebServer.h>
 
 //Variables globales
-WebServer server(PUERTO_WEBSERVER); //ESP8266WebServer server[MAX_WEB_SERVERS];
+WebServer server(PUERTO_WEBSERVER);
 
 //Cadenas HTML precargadas
-String cabeceraHTML="<HTML><HEAD><TITLE>" + nombre_dispositivo + "</TITLE></HEAD><BODY>";
+String cabeceraHTML="";//<HTML><HEAD><TITLE>" + nombre_dispositivo + "</TITLE></HEAD><BODY>";
+String enlaces="<TABLE>\n<CAPTION>Enlaces</CAPTION>\n<TR><TD><a href=\"info\" target=\"_self\">Info</a></TD></TR>\n<TR><TD><a href=\"test\" target=\"_self\">Test</a></TD></TR>\n<TR><TD><a href=\"restart\" target=\"_self\">Restart</a></TD></TR>\n<TR><TD><a href=\"listaFicheros\" target=\"_self\">Lista ficheros</a></TD></TR>\n<TR><TD><a href=\"estado\" target=\"_self\">Estado</a></TD></TR>\n<TR><TD><a href=\"estadoSalidas\" target=\"_self\">Estado salidas</a></TD></TR>\n<TR><TD><a href=\"estadoEntradas\" target=\"_self\">Estado entradas</a></TD></TR>\n<TR><TD><a href=\"planes\" target=\"_self\">Planes del secuenciador</a></TD></TR></TABLE>\n"; 
 String pieHTML="</BODY></HTML>";
-String enlaces="<TABLE>\n<CAPTION>Enlaces</CAPTION>\n<TR><TD><a href=\"info\" target=\"_blank\">Info</a></TD></TR>\n<TR><TD><a href=\"test\" target=\"_blank\">Test</a></TD></TR>\n<TR><TD><a href=\"restart\" target=\"_blank\">Restart</a></TD></TR>\n<TR><TD><a href=\"estado\" target=\"_blank\">Estado</a></TD></TR>\n<TR><TD><a href=\"listaFicheros\" target=\"_blank\">Lista ficheros</a></TD></TR>\n<TR><TD><a href=\"estadoSalidas\" target=\"_blank\">Estado salidas</a></TD></TR>\n<TR><TD><a href=\"estadoEntradas\" target=\"_blank\">Estado entradas</a></TD></TR>\n<TR><TD><a href=\"planes\" target=\"_blank\">Planes del secuenciador</a></TD></TR></TABLE>\n"; 
+
+/*********************************** Inicializacion y configuracion *****************************************************************/
+void inicializaWebServer(void)
+  {
+  //lo inicializo aqui, despues de leer el nombre del dispositivo en la configuracion del cacharro
+  cabeceraHTML="<HTML><HEAD><TITLE>" + nombre_dispositivo + " </TITLE></HEAD><BODY><h1><a href=\"../\" target=\"_self\">" + nombre_dispositivo + "</a><br></h1>";
+    
+  /*******Configuracion del Servicio Web***********/  
+  //Inicializo los serivcios  
+  //decalra las URIs a las que va a responder
+  server.on("/", handleRoot); //Responde con la iodentificacion del modulo
+  server.on("/estado", handleEstado); //Servicio de estdo de reles
+  server.on("/estadoSalidas", handleEstadoSalidas); //Servicio de estdo de reles
+  server.on("/estadoEntradas", handleEstadoEntradas); //Servicio de estdo de reles    
+  server.on("/activaRele", handleActivaRele); //Servicio de activacion de rele
+  server.on("/desactivaRele", handleDesactivaRele);  //Servicio de desactivacion de rele
+  server.on("/pulsoRele", handlePulsoRele);  //Servicio de pulso de rele
+  server.on("/planes", handlePlanes);  //Servicio de representacion del plan del secuenciador
+  server.on("/activaSecuenciador", handleActivaSecuenciador);  //Servicio para activar el secuenciador
+  server.on("/desactivaSecuenciador", handleDesactivaSecuenciador);  //Servicio para desactivar el secuenciador
+      
+  server.on("/test", handleTest);  //URI de test
+  server.on("/restart", handleRestart);  //URI de test
+  server.on("/info", handleInfo);  //URI de test
+  
+  server.on("/listaFicheros", handleListaFicheros);  //URI de leer fichero
+  server.on("/creaFichero", handleCreaFichero);  //URI de crear fichero
+  server.on("/borraFichero", handleBorraFichero);  //URI de borrar fichero
+  server.on("/leeFichero", handleLeeFichero);  //URI de leer fichero
+  server.on("/manageFichero", handleManageFichero);  //URI de leer fichero  
+
+  server.on("/edit.html",  HTTP_POST, []() {  // If a POST request is sent to the /edit.html address,
+                                           server.send(200, "text/plain", ""); 
+                                           }, handleFileUpload);                       // go to 'handleFileUpload'
+  server.on("/speech", handleSpeechPath);
+  server.on("/habla", handleHablaPath);
+  
+  server.onNotFound(handleNotFound);//pagina no encontrada
+
+  server.begin();
+
+  Serial.printf("Servicio web iniciado en puerto %i\n", PUERTO_WEBSERVER);
+  }
 
 /*******************************************************/
 /*                                                     */ 
@@ -30,8 +72,9 @@ String enlaces="<TABLE>\n<CAPTION>Enlaces</CAPTION>\n<TR><TD><a href=\"info\" ta
 /*******************************************************/
 void webServer(int debug)
   {
-  server.handleClient();  
+  server.handleClient();
   }
+/********************************* FIn inicializacion y configuracion ***************************************************************/
 
 /************************* Gestores de las diferentes URL coniguradas ******************************/
 /*************************************************/
@@ -42,19 +85,18 @@ void webServer(int debug)
 /*************************************************/  
 void handleRoot() 
   {
-  String cad=cabeceraHTML;
+  String cad="";
   String orden="";
 
-  //genero la respuesta por defecto  
-  cad += "<h1>" + nombre_dispositivo + "</h1>";
-  cad += "<BR>\n";
-
+  //genero la respuesta por defecto
+  cad += cabeceraHTML;
   //Entradas  
   cad += "<TABLE style=\"border: 2px solid black\">\n";
   cad += "<CAPTION>Entradas</CAPTION>\n";  
   for(int8_t i=0;i<MAX_ENTRADAS;i++)
     {
-    if(entradas[i].configurada==CONFIGURADO) cad += "<TR><TD>" + entradas[i].nombre + "-></TD><TD>" + String(entradas[i].estado) + "</TD></TR>\n";
+    //if(entradas[i].configurada==CONFIGURADO) cad += "<TR><TD>" + entradas[i].nombre + "-></TD><TD>" + String(entradas[i].estado) + "</TD></TR>\n";
+    if(entradas[i].configurada==CONFIGURADO) cad += "<TR><TD>" + entradas[i].nombre + "-></TD><TD>" + String(entradas[i].nombreEstados[entradas[i].estado]) + "</TD></TR>\n";
     }
   cad += "</TABLE>\n";
   cad += "<BR>";
@@ -223,10 +265,12 @@ void handlePulsoRele(void)
 /*********************************************/  
 void handlePlanes(void)
   {
+  int8_t numPlanes=getNumPlanes();  
   String cad=cabeceraHTML;
-  cad += "<h1>" + nombre_dispositivo + "</h1>";
-
-  for(int8_t i=0;i<getNumPlanes();i++)
+  
+  cad += "<h1>hay " + String(numPlanes) + " plan(es) activo(s).</h1><BR>";
+  
+  for(int8_t i=0;i<numPlanes;i++)
     {
     cad += pintaPlanHTML(i);
     cad += "<BR><BR>";
@@ -267,8 +311,9 @@ void handleDesactivaSecuenciador(void)
 /*********************************************/  
 void handleTest(void)
   {
-  String cad=cabeceraHTML;
-  cad += "<h1>" + nombre_dispositivo + "</h1>";
+  String cad="";
+
+  cad += cabeceraHTML;
   
   cad += "Test OK<br>";
   cad += pieHTML;
@@ -284,8 +329,9 @@ void handleTest(void)
 /*********************************************/  
 void handleRestart(void)
   {
-  String cad=cabeceraHTML;
-  cad += "<h1>" + nombre_dispositivo + "</h1>";
+  String cad="";
+
+  cad += cabeceraHTML;
   
   cad += "Reiniciando...<br>";
   cad += pieHTML;
@@ -322,7 +368,7 @@ void handleInfo(void)
     cad += "Rele " + String(i) + " nombre: " + nombreRele(i) + "| estado: " + estadoRele(i);    
     cad += "<BR>";   
     }
-  cad += "-----------------------------------------------<BR>";  
+  cad += "-----------------------------------------------<BR>"; 
   
   cad += "<BR>-----------------WiFi info-----------------<BR>";
   cad += "SSID: " + nombreSSID();
@@ -331,7 +377,7 @@ void handleInfo(void)
   cad += "<BR>";    
   cad += "Potencia: " + String(WiFi.RSSI());
   cad += "<BR>";    
-  cad += "-----------------------------------------------<BR>";    
+  cad += "-----------------------------------------------<BR>";  
 /*
   cad += "<BR>-----------------MQTT info-----------------<BR>";
   cad += "IP broker: " + IPBroker.toString();
@@ -345,7 +391,7 @@ void handleInfo(void)
   cad += "Topic root: " + topicRoot="";
   cad += "<BR>";  
   cad += "-----------------------------------------------<BR>";  
-*/
+*/    
   cad += "<BR>-----------------Hardware info-----------------<BR>";
   cad += "FreeHeap: " + String(ESP.getFreeHeap());
   cad += "<BR>";
@@ -358,82 +404,11 @@ void handleInfo(void)
   cad += "FlashChipSize: " + String(ESP.getFlashChipSize());
   cad += "<BR>";  
   cad += "FlashChipSpeed: " + String(ESP.getFlashChipSpeed());
-  cad += "<BR>";    
+  cad += "<BR>";  
   cad += "-----------------------------------------------<BR>";  
   
   cad += pieHTML;
   server.send(200, "text/html", cad);     
-  }
-
-/*********************************************/
-/*                                           */
-/*  Lista los ficheros en el sistema a       */
-/*  traves de una peticion HTTP              */ 
-/*                                           */
-/*********************************************/  
-void handleListaFicheros(void)
-  {
-  String cad=cabeceraHTML;
-  String nombreFichero="";
-  String contenidoFichero="";
-  boolean salvado=false;
-
-  cad += "<h1>" + nombre_dispositivo + "</h1>";
-  cad += "<h2>Lista de ficheros</h2>";
-
-  //Variables para manejar la lista de ficheros
-  String contenido="";
-  String fichero="";  
-  int16_t to=0;
-  
-  if(listaFicheros(contenido)) 
-    {
-    Serial.printf("contenido inicial= %s\n",contenido.c_str());      
-    //busco el primer separador
-    to=contenido.indexOf(SEPARADOR); 
-
-    cad +="<style> table{border-collapse: collapse;} th, td{border: 1px solid black; padding: 10px; text-align: left;}</style>";
-    cad += "<TABLE>";
-    while(to!=-1)
-      {
-      fichero=contenido.substring(0, to);//cojo el principio como el fichero
-      contenido=contenido.substring(to+1); //la cadena ahora es desde el separador al final del fichero anterior
-      to=contenido.indexOf(SEPARADOR); //busco el siguiente separador
-
-      cad += "<TR><TD>" + fichero + "</TD>";           
-      cad += "<TD>";
-      cad += "<form action=\"manageFichero\" target=\"_blank\">";
-      cad += "    <input type=\"hidden\" name=\"nombre\" value=\"" + fichero + "\">";
-      cad += "    <input type=\"submit\" value=\"editar\">";
-      cad += "</form>";
-      cad += "</TD><TD>";
-      cad += "<form action=\"borraFichero\" target=\"_blank\">";
-      cad += "    <input type=\"hidden\" name=\"nombre\" value=\"" + fichero + "\">";
-      cad += "    <input type=\"submit\" value=\"borrar\">";
-      cad += "</form>";
-      cad += "</TD></TR>";
-      //cad += "<TR><TD><a href=\"borraFichero?nombre="+ fichero +"\" target=\"_blank\">borrar</a></TD><TD><a href=\"manageFichero?nombre="+ fichero +"\" target=\"_blank\">" + fichero + "</a></TD></TR>\n";           
-      }
-    cad += "</TABLE>\n";
-    cad += "<BR>";
-    
-    //Para crear un fichero nuevo
-    cad += "<h2>Crear un fichero nuevo:</h2>";
-    cad += "<table><tr><td>";      
-    cad += "<form action=\"creaFichero\" target=\"_blank\">";
-    cad += "  <p>";
-    cad += "    Nombre:<input type=\"text\" name=\"nombre\" value=\"\">";
-    cad += "    <BR>";
-    cad += "    Contenido:<br><textarea cols=75 rows=20 name=\"contenido\"></textarea>";
-    cad += "    <BR>";
-    cad += "    <input type=\"submit\" value=\"salvar\">";
-    cad += "  </p>";
-    cad += "</td></tr></table>";      
-    }
-  else cad += "<TR><TD>No se pudo recuperar la lista de ficheros</TD></TR>"; 
-
-  cad += pieHTML;
-  server.send(200, "text/html", cad); 
   }
 
 /*********************************************/
@@ -444,12 +419,12 @@ void handleListaFicheros(void)
 /*********************************************/  
 void handleCreaFichero(void)
   {
-  String cad=cabeceraHTML;
+  String cad="";
   String nombreFichero="";
   String contenidoFichero="";
   boolean salvado=false;
 
-  cad += "<h1>" + nombre_dispositivo + "</h1>";
+  cad += cabeceraHTML;
 
   if(server.hasArg("nombre") && server.hasArg("contenido")) //si existen esos argumentos
     {
@@ -473,11 +448,11 @@ void handleCreaFichero(void)
 /*********************************************/  
 void handleBorraFichero(void)
   {
-  String cad=cabeceraHTML;
   String nombreFichero="";
   String contenidoFichero="";
+  String cad="";
 
-  cad += "<h1>" + nombre_dispositivo + "</h1>";
+  cad += cabeceraHTML;
   
   if(server.hasArg("nombre") ) //si existen esos argumentos
     {
@@ -503,9 +478,7 @@ void handleLeeFichero(void)
   String cad=cabeceraHTML;
   String nombreFichero="";
   String contenido="";
-  
-  cad += "<h1>" + nombre_dispositivo + "</h1>";
-  
+   
   if(server.hasArg("nombre") ) //si existen esos argumentos
     {
     nombreFichero=server.arg("nombre");
@@ -521,64 +494,7 @@ void handleLeeFichero(void)
       cad += "</textarea>";
       cad += "<BR>";
       }
-    else cad += "Error al abrir el fichero " + nombreFichero + "<BR>";      
-    }
-  else cad += "Falta el argumento <nombre de fichero>"; 
-
-  cad += pieHTML;
-  server.send(200, "text/html", cad); 
-  }
-
-/*********************************************/
-/*                                           */
-/*  Gestion de un fichero a traves de una    */
-/*  peticion HTTP                            */ 
-/*                                           */
-/*********************************************/  
-void handleManageFichero(void)
-  {
-  String cad=cabeceraHTML;
-  String nombreFichero="";
-  String contenido="";
-  
-  cad += "<h1>" + nombre_dispositivo + "</h1>";
-  
-  if(server.hasArg("nombre") ) //si existen esos argumentos
-    {
-    nombreFichero=server.arg("nombre");
-    cad += "<h2>Fichero: " + nombreFichero + "</h2><BR>";  
-
-    if(leeFichero(nombreFichero, contenido))
-      {
-      cad += "El fichero tiene un tama&ntilde;o de ";
-      cad += contenido.length();
-      cad += " bytes.<BR>";
-      cad += "El contenido del fichero es:<BR>";
-      cad += "<textarea readonly=true cols=75 rows=20 name=\"contenido\">";
-      cad += contenido;
-      cad += "</textarea>";
-      cad += "<BR>";
-
-      cad += "<table><tr><td>";
-      cad += "<form action=\"borraFichero\" target=\"_blank\">";
-      cad += "  <p>";
-      cad += "    <input type=\"hidden\" name=\"nombre\" value=\"" + nombreFichero + "\">";
-      cad += "    <input type=\"submit\" value=\"borrar\">";
-      cad += "  </p>";
-      cad += "</form>";
-      cad += "</td></tr></table>";
-      
-      cad += "<table>Modificar fichero<tr><td>";      
-      cad += "<form action=\"creaFichero\" target=\"_blank\">";
-      cad += "  <p>";
-      cad += "    <input type=\"hidden\" name=\"nombre\" value=\"" + nombreFichero + "\">";
-      cad += "    contenido del fichero: <br><textarea cols=75 rows=20 name=\"contenido\">" + contenido + "</textarea>";
-      cad += "    <BR>";
-      cad += "    <input type=\"submit\" value=\"salvar\">";
-      cad += "  </p>";
-      cad += "</td></tr></table>";
-      }
-    else cad += "Error al abrir el fichero " + nombreFichero + "<BR>";
+    else cad += "Error al abrir el fichero " + nombreFichero + "<BR>";   
     }
   else cad += "Falta el argumento <nombre de fichero>"; 
 
@@ -593,6 +509,8 @@ void handleManageFichero(void)
 /*********************************************/
 void handleNotFound()
   {
+  if(handleFileRead(server.uri()))return;
+    
   String message = "";
 
   message = "<h1>" + nombre_dispositivo + "<br></h1>";
@@ -613,37 +531,229 @@ void handleNotFound()
   server.send(404, "text/html", message);
   }
 
-/*********************************** Inicializacion y configuracion *****************************************************************/
-void inicializaWebServer(void)
+/*********************************************/
+/*                                           */
+/*  Habilita la edicion y borrado de los     */
+/*  ficheros en el sistema a traves de una   */
+/*  peticion HTTP                            */ 
+/*                                           */
+/*********************************************/ 
+void handleManageFichero(void)
   {
-  /*******Configuracion del Servicio Web***********/  
-  //Inicializo los serivcios  
-  //decalra las URIs a las que va a responder
-  server.on("/", handleRoot); //Responde con la iodentificacion del modulo
-  server.on("/estado", handleEstado); //Servicio de estdo de reles
-  server.on("/estadoSalidas", handleEstadoSalidas); //Servicio de estdo de reles
-  server.on("/estadoEntradas", handleEstadoEntradas); //Servicio de estdo de reles    
-  server.on("/activaRele", handleActivaRele); //Servicio de activacion de rele
-  server.on("/desactivaRele", handleDesactivaRele);  //Servicio de desactivacion de rele
-  server.on("/pulsoRele", handlePulsoRele);  //Servicio de pulso de rele
-  server.on("/planes", handlePlanes);  //Servicio de representacion del plan del secuenciador
-	server.on("/activaSecuenciador", handleActivaSecuenciador);  //Servicio para activar el secuenciador
-  server.on("/desactivaSecuenciador", handleDesactivaSecuenciador);  //Servicio para desactivar el secuenciador
+  String nombreFichero="";
+  String contenido="";
+  String cad="";
+
+  cad += cabeceraHTML;
+  cad += "<h1>" + nombre_dispositivo + "</h1>";
   
-  server.on("/test", handleTest);  //URI de test
+  if(server.hasArg("nombre") ) //si existen esos argumentos
+    {
+    nombreFichero=server.arg("nombre");
+    cad += "<h2>Fichero: " + nombreFichero + "</h2><BR>";  
 
-  server.on("/restart", handleRestart);  //URI de test
-  server.on("/info", handleInfo);  //URI de test
-  
-  server.on("/listaFicheros", handleListaFicheros);  //URI de leer fichero
-  server.on("/creaFichero", handleCreaFichero);  //URI de crear fichero
-  server.on("/borraFichero", handleBorraFichero);  //URI de borrar fichero
-  server.on("/leeFichero", handleLeeFichero);  //URI de leer fichero
-  server.on("/manageFichero", handleManageFichero);  //URI de leer fichero
+    if(leeFichero(nombreFichero, contenido))
+      {
+      cad += "El fichero tiene un tama&ntilde;o de ";
+      cad += contenido.length();
+      cad += " bytes.<BR>";
+      cad += "El contenido del fichero es:<BR>";
+      cad += "<textarea readonly=true cols=75 rows=20 name=\"contenido\">";
+      cad += contenido;
+      cad += "</textarea>";
+      cad += "<BR>";
 
-  server.onNotFound(handleNotFound);//pagina no encontrada
+      cad += "<table><tr><td>";
+      cad += "<form action=\"borraFichero\" target=\"_self\">";
+      cad += "  <p>";
+      cad += "    <input type=\"hidden\" name=\"nombre\" value=\"" + nombreFichero + "\">";
+      cad += "    <input type=\"submit\" value=\"borrar\">";
+      cad += "  </p>";
+      cad += "</form>";
+      cad += "</td></tr></table>";
+      
+      cad += "<table>Modificar fichero<tr><td>";      
+      cad += "<form action=\"creaFichero\" target=\"_self\">";
+      cad += "  <p>";
+      cad += "    <input type=\"hidden\" name=\"nombre\" value=\"" + nombreFichero + "\">";
+      cad += "    contenido del fichero: <br><textarea cols=75 rows=20 name=\"contenido\">" + contenido + "</textarea>";
+      cad += "    <BR>";
+      cad += "    <input type=\"submit\" value=\"salvar\">";
+      cad += "  </p>";
+      cad += "</td></tr></table>";
+      }
+    else cad += "Error al abrir el fichero " + nombreFichero + "<BR>";
+    }
+  else cad += "Falta el argumento <nombre de fichero>"; 
 
-  server.begin();
-
-  Serial.printf("Servicio web iniciado en puerto %i\n", PUERTO_WEBSERVER);
+  cad += pieHTML;
+  server.send(200, "text/html", cad); 
   }
+
+/*********************************************/
+/*                                           */
+/*  Lista los ficheros en el sistema a       */
+/*  traves de una peticion HTTP              */ 
+/*                                           */
+/*********************************************/  
+void handleListaFicheros(void)
+  {
+  String nombreFichero="";
+  String contenidoFichero="";
+  boolean salvado=false;
+  String cad="";
+
+  cad += cabeceraHTML;
+  
+  //Variables para manejar la lista de ficheros
+  String contenido="";
+  String fichero="";  
+  int16_t to=0;
+  
+  if(listaFicheros(contenido)) 
+    {
+    Serial.printf("contenido inicial= %s\n",contenido.c_str());      
+    //busco el primer separador
+    to=contenido.indexOf(SEPARADOR); 
+
+    cad +="<style> table{border-collapse: collapse;} th, td{border: 1px solid black; padding: 10px; text-align: left;}</style>";
+    cad += "<TABLE>";
+    while(to!=-1)
+      {
+      fichero=contenido.substring(0, to);//cojo el principio como el fichero
+      contenido=contenido.substring(to+1); //la cadena ahora es desde el separador al final del fichero anterior
+      to=contenido.indexOf(SEPARADOR); //busco el siguiente separador
+
+      cad += "<TR><TD>" + fichero + "</TD>";           
+      cad += "<TD>";
+      cad += "<form action=\"manageFichero\" target=\"_self\">";
+      cad += "    <input type=\"hidden\" name=\"nombre\" value=\"" + fichero + "\">";
+      cad += "    <input type=\"submit\" value=\"editar\">";
+      cad += "</form>";
+      cad += "</TD><TD>";
+      cad += "<form action=\"borraFichero\" target=\"_self\">";
+      cad += "    <input type=\"hidden\" name=\"nombre\" value=\"" + fichero + "\">";
+      cad += "    <input type=\"submit\" value=\"borrar\">";
+      cad += "</form>";
+      cad += "</TD></TR>";
+      }
+    cad += "</TABLE>\n";
+    cad += "<BR>";
+    
+    //Para crear un fichero nuevo
+    cad += "<h2>Crear un fichero nuevo:</h2>";
+    cad += "<table><tr><td>";      
+    cad += "<form action=\"creaFichero\" target=\"_self\">";
+    cad += "  <p>";
+    cad += "    Nombre:<input type=\"text\" name=\"nombre\" value=\"\">";
+    cad += "    <BR>";
+    cad += "    Contenido:<br><textarea cols=75 rows=20 name=\"contenido\"></textarea>";
+    cad += "    <BR>";
+    cad += "    <input type=\"submit\" value=\"salvar\">";
+    cad += "  </p>";
+    cad += "</td></tr></table>";      
+    }
+  else cad += "<TR><TD>No se pudo recuperar la lista de ficheros</TD></TR>"; 
+
+  cad += pieHTML;
+  server.send(200, "text/html", cad); 
+  }
+
+/**********************************************************************/
+String getContentType(String filename) { // determine the filetype of a given filename, based on the extension
+  if (filename.endsWith(".html")) return "text/html";
+  else if (filename.endsWith(".css")) return "text/css";
+  else if (filename.endsWith(".js")) return "application/javascript";
+  else if (filename.endsWith(".ico")) return "image/x-icon";
+  else if (filename.endsWith(".gz")) return "application/x-gzip";
+  return "text/plain";
+}
+
+bool handleFileRead(String path) 
+  { // send the right file to the client (if it exists)
+  Serial.println("handleFileRead: " + path);
+  
+  if (!path.startsWith("/")) path += "/";
+  path = "/www" + path; //busco los ficheros en el SPIFFS en la carpeta www
+  //if (!path.endsWith("/")) path += "/";
+  
+  String contentType = getContentType(path);             // Get the MIME type
+  String pathWithGz = path + ".gz";
+  if (SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)) 
+    { // If the file exists, either as a compressed archive, or normal
+    if (SPIFFS.exists(pathWithGz))                         // If there's a compressed version available
+      path += ".gz";                                         // Use the compressed verion
+    File file = SPIFFS.open(path, "r");                    // Open the file
+    size_t sent = server.streamFile(file, contentType);    // Send it to the client
+    file.close();                                          // Close the file again
+    Serial.println(String("\tSent file: ") + path);
+    return true;
+    }
+  Serial.println(String("\tFile Not Found: ") + path);   // If the file doesn't exist, return false
+  return false;
+  }
+
+void handleFileUpload()
+  {
+  File fsUploadFile;
+  HTTPUpload& upload = server.upload();
+  String path;
+ 
+  if(upload.status == UPLOAD_FILE_START)
+    {
+    path = upload.filename;
+    if(!path.startsWith("/")) path = "/"+path;
+    if(!path.startsWith("/www")) path = "/www"+path;
+    if(!path.endsWith(".gz")) 
+      {                          // The file server always prefers a compressed version of a file 
+      String pathWithGz = path+".gz";                    // So if an uploaded file is not compressed, the existing compressed
+      if(SPIFFS.exists(pathWithGz))                      // version of that file must be deleted (if it exists)
+         SPIFFS.remove(pathWithGz);
+      }
+      
+    Serial.print("handleFileUpload Name: "); Serial.println(path);
+    fsUploadFile = SPIFFS.open(path, "w");            // Open the file for writing in SPIFFS (create if it doesn't exist)
+    path = String();
+    }
+  else if(upload.status == UPLOAD_FILE_WRITE)
+    {
+    if(fsUploadFile) fsUploadFile.write(upload.buf, upload.currentSize); // Write the received bytes to the file
+    } 
+  else if(upload.status == UPLOAD_FILE_END)
+    {
+    if(fsUploadFile) 
+      {                                    // If the file was successfully created
+      fsUploadFile.close();                               // Close the file again
+      Serial.print("handleFileUpload Size: "); Serial.println(upload.totalSize);
+      server.sendHeader("Location","/success.html");      // Redirect the client to the success page
+      server.send(303);
+      }
+    else 
+      {
+      server.send(500, "text/plain", "500: couldn't create file");
+      }
+    }
+  }
+
+/****************************Google Home Notifier ******************************/
+void handleSpeechPath() {
+  String phrase = server.arg("phrase");
+  if (phrase == "") {
+    server.send(401, "text / plain", "query 'phrase' is not found");
+    return;
+  }
+  
+
+  /*
+  if (ghn.notify(phrase.c_str()) != true) {
+    Serial.println(ghn.getLastError());
+    server.send(500, "text / plain", ghn.getLastError());
+    return;
+  }*/
+  if(enviaNotificacion((char*)phrase.c_str())) server.send(200, "text / plain", "OK");
+  server.send(404, "text / plain", "KO");  
+}
+
+void handleHablaPath() {
+  server.send(200, "text/html", "<html><head></head><body><input type=\"text\"><button>speech</button><script>var d = document;d.querySelector('button').addEventListener('click',function(){xhr = new XMLHttpRequest();xhr.open('GET','/speech?phrase='+encodeURIComponent(d.querySelector('input').value));xhr.send();});</script></body></html>");
+}  

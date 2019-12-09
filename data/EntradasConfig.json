@@ -1,0 +1,30 @@
+{
+  "Entradas": [
+    {
+    "GPIO": 13, 
+    "nombre": "P. abierta", 
+    "tipo": "INPUT_PULLUP", 
+    "Estados": [
+      {"valor": 0, "texto": "Abierta"},
+      {"valor": 1, "texto": "---"}
+      ],
+    "Mensajes": [
+      {"valor": 0, "texto": "Puerta abierta"},
+      {"valor": 1, "texto": "Cerrando la puerta"}
+      ]
+    },
+    {
+    "GPIO": 12, 
+    "nombre": "P. cerrada", 
+    "tipo": "INPUT_PULLUP",
+    "Estados": [
+      {"valor": 0, "texto": "Cerrada"},
+      {"valor": 1, "texto": "---"}
+      ],
+    "Mensajes": [
+      {"valor": 0, "texto": "Puerta cerrada"},
+      {"valor": 1, "texto": "Abriendo la puerta"}
+      ]
+    }
+  ]
+}

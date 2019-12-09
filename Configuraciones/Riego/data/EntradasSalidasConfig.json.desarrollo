@@ -1,0 +1,8 @@
+{
+  "Salidas": [	
+	  {"GPIO":  "23", "nombre": "Delante", "inicio": "off" },
+	  {"GPIO":  "22", "nombre": "Atras", "inicio": "off" }
+	],
+  "Entradas": []	
+}
+

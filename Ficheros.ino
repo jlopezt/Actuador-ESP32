@@ -4,6 +4,8 @@
 /* memoria del modulo esp6288                   */
 /*                                              */
 /************************************************/
+#include <FS.h>     //this needs to be first, or it all crashes and burns...
+#include <SPIFFS.h> //para el ESP32
 
 /************************************************/
 /* Inicializa el sistema de ficheros del modulo */
@@ -160,8 +162,8 @@ boolean listaFicheros(String &contenido)
  
   while(file)
     {
-    Serial.print("FILE: ");
-    Serial.println(file.name());
+    //Serial.printf("FILE: %s\n",String(file.name()).c_str());
+    //Serial.println(file.name());
 
     contenido += String(file.name());
     contenido += SEPARADOR;

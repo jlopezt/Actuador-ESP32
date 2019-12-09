@@ -44,7 +44,7 @@ void miSaveConfigCallback(void)
 
   if(!leeFicheroConfig(WIFI_CONFIG_FILE, cad)) Serial.println("No se pudo leer el fichero");
   cad=generaJsonConfiguracionWifi(cad, WiFi.SSID(),WiFi.psk());
-  if(!salvaFichero(WIFI_CONFIG_FILE, WIFI_CONFIG_BAK_FILE, cad)) Serial.println("No se pudo salvar el fichero");  
+  //if(!salvaFichero(WIFI_CONFIG_FILE, WIFI_CONFIG_BAK_FILE, cad)) Serial.println("No se pudo salvar el fichero");  
   Serial.println("---------------------Fin salvando configuracion---------------");
   
   conectado=true;
@@ -69,11 +69,11 @@ boolean recuperaDatosWiFi(boolean debug)
   if (debug) Serial.println("Recupero configuracion de archivo...");
 
   //cargo el valores por defecto
-  wifiIP=(0,0,0,0);
-  wifiGW=(0,0,0,0);
-  wifiNet=(0,0,0,0);
-  wifiDNS1=(0,0,0,0);
-  wifiDNS2=(0,0,0,0);
+  wifiIP=IPAddress(0,0,0,0);
+  wifiGW=IPAddress(0,0,0,0);
+  wifiNet=IPAddress(0,0,0,0);
+  wifiDNS1=IPAddress(0,0,0,0);
+  wifiDNS2=IPAddress(0,0,0,0);
    
   if(!leeFicheroConfig(WIFI_CONFIG_FILE, cad)) 
     {
@@ -122,22 +122,29 @@ boolean parseaConfiguracionWifi(String contenido)
 
 boolean inicializaWifi(boolean debug)
   {
+  //Desconecto si esta conectado
+  WiFi.disconnect(true);//(false);   
+  //No reconecta a la ultima WiFi que se conecto
+  WiFi.persistent(false);  
+  //Activo el modo de autoreconexion nuevo en version 1.5 (con el cambio a esp8266 2.4.2)
+  WiFi.setAutoReconnect(true);   
+  //Activo el modo solo estacion, no access point
+  WiFi.mode(WIFI_OFF);
+  WiFi.mode(WIFI_STA);
+
   if(recuperaDatosWiFi(debug))
     {
-    //Configuro la IP fija
-    if (wifiIP!=(0,0,0,0) && wifiGW!=(0,0,0,0))
-      {
-      Serial.printf("Datos WiFi: IP fija-> %s, GW-> %s, subnet-> %s, DNS1-> %s, DNS2-> %s\n",wifiIP.toString().c_str(), wifiGW.toString().c_str(), wifiNet.toString().c_str(), wifiDNS1.toString().c_str(), wifiDNS2.toString().c_str());
-      WiFi.config(wifiIP, wifiGW, wifiNet, wifiDNS1, wifiDNS2);
-      }
-    else Serial.println("No hay IP fija");
-
-    //Activo el modo de autoreconexion nuevo en version 1.5 (con el cambio a esp8266 2.4.2)
-    WiFi.setAutoReconnect(true);
-
     Serial.println("Conectando multibase");
     if (conectaMultibase(debug)) 
       {
+      //Configuro la IP fija
+      if (wifiIP!=IPAddress(0,0,0,0) && wifiGW!=IPAddress(0,0,0,0))
+        {
+        Serial.printf("Datos WiFi: IP fija-> %s, GW-> %s, subnet-> %s, DNS1-> %s, DNS2-> %s\n",wifiIP.toString().c_str(), wifiGW.toString().c_str(), wifiNet.toString().c_str(), wifiDNS1.toString().c_str(), wifiDNS2.toString().c_str());
+        WiFi.config(wifiIP, wifiGW, wifiNet, wifiDNS1, wifiDNS2);
+        }
+      else Serial.println("No hay IP fija");
+
       Serial.println("------------------------WiFi conectada (configuracion almacenada)--------------------------------------");
       Serial.println("WiFi conectada");
       WiFi.printDiag(Serial);
@@ -187,7 +194,7 @@ boolean conectaAutodetect(boolean debug)
   //wifiManager.setAPCallback(miAPCallback);//llamada cuando se actie el portal de configuracion
   
   //Si se ha configurado IP fija
-  if (wifiIP!=(0,0,0,0)) wifiManager.setSTAStaticIPConfig(wifiIP,wifiGW,wifiNet);//Preparo la IP fija (IPAddress ip, IPAddress gw, IPAddress sn) 
+  if (wifiIP!=IPAddress(0,0,0,0)) wifiManager.setSTAStaticIPConfig(wifiIP,wifiGW,wifiNet);//Preparo la IP fija (IPAddress ip, IPAddress gw, IPAddress sn) 
 
   if (!wifiManager.startConfigPortal(("AP_"+nombre_dispositivo).c_str())) 
     {
@@ -297,4 +304,3 @@ String generaJsonConfiguracionWifi(String configActual, String ssid, String pass
 
   return salida;  
   }
-

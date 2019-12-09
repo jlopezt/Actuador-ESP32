@@ -1,0 +1,6 @@
+{
+	"Salidas": [
+		{"GPIO": 23, "nombre": "Pulsador", "inicio": "off" }
+	]
+}
+

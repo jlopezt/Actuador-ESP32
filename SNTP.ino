@@ -9,6 +9,7 @@
 
 String Semana[7]={"Lunes","Martes","Miercoles","Jueves","Viernes","Sabado","Domingo"};
 
+#include <TimeLib.h>  // download from: http://www.arduino.cc/playground/Code/Time
 #include <time.h>
 
 const char* NTP_SERVER = "pool.ntp.org";//"ntp.mydomain.com";
@@ -240,7 +241,7 @@ String getHora(void)
 String getFecha(void)
   {
   String cad=""; 
-  char ss[3];
+  char ss[5];
 
   getLocalTime(&timeinfo);
   

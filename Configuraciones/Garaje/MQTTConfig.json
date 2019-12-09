@@ -7,5 +7,5 @@
 	"ID_MQTT": "garaje/puerta", 
 	"topicRoot": "casa", 
 	"publicarEntradas": 1,
-	"publicarSalidas": 1
+	"publicarSalidas": 0
 }
