@@ -11,7 +11,7 @@
 /***************************** Defines *****************************/
 //Defines generales
 #define NOMBRE_FAMILIA   "Actuador/Secuenciador (E/S)"
-#define VERSION          "4.3.2 (ESP32 1.0.2|OTA|MQTT|Logic+|Secuenciador|FicherosWeb)" //ping MQTT, separacion de la configuracion de E y S
+#define VERSION          "4.4.0 (ESP32 1.0.2|OTA|MQTT|Logic++|Secuenciador|FicherosWeb)" //ping MQTT, separacion de la configuracion de E y S
 #define SEPARADOR        '|'
 #define SUBSEPARADOR     '#'
 #define KO               -1
