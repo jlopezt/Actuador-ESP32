@@ -104,7 +104,7 @@ void handleRoot()
   //Salidas
   cad += "\n<TABLE style=\"border: 2px solid blue\">\n";
   cad += "<CAPTION>Salidas</CAPTION>\n";  
-  for(int8_t i=0;i<MAX_RELES;i++)
+  for(int8_t i=0;i<MAX_SALIDAS;i++)
     {
     if(releConfigurado(i)==CONFIGURADO)
       {      
@@ -115,6 +115,10 @@ void handleRoot()
       if(asociadaASecuenciador(i)!=NO_CONFIGURADO && estadoSecuenciador())//Si esa asociada a un secuenciador o el secuenciador esta on
         {
         cad += "<TD colspan=2> | Secuenciador " + String(asociadaASecuenciador(i)) + "</TD>";
+        }
+      else if(salidaSeguimiento(i)!=NO_CONFIGURADO)
+        {
+        cad += "<TD>Siguiendo a entrada " + String(salidaSeguimiento(i)) + "</TD>";
         }
       else      
         {
@@ -359,11 +363,15 @@ void handleInfo(void)
   cad += "<BR>-----------------------------------------------<BR>";  
 
   cad+= "<BR>-----------------info logica-----------------<BR>";
+  cad += "Hora actual: " + getHora(); 
+  cad += "<BR>";
+  cad += "Fecha actual: " + getFecha(); 
+  cad += "<BR>";
   cad += "IP: " + String(getIP(debugGlobal));
   cad += "<BR>";  
   cad += "nivelActivo: " + String(nivelActivo);
   cad += "<BR>";  
-  for(int8_t i=0;i<MAX_RELES;i++)
+  for(int8_t i=0;i<MAX_SALIDAS;i++)
     {
     cad += "Rele " + String(i) + " nombre: " + nombreRele(i) + "| estado: " + estadoRele(i);    
     cad += "<BR>";   

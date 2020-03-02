@@ -1,0 +1,19 @@
+{
+  "Salidas": [
+    {
+    "GPIO": 23, 
+    "nombre": "Rele",
+    "inicio": "off",
+    "anchoPulso": 1000,
+    "entradaAsociada": 0,
+    "Estados": [
+      {"valor": 0, "texto": "Encendida"},
+      {"valor": 1, "texto": "Apagada"}
+      ],
+    "Mensajes": [
+      {"valor": 0, "texto": "Luz encendida"},
+      {"valor": 1, "texto": "Lus apagada"}
+      ]
+    }
+  ]
+}

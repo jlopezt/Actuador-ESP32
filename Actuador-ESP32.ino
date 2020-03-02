@@ -11,7 +11,7 @@
 /***************************** Defines *****************************/
 //Defines generales
 #define NOMBRE_FAMILIA   "Actuador/Secuenciador (E/S)"
-#define VERSION          "4.4.0 (ESP32 1.0.2|OTA|MQTT|Logic++|Secuenciador|FicherosWeb)" //ping MQTT, separacion de la configuracion de E y S
+#define VERSION          "4.5.0 (ESP32 1.0.2|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)" //ping MQTT, separacion de la configuracion de E y S
 #define SEPARADOR        '|'
 #define SUBSEPARADOR     '#'
 #define KO               -1
@@ -34,17 +34,20 @@
 #define SECUENCIADOR_CONFIG_BAK_FILE     "/SecuenciadorConfig.json.bak"
 #define GHN_CONFIG_FILE                  "/GHNConfig.json"
 #define GHN_CONFIG_BAK_FILE              "/GHNConfig.json.bak"
+#define MAQUINAESTADOS_CONFIG_FILE       "/MaqEstadosConfig.json"
+#define MAQUINAESTADOS_CONFIG_BAK_FILE   "/MaqEstadosConfig.json.bak"
 
 // Una vuela de loop son ANCHO_INTERVALO segundos 
-#define ANCHO_INTERVALO         100 //Ancho en milisegundos de la rodaja de tiempo
-#define FRECUENCIA_OTA            5 //cada cuantas vueltas de loop atiende las acciones
-#define FRECUENCIA_ENTRADAS       5 //cada cuantas vueltas de loop atiende las entradas
-#define FRECUENCIA_SALIDAS        5 //cada cuantas vueltas de loop atiende las salidas
-#define FRECUENCIA_SECUENCIADOR  10 //cada cuantas vueltas de loop atiende al secuenciador
-#define FRECUENCIA_SERVIDOR_WEB   1 //cada cuantas vueltas de loop atiende el servidor web
-#define FRECUENCIA_MQTT          10 //cada cuantas vueltas de loop envia y lee del broker MQTT
-#define FRECUENCIA_ENVIO_DATOS  100 //cada cuantas vueltas de loop envia al broker el estado de E/S
-#define FRECUENCIA_ORDENES        2 //cada cuantas vueltas de loop atiende las ordenes via serie 
+#define ANCHO_INTERVALO          100 //Ancho en milisegundos de la rodaja de tiempo
+#define FRECUENCIA_OTA             5 //cada cuantas vueltas de loop atiende las acciones
+#define FRECUENCIA_ENTRADAS        5 //cada cuantas vueltas de loop atiende las entradas
+#define FRECUENCIA_SALIDAS         5 //cada cuantas vueltas de loop atiende las salidas
+#define FRECUENCIA_SECUENCIADOR   10 //cada cuantas vueltas de loop atiende al secuenciador
+#define FRECUENCIA_MAQUINAESTADOS 10 //cada cuantas vueltas de loop atiende a la maquina de estados
+#define FRECUENCIA_SERVIDOR_WEB    1 //cada cuantas vueltas de loop atiende el servidor web
+#define FRECUENCIA_MQTT           10 //cada cuantas vueltas de loop envia y lee del broker MQTT
+#define FRECUENCIA_ENVIO_DATOS   100 //cada cuantas vueltas de loop envia al broker el estado de E/S
+#define FRECUENCIA_ORDENES         2 //cada cuantas vueltas de loop atiende las ordenes via serie 
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/
@@ -59,7 +62,7 @@
 
 /***************************** variables globales *****************************/
 //Indica si el rele se activa con HIGH o LOW
-int nivelActivo=HIGH; //Se activa con HIGH por defecto
+int nivelActivo;
 
 String nombre_dispositivo;//(NOMBRE_FAMILIA);//Nombre del dispositivo, por defecto el de la familia
 uint16_t vuelta = MAX_VUELTAS-100;//0; //vueltas de loop
@@ -96,8 +99,8 @@ void setup()
     {
     candado=false;
     //Genera candado
-    if(salvaFichero(FICHERO_CANDADO,"","JSD")) Serial.println("Candado creado");
-    else Serial.println("ERROR - No se pudo crear el candado");
+ /*   if(salvaFichero(FICHERO_CANDADO,"","JSD")) Serial.println("Candado creado");
+    else Serial.println("ERROR - No se pudo crear el candado");*/
     }
  
   //Configuracion general
@@ -139,6 +142,10 @@ void setup()
   Serial.println("\n\nInit secuenciador ---------------------------------------------------------------------\n");
   inicializaSecuenciador();
   
+  //Maquina de estados
+  Serial.println("\n\nInit maquina de estados----------------------------------------------------------------\n");
+  inicializaMaquinaEstados();
+  
   //Ordenes serie
   Serial.println("\n\nInit Ordenes ----------------------------------------------------------------------\n");  
   inicializaOrden();//Inicializa los buffers de recepcion de ordenes desde PC
@@ -170,6 +177,7 @@ void loop()
   if ((vuelta % FRECUENCIA_ENTRADAS)==0) consultaEntradas(debugGlobal); //comprueba las entradas
   if ((vuelta % FRECUENCIA_SALIDAS)==0) actualizaSalidas(debugGlobal); //comprueba las salidas
   if ((vuelta % FRECUENCIA_SECUENCIADOR)==0) actualizaSecuenciador(debugGlobal); //Actualiza la salida del secuenciador
+  if ((vuelta % FRECUENCIA_MAQUINAESTADOS)==0) actualizaMaquinaEstados(debugGlobal); //Actualiza la maquina de estados
   //Prioridad 3: Interfaces externos de consulta    
   if ((vuelta % FRECUENCIA_SERVIDOR_WEB)==0) webServer(debugGlobal); //atiende el servidor web
   if ((vuelta % FRECUENCIA_MQTT)==0) atiendeMQTT();      

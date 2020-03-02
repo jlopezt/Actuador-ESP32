@@ -7,10 +7,10 @@
 #define MES_CAMBIO_HORARIO_DOWN 10 //octubre
 #define DOMINGO 7
 
-String Semana[7]={"Lunes","Martes","Miercoles","Jueves","Viernes","Sabado","Domingo"};
-
 #include <TimeLib.h>  // download from: http://www.arduino.cc/playground/Code/Time
 #include <time.h>
+
+String Semana[7]={"Lunes","Martes","Miercoles","Jueves","Viernes","Sabado","Domingo"};
 
 const char* NTP_SERVER = "pool.ntp.org";//"ntp.mydomain.com";
 //const char* TZ_INFO    = "EST5EDT4,M3.2.0/02:00:00,M11.1.0/02:00:00";

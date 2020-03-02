@@ -237,6 +237,10 @@ void inicializaOrden(void)
   comandos[i].descripcion="JSON salidas";
   comandos[i++].p_func_comando=func_comando_Salidas;
 
+  comandos[i].comando="debugME";
+  comandos[i].descripcion="Debug de la maquina de estados";
+  comandos[i++].p_func_comando=func_comando_debugMaquinaEstados;
+
   //resto
   for(;i<MAX_COMANDOS;)
     {
@@ -301,7 +305,7 @@ void func_comando_estadoRele(int iParametro, char* sParametro, float fParametro)
   if (estadoRele(iParametro))Serial.printf("activado");
   else Serial.printf("desactivado");
 
-  Serial.printf("\nEl estado fisico del rele %i es %i\nPines:\npin rele: %i\n",iParametro, digitalRead(reles[iParametro].pin),reles[iParametro].pin);
+  Serial.printf("\nEl estado fisico del rele %i es %i\nPines:\npin rele: %i\n",iParametro, digitalRead(salidas[iParametro].pin),salidas[iParametro].pin);
   }  
     
 void func_comando_restart(int iParametro, char* sParametro, float fParametro)//"restart")
@@ -318,7 +322,7 @@ void func_comando_info(int iParametro, char* sParametro, float fParametro)//"inf
   Serial.printf("\n-----------------info logica-----------------\n");
   Serial.printf("IP: %s\n", String(getIP(debugGlobal)).c_str());
   Serial.printf("nivelActivo: %s\n", String(nivelActivo).c_str());  
-  for(int8_t i=0;i<MAX_RELES;i++) Serial.printf("Rele %i | nombre: %s | estado: %i\n", i,nombreRele(i).c_str(), estadoRele(i));
+  for(int8_t i=0;i<MAX_SALIDAS;i++) Serial.printf("Rele %i | nombre: %s | estado: %i\n", i,nombreRele(i).c_str(), estadoRele(i));
   Serial.printf("-----------------------------------------------\n");  
   
   Serial.printf("-------------------WiFi info-------------------\n");
@@ -448,7 +452,7 @@ void func_comando_ES(int iParametro, char* sParametro, float fParametro)//"debug
   Serial.println("Entradas");  
   for(int8_t i=0;i<MAX_ENTRADAS;i++) Serial.printf("%i: nombre: %s | configurada: %i | estado: %i | tipo: %s | pin: %i\n",i,entradas[i].nombre.c_str(),entradas[i].configurada,entradas[i].estado,entradas[i].tipo.c_str(),entradas[i].pin);
   Serial.println("Salidas");  
-  for(int8_t i=0;i<MAX_RELES;i++) Serial.printf("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i\n",i,reles[i].nombre.c_str(),reles[i].configurado,reles[i].estado,reles[i].inicio,reles[i].pin);  
+  for(int8_t i=0;i<MAX_SALIDAS;i++) Serial.printf("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i\n",i,salidas[i].nombre.c_str(),salidas[i].configurado,salidas[i].estado,salidas[i].inicio,salidas[i].pin);  
   } 
 
 void func_comando_actSec(int iParametro, char* sParametro, float fParametro)//"debug")
@@ -483,4 +487,11 @@ void func_comando_Entradas(int iParametro, char* sParametro, float fParametro)//
   {
   Serial.printf("%s\n",generaJsonEstadoEntradas().c_str());
   }    
+
+void func_comando_debugMaquinaEstados(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  debugMaquinaEstados=!debugMaquinaEstados;
+  if (debugMaquinaEstados) Serial.println("El debug de la maquina de estados esta on");
+  else Serial.println("El debug de la maquina de estados esta off");
+  }  
 /***************************** FIN funciones para comandos ******************************************/ 

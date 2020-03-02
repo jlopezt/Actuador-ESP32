@@ -65,7 +65,7 @@ void erroresOTA(ota_error_t error)
   //Sets if the device should be rebooted after successful update. Default true
   //ArduinoOTAClass&/void setRebootOnSuccess(bool reboot);
 
-  ArduinoOTA.setHostname((const char *)NOMBRE_FAMILIA);        
+  ArduinoOTA.setHostname(nombre_dispositivo.c_str());
   ArduinoOTA.setRebootOnSuccess(true);
   ArduinoOTA.setPassword((const char *)"88716");// No authentication by default
 

@@ -1,0 +1,17 @@
+{
+  "Entradas": [
+    {
+    "GPIO": 13, 
+    "nombre": "PIR", 
+    "tipo": "INPUT_PULLUP", 
+    "Estados": [
+      {"valor": 0, "texto": "No detectado"},
+      {"valor": 1, "texto": "Detectado"}
+      ],
+    "Mensajes": [
+      {"valor": 0, "texto": "Detecta movimiento"},
+      {"valor": 1, "texto": "No detecta movimiento"}
+      ]
+    }
+  ]
+}

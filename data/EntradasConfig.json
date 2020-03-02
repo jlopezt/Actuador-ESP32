@@ -1,30 +1,56 @@
 {
-  "Entradas": [
-    {
-    "GPIO": 13, 
-    "nombre": "P. abierta", 
-    "tipo": "INPUT_PULLUP", 
-    "Estados": [
-      {"valor": 0, "texto": "Abierta"},
-      {"valor": 1, "texto": "---"}
-      ],
-    "Mensajes": [
-      {"valor": 0, "texto": "Puerta abierta"},
-      {"valor": 1, "texto": "Cerrando la puerta"}
-      ]
-    },
-    {
-    "GPIO": 12, 
-    "nombre": "P. cerrada", 
-    "tipo": "INPUT_PULLUP",
-    "Estados": [
-      {"valor": 0, "texto": "Cerrada"},
-      {"valor": 1, "texto": "---"}
-      ],
-    "Mensajes": [
-      {"valor": 0, "texto": "Puerta cerrada"},
-      {"valor": 1, "texto": "Abriendo la puerta"}
-      ]
-    }
-  ]
+	"Entradas": [
+		{
+		"GPIO": 16, 
+		"nombre": "FcArriba", 
+		"tipo": "INPUT_PULLUP",
+		"Estados": [
+			{"valor": 0, "texto": "Activo"},
+			{"valor": 1, "texto": "Reposo"}
+			],
+		"Mensajes": [
+			{"valor": 0, "texto": "Arriba"},
+			{"valor": 1, "texto": ""}
+			]
+		},
+		{
+		"GPIO": 17, 
+		"nombre": "FcAbajo", 
+		"tipo": "INPUT_PULLUP", 
+		"Estados": [
+			{"valor": 0, "texto": "Activo"},
+			{"valor": 1, "texto": "Reposo"}
+			],
+		"Mensajes": [
+			{"valor": 0, "texto": "Abajo"},
+			{"valor": 1, "texto": ""}
+			]
+		},
+		{
+		"GPIO": 18, 
+		"nombre": "Pulsador", 
+		"tipo": "INPUT_PULLUP",
+		"Estados": [
+			{"valor": 0, "texto": "Activo"},
+			{"valor": 1, "texto": "Reposo"}
+			],
+		"Mensajes": [
+			{"valor": 0, "texto": "Pulsado"},
+			{"valor": 1, "texto": ""}
+			]
+		},
+		{
+		"GPIO": 19, 
+		"nombre": "Otra", 
+		"tipo": "INPUT_PULLUP",
+		"Estados": [
+			{"valor": 0, "texto": "Activo"},
+			{"valor": 1, "texto": "Reposo"}
+			],
+		"Mensajes": [
+			{"valor": 0, "texto": "Esta actuando"},
+			{"valor": 1, "texto": "Paradito del todo"}
+			]
+		}		
+	]
 }
