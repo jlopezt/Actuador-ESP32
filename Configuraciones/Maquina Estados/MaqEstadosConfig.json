@@ -1,25 +1,32 @@
 {
+	"Entradas": [0,1,2],
+	"Salidas": [0,1],
 	"Estados":[
-		{"id":0, "nombre": "Error", "salidas":[{"id":0,"valor":0},{"id":1,"valor":0}]},
-		{"id":1, "nombre": "Inicio", "salidas":[{"id":0,"valor":0},{"id":1,"valor":0}]},
+		{"id":0, "nombre": "Error",    "salidas":[{"id":0,"valor":0},{"id":1,"valor":0}]},
+		{"id":1, "nombre": "Inicio",   "salidas":[{"id":0,"valor":0},{"id":1,"valor":0}]},
 		{"id":2, "nombre": "Subiendo", "salidas":[{"id":0,"valor":1},{"id":1,"valor":0}]},
-		{"id":3, "nombre": "Bajando", "salidas":[{"id":0,"valor":0},{"id":1,"valor":1}]},
-		{"id":4, "nombre": "Medio", "salidas":[{"id":0,"valor":0},{"id":1,"valor":0}]},
-		{"id":5, "nombre": "Arriba", "salidas":[{"id":0,"valor":0},{"id":1,"valor":0}]},
-		{"id":6, "nombre": "Abajo", "salidas":[{"id":0,"valor":0},{"id":1,"valor":0}]}
+		{"id":3, "nombre": "Bajando",  "salidas":[{"id":0,"valor":0},{"id":1,"valor":1}]},
+		{"id":4, "nombre": "Medio",    "salidas":[{"id":0,"valor":0},{"id":1,"valor":0}]},
+		{"id":5, "nombre": "Arriba",   "salidas":[{"id":0,"valor":0},{"id":1,"valor":0}]},
+		{"id":6, "nombre": "Abajo",    "salidas":[{"id":0,"valor":0},{"id":1,"valor":0}]}
 		],
 	"Transiciones":[
-		{"inicial":1,"final":5, "entradas":[{"id":0,"valor":1},{"id":1,"valor":0},{"id":2,"valor":-1}]},
-		{"inicial":1,"final":4, "entradas":[{"id":0,"valor":0},{"id":1,"valor":0},{"id":2,"valor":-1}]},
-		{"inicial":1,"final":6, "entradas":[{"id":0,"valor":0},{"id":1,"valor":1},{"id":2,"valor":-1}]},
-		{"inicial":2,"final":2, "entradas":[{"id":0,"valor":0},{"id":1,"valor":0},{"id":2,"valor":-1}]},
-		{"inicial":2,"final":5, "entradas":[{"id":1,"valor":1},{"id":1,"valor":0},{"id":2,"valor":-1}]},
-		{"inicial":3,"final":3, "entradas":[{"id":0,"valor":0},{"id":1,"valor":0},{"id":2,"valor":-1}]},
-		{"inicial":3,"final":6, "entradas":[{"id":0,"valor":0},{"id":1,"valor":1},{"id":2,"valor":-1}]},
-		{"inicial":4,"final":2, "entradas":[{"id":0,"valor":0},{"id":1,"valor":0},{"id":2,"valor":-1}]},
-		{"inicial":5,"final":5, "entradas":[{"id":1,"valor":1},{"id":1,"valor":0},{"id":2,"valor":0}]},
-		{"inicial":5,"final":3, "entradas":[{"id":0,"valor":-1},{"id":1,"valor":0},{"id":2,"valor":1}]},
-		{"inicial":6,"final":6, "entradas":[{"id":0,"valor":0},{"id":1,"valor":1},{"id":2,"valor":0}]},
-		{"inicial":6,"final":2, "entradas":[{"id":0,"valor":0},{"id":1,"valor":-1},{"id":1,"valor":1}]}
-		]	
+		{"inicial":1, "entradas":[{"id":0,"valor": 0},{"id":1,"valor": 1},{"id":2,"valor":-1}], "final":6},
+		{"inicial":1, "entradas":[{"id":0,"valor": 1},{"id":1,"valor": 0},{"id":2,"valor":-1}], "final":5},
+		{"inicial":1, "entradas":[{"id":0,"valor": 0},{"id":1,"valor": 0},{"id":2,"valor":-1}], "final":4},
+		                                                                                                 
+		{"inicial":2, "entradas":[{"id":0,"valor": 0},{"id":1,"valor":-1},{"id":2,"valor":-1}], "final":2},
+		{"inicial":2, "entradas":[{"id":1,"valor": 1},{"id":1,"valor":-1},{"id":2,"valor":-1}], "final":5},
+		                                                                                                 
+		{"inicial":3, "entradas":[{"id":0,"valor":-1},{"id":1,"valor": 0},{"id":2,"valor":-1}], "final":3},
+		{"inicial":3, "entradas":[{"id":0,"valor":-1},{"id":1,"valor": 1},{"id":2,"valor":-1}], "final":6},
+		                                                                                                 
+		{"inicial":4, "entradas":[{"id":0,"valor": 0},{"id":1,"valor": 0},{"id":2,"valor":-1}], "final":2},
+		                                                                                                 
+		{"inicial":5, "entradas":[{"id":1,"valor": 1},{"id":1,"valor": 0},{"id":2,"valor": 0}], "final":5},
+		{"inicial":5, "entradas":[{"id":0,"valor":-1},{"id":1,"valor": 0},{"id":2,"valor": 1}], "final":3},
+		                                                                                                 
+		{"inicial":6, "entradas":[{"id":0,"valor": 0},{"id":1,"valor": 1},{"id":2,"valor": 0}], "final":6},
+		{"inicial":6, "entradas":[{"id":0,"valor": 0},{"id":1,"valor":-1},{"id":1,"valor": 1}], "final":2}
+		]	                                                                                      
 }

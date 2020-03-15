@@ -302,3 +302,12 @@ int8_t actualizaSalidasMaquinaEstados(uint8_t estado)
 
   return retorno;
   }
+
+
+/****************************************************/
+/* Funciones de consulta de dataos (encapsulan)     */
+/****************************************************/
+uint8_t getNumEstados(void){return numeroEstados;}
+uint8_t getNumTransiciones(void){return numeroTransiciones;}
+uint8_t getNumEntradasME(void){return numeroEntradas;}
+uint8_t getNumSalidasME(void){return numeroSalidas;}

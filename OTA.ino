@@ -57,7 +57,7 @@ void erroresOTA(ota_error_t error)
   else if (error == OTA_END_ERROR) Serial.println("End Failed");
   }
 
- boolean iniializaOTA(boolean debug)
+ boolean inicializaOTA(boolean debug)
   {    
   //OTA
   //Sets the device hostname. Default esp32-xxxxxx

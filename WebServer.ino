@@ -19,7 +19,7 @@ WebServer server(PUERTO_WEBSERVER);
 
 //Cadenas HTML precargadas
 String cabeceraHTML="";//<HTML><HEAD><TITLE>" + nombre_dispositivo + "</TITLE></HEAD><BODY>";
-String enlaces="<TABLE>\n<CAPTION>Enlaces</CAPTION>\n<TR><TD><a href=\"info\" target=\"_self\">Info</a></TD></TR>\n<TR><TD><a href=\"test\" target=\"_self\">Test</a></TD></TR>\n<TR><TD><a href=\"restart\" target=\"_self\">Restart</a></TD></TR>\n<TR><TD><a href=\"listaFicheros\" target=\"_self\">Lista ficheros</a></TD></TR>\n<TR><TD><a href=\"estado\" target=\"_self\">Estado</a></TD></TR>\n<TR><TD><a href=\"estadoSalidas\" target=\"_self\">Estado salidas</a></TD></TR>\n<TR><TD><a href=\"estadoEntradas\" target=\"_self\">Estado entradas</a></TD></TR>\n<TR><TD><a href=\"planes\" target=\"_self\">Planes del secuenciador</a></TD></TR></TABLE>\n"; 
+String enlaces="<TABLE>\n<CAPTION>Enlaces</CAPTION>\n<TR><TD><a href=\"info\" target=\"_self\">Info</a></TD></TR>\n<TR><TD><a href=\"test\" target=\"_self\">Test</a></TD></TR>\n<TR><TD><a href=\"restart\" target=\"_self\">Restart</a></TD></TR>\n<TR><TD><a href=\"listaFicheros\" target=\"_self\">Lista ficheros</a></TD></TR>\n<TR><TD><a href=\"estado\" target=\"_self\">Estado</a></TD></TR>\n<TR><TD><a href=\"estadoSalidas\" target=\"_self\">Estado salidas</a></TD></TR>\n<TR><TD><a href=\"estadoEntradas\" target=\"_self\">Estado entradas</a></TD></TR>\n<TR><TD><a href=\"planes\" target=\"_self\">Planes del secuenciador</a></TD></TR>\n<TR><TD><a href=\"maquinaEstados\" target=\"_self\">Maquina de estados</a></TD></TR></TABLE>\n"; 
 String pieHTML="</BODY></HTML>";
 
 /*********************************** Inicializacion y configuracion *****************************************************************/
@@ -41,6 +41,7 @@ void inicializaWebServer(void)
   server.on("/planes", handlePlanes);  //Servicio de representacion del plan del secuenciador
   server.on("/activaSecuenciador", handleActivaSecuenciador);  //Servicio para activar el secuenciador
   server.on("/desactivaSecuenciador", handleDesactivaSecuenciador);  //Servicio para desactivar el secuenciador
+  server.on("/maquinaEstados", handleMaquinaEstados);  //Servicio de representacion de las transiciones d ela maquina de estados
       
   server.on("/test", handleTest);  //URI de test
   server.on("/restart", handleRestart);  //URI de test
@@ -154,6 +155,65 @@ void handleRoot()
   cad += "<BR><BR>\n";
   cad += enlaces;
   cad += "<BR><BR>" + nombre_dispositivo + " . Version " + String(VERSION) + ".";
+
+  server.send(200, "text/html", cad);
+  }
+
+/*************************************************/
+/*                                               */
+/*  Servicio de consulta de las transiciones de  */
+/*  la maquina de estados                        */
+/*                                               */
+/*************************************************/  
+void handleMaquinaEstados(void)
+  {
+  String cad="";
+  String orden="";
+
+  //genero la respuesta por defecto
+  cad += cabeceraHTML;
+
+  //Estados
+  cad += "<TABLE style=\"border: 2px solid black\">\n";
+  cad += "<CAPTION>ESTADOS</CAPTION>\n";  
+
+  cad += "<TR>"; 
+  cad += "<TD>id</TD>";  
+  cad += "<TD>Nombre</TD>";
+  for(uint8_t i=0;i<getNumSalidasME();i++) cad += "<TD>Salida " + String(i) + "</TD>";
+  cad += "</TR>"; 
+    
+  for(uint8_t i=0;i<getNumEstados();i++)
+    {
+    cad += "<TR>";  
+    cad += "<TD>" + String(i) + "</TD>";  
+    cad += "<TD>" + estados[i].nombre + "</TD>";
+    for(uint8_t j=0;j<getNumSalidasME();j++) cad += "<TD>" + String(estados[i].salidasAsociadas[j]) + "</TD>";
+    cad += "</TR>";
+    }
+  cad += "</TABLE>";
+
+  cad += "<BR><BR>";
+  
+  //Transiciones
+  cad += "<TABLE style=\"border: 2px solid black\">\n";
+  cad += "<CAPTION>TRANSICIONES</CAPTION>\n";  
+
+  cad += "<TR>";
+  cad += "<TD>Inicial</TD>";
+  for(uint8_t i=0;i<getNumEntradasME();i++) cad += "<TD>Entrada " + String(i) + "</TD>";
+  cad += "<TD>Final</TD>";  
+  cad += "</TR>";
+  
+  for(uint8_t i=0;i<getNumTransiciones();i++)
+    {
+    cad += "<TR>";
+    cad += "<TD>" + String(transiciones[i].estadoInicial) + "</TD>";
+    for(uint8_t j=0;j<getNumEntradasME();j++) cad += "<TD>" + String(transiciones[i].valorEntradas[j]) + "</TD>";
+    cad += "<TD>" + String(transiciones[i].estadoFinal) + "</TD>";    
+    cad += "</TR>";
+    }
+  cad += "</TABLE>";
 
   server.send(200, "text/html", cad);
   }

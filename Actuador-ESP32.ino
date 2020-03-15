@@ -114,7 +114,7 @@ void setup()
     /*----------------Inicializaciones que necesitan red-------------*/
     //OTA
     Serial.println("\n\nInit OTA ------------------------------------------------------------------------\n");
-    iniializaOTA(debugGlobal);
+    inicializaOTA(debugGlobal);
     //SNTP
     Serial.printf("\n\nInit SNTP ------------------------------------------------------------------------\n");
     inicializaReloj();    
