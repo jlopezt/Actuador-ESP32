@@ -21,8 +21,8 @@
 #define MODO_SECUENCIADOR 1
 #define MODO_SEGUIMIENTO  2
 
-#define ESTADO_ACTIVO     0
-#define ESTADO_DESACTIVO  1
+#define ESTADO_DESACTIVO  0
+#define ESTADO_ACTIVO     1
 #define ESTADO_PULSO      2
 #define ESTADO_MAQUINA    3
 
@@ -34,6 +34,7 @@ typedef struct{
   int8_t configurada;
   String nombre;
   int8_t estado;
+  int8_t estadoActivo;  
   int8_t pin;
   String tipo;        //Puede ser INPUT, INPUT_PULLUP, No valido!!-->INPUT_PULLDOWN
   String nombreEstados[2];  //Son entradas binarias, solo puede haber 2 mensajes. El 0 nombre del estado en valor 0 y el 1 nombre del estado en valor 1
@@ -71,6 +72,7 @@ void inicializaEntradas(void)
     entradas[i].configurada=NO_CONFIGURADO ;//la inicializo a no configurada
     entradas[i].nombre="No configurado";
     entradas[i].estado=NO_CONFIGURADO;    
+    entradas[i].estadoActivo=NO_CONFIGURADO;
     entradas[i].tipo="INPUT";
     entradas[i].pin=-1;
     entradas[i].nombreEstados[0]="0";
@@ -213,6 +215,7 @@ boolean parseaConfiguracionEntradas(String contenido)
     entradas[i].tipo=String((const char *)Entradas[i]["tipo"]);
     entradas[i].pin=atoi(Entradas[i]["GPIO"]);
     JsonObject& entrada = json["Entradas"][i];
+    if(entrada.containsKey("estadoActivo")) entradas[i].estadoActivo=entrada["estadoActivo"];
     if(entrada.containsKey("Estados"))
       {
       int8_t est_max=entrada["Estados"].size();//maximo de mensajes en el JSON
@@ -236,7 +239,7 @@ boolean parseaConfiguracionEntradas(String contenido)
   Serial.printf("*************************\nEntradas:\n"); 
   for(int8_t i=0;i<MAX_ENTRADAS;i++) 
     {
-    Serial.printf("%01i: %s| pin: %i| configurado= %i| tipo=%s\n",i,entradas[i].nombre.c_str(),entradas[i].pin,entradas[i].configurada,entradas[i].tipo.c_str());
+  	Serial.printf("%01i: %s|pin: %i|configurado= %i|tipo=%s|estado activo: %i\n",i,entradas[i].nombre.c_str(),entradas[i].pin,entradas[i].configurada,entradas[i].tipo.c_str(),entradas[i].estadoActivo);
     Serial.printf("Mensajes:\n");
     for(int8_t m=0;m<2;m++) 
       {
@@ -333,7 +336,7 @@ void actualizaPulso(int8_t salida)
     {
     if(UINT64_MAX-salidas[salida].anchoPulso>millis())//Ya ha desbordado
       {
-      if(millis()>=salidas[salida].finPulso) 
+      if(millis()>=salidas[salida].finPulso) //El pulso ha acabado
         {
         conmutaRele(salida,!nivelActivo,debugGlobal);
         Serial.printf("Fin del pulso. millis()= %i\n",millis());
@@ -361,7 +364,7 @@ void actualizaSalida(int8_t salida)
     case MODO_SEGUIMIENTO://seguimiento
       //Serial.printf("Salida %i en modo seguimiento\n",salida);
       //Serial.printf("Entrada Asociada: %i\n Estado de la entrada asociada: %i\n\n",salidas[salida].controlador,entradas[salidas[salida].controlador].estado);
-      if(entradas[salidas[salida].controlador].estado==nivelActivo) 
+      if(entradas[salidas[salida].controlador].estado==entradas[salidas[salida].controlador].estadoActivo)//ESTADO_ACTIVO)//nivelActivo) 
         {
         actuaRele(salida, ESTADO_PULSO);
         //Serial.printf("Pulso generado, salida: %i\n",salidas[salida].finPulso);
@@ -425,8 +428,8 @@ int8_t conmutaRele(int8_t id, boolean estado_final, int debug)
   if(salidas[id].configurado==NO_CONFIGURADO) return -1; //El rele no esta configurado
   
   //parte logica
-  if(estado_final==nivelActivo) salidas[id].estado=1;
-  else salidas[id].estado=0;
+  if(estado_final==nivelActivo) salidas[id].estado=ESTADO_ACTIVO;//1;
+  else salidas[id].estado=ESTADO_DESACTIVO;//0;
   
   //parte fisica
   digitalWrite(salidas[id].pin, estado_final); //controlo el rele
@@ -448,6 +451,7 @@ int8_t pulsoRele(int8_t id)
   {
   //validaciones previas
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
+  if(salidas[id].configurado==NO_CONFIGURADO) return -1; //El rele no esta configurado
       
   //Pongo el rele en nivel Activo  
   if(!conmutaRele(id, nivelActivo, debugGlobal)) return 0; //Si no puede retorna -1
@@ -471,15 +475,17 @@ int8_t actuaRele(int8_t id, int8_t estado)
   {
   switch(estado)
     {
-    case 0:
+    case ESTADO_DESACTIVO:
       return conmutaRele(id, !nivelActivo, debugGlobal);
       break;
-    case 1:
+    case ESTADO_ACTIVO:
       return conmutaRele(id, nivelActivo, debugGlobal);
       break;
-    case 2:
+    case ESTADO_PULSO:
       return pulsoRele(id);
       break;      
+    case ESTADO_MAQUINA:
+      break;
     default://no deberia pasar nunca!!
       return -1;
     }
@@ -570,6 +576,21 @@ int8_t salidaSeguimiento(int8_t id)
        
   return salidas[id].controlador;  
   }
+
+/********************************************************/
+/*                                                      */
+/*     Devuelve el modo de la salida                    */
+/*                                                      */
+/********************************************************/ 
+uint8_t getModoSalida(uint8_t id)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
+  if(salidas[id].modo!=MODO_SEGUIMIENTO) return NO_CONFIGURADO;
+       
+  return salidas[id].modo;  
+  }   
+
 /********************************************************** Fin salidas ******************************************************************/  
 /**********************************************************ENTRADAS******************************************************************/  
 /*************************************************/
@@ -585,17 +606,19 @@ void consultaEntradas(bool debug)
     if(entradas[i].configurada==CONFIGURADO) 
       {
       int8_t valor_inicial=  entradas[i].estado;
-      entradas[i].estado=digitalRead(entradas[i].pin); //si la entrada esta configurada
+      //entradas[i].estado=digitalRead(entradas[i].pin); //si la entrada esta configurada
+      if(digitalRead(entradas[i].pin)==ESTADO_ACTIVO) entradas[i].estado=entradas[i].estadoActivo;
+      else 
+        {
+        int temp=entradas[i].estadoActivo;
+        ++temp=temp % 2;
+        entradas[i].estado=temp;
+        }
+      //Serial.printf("Entrada %i en pin %i leido %i\n",i,entradas[i].pin,entradas[i].estado);
 
       if(valor_inicial!=NO_CONFIGURADO && valor_inicial!=entradas[i].estado) enviaMensajeEntrada(i,entradas[i].estado);      
       }
     }
-    
-/*  //Reviso las salidas en modo seguimiento
-  for(int8_t i=0;i<MAX_SALIDAS;i++)
-    {
-    if(salidas[i].entradaAsociada!=NO_CONFIGURADO) salidas[i].estado=entradas[salidas[i].entradaAsociada].estado;
-    }  */
   }
 
 /*************************************************/
@@ -623,7 +646,7 @@ int8_t estadoEntrada(int8_t id)
   {
   if(id <0 || id>=MAX_ENTRADAS) return NO_CONFIGURADO; //Rele fuera de rango
   
-  if(entradas[id].configurada==CONFIGURADO) return (entradas[id].estado); //si la entrada esta configurada
+  if(entradas[id].configurada!=NO_CONFIGURADO) return (entradas[id].estado); //si la entrada esta configurada
   else return NO_CONFIGURADO;
  }
 
@@ -638,8 +661,10 @@ int8_t estadoLogicoEntrada(int8_t id)
   if(id <0 || id>=MAX_ENTRADAS) return NO_CONFIGURADO; //Rele fuera de rango
   if(entradas[id].configurada!=CONFIGURADO) return NO_CONFIGURADO;
   
-  if(entradas[id].estado==nivelActivo) return 1;
-  else return 0;
+  //if(entradas[id].estado==nivelActivo) return 1;
+  //else return 0;
+  if(entradas[id].estado==entradas[id].estadoActivo) return ESTADO_ACTIVO;
+  else return ESTADO_DESACTIVO;
  }
 
 /********************************************************/
@@ -687,7 +712,7 @@ String generaJsonEstadoSalidas(void)
   {
   String salida="";
 
-  const size_t bufferSize = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(3);
+  const size_t bufferSize = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(8);
   DynamicJsonBuffer jsonBuffer(bufferSize);
   
   JsonObject& root = jsonBuffer.createObject();
@@ -700,7 +725,12 @@ String generaJsonEstadoSalidas(void)
       JsonObject& Salidas_0 = Salidas.createNestedObject();
       Salidas_0["id"] = id;
       Salidas_0["nombre"] = salidas[id].nombre;
+      Salidas_0["pin"] = salidas[id].pin;
+      Salidas_0["modo"] = salidas[id].modo;
+      Salidas_0["controlador"] = salidas[id].controlador;
       Salidas_0["valor"] = salidas[id].estado;    
+      Salidas_0["anchoPulso"] = salidas[id].anchoPulso;
+      Salidas_0["finPulso"] = salidas[id].finPulso;  
       }
     }
     
@@ -790,7 +820,12 @@ String generaJsonEstado(void)
       JsonObject& Salidas_0 = Salidas.createNestedObject();
       Salidas_0["id"] = id;
       Salidas_0["nombre"] = salidas[id].nombre;
+      Salidas_0["pin"] = salidas[id].pin;
+      Salidas_0["modo"] = salidas[id].modo;
+      Salidas_0["controlador"] = salidas[id].controlador;
       Salidas_0["valor"] = salidas[id].estado;    
+      Salidas_0["anchoPulso"] = salidas[id].anchoPulso;
+      Salidas_0["finPulso"] = salidas[id].finPulso;
       }
     }
 

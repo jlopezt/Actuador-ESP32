@@ -18,7 +18,7 @@ Informacion del Hw del sistema http://IP/info
 WebServer server(PUERTO_WEBSERVER);
 
 //Cadenas HTML precargadas
-String cabeceraHTML="";//<HTML><HEAD><TITLE>" + nombre_dispositivo + "</TITLE></HEAD><BODY>";
+String cabeceraHTML="";
 String enlaces="<TABLE>\n<CAPTION>Enlaces</CAPTION>\n<TR><TD><a href=\"info\" target=\"_self\">Info</a></TD></TR>\n<TR><TD><a href=\"test\" target=\"_self\">Test</a></TD></TR>\n<TR><TD><a href=\"restart\" target=\"_self\">Restart</a></TD></TR>\n<TR><TD><a href=\"listaFicheros\" target=\"_self\">Lista ficheros</a></TD></TR>\n<TR><TD><a href=\"estado\" target=\"_self\">Estado</a></TD></TR>\n<TR><TD><a href=\"estadoSalidas\" target=\"_self\">Estado salidas</a></TD></TR>\n<TR><TD><a href=\"estadoEntradas\" target=\"_self\">Estado entradas</a></TD></TR>\n<TR><TD><a href=\"planes\" target=\"_self\">Planes del secuenciador</a></TD></TR>\n<TR><TD><a href=\"maquinaEstados\" target=\"_self\">Maquina de estados</a></TD></TR></TABLE>\n"; 
 String pieHTML="</BODY></HTML>";
 
@@ -111,7 +111,7 @@ void handleRoot()
       {      
       cad += "<TR>\n";
       cad += "<TD>" + nombreRele(i) + "-></TD><TD>" + String(estadoRele(i)) + "</TD>";            
-
+/*Se sustituye por el bloque siguiente
       //compruebo si esta asociada a un plan de secuenciador
       if(asociadaASecuenciador(i)!=NO_CONFIGURADO && estadoSecuenciador())//Si esa asociada a un secuenciador o el secuenciador esta on
         {
@@ -129,6 +129,26 @@ void handleRoot()
         //Enlace para generar un pulso
         cad += "<TD><a href=\"pulsoRele\?id=" + String(i) + "\" target=\"_self\">Pulso</a></TD>\n";
         }
+  */
+        //acciones en funcion del modo
+        switch (getModoSalida(i))          
+          {
+          case MODO_MANUAL:
+            //Enlace para activar o desactivar
+            if (estadoRele(i)==1) orden="desactiva"; else orden="activa";//para 0 y 2 (apagado y en pulso) activa
+            cad += "<TD><a href=\"" + orden + "Rele\?id=" + String(i) + "\" target=\"_self\">" + orden + " rele</a></TD>\n";  
+            //Enlace para generar un pulso
+            cad += "<TD><a href=\"pulsoRele\?id=" + String(i) + "\" target=\"_self\">Pulso</a></TD>\n";
+            break;
+          case MODO_SECUENCIADOR:
+            cad += "<TD colspan=2> | Secuenciador " + String(asociadaASecuenciador(i)) + "</TD>";
+            break;
+          case MODO_SEGUIMIENTO:
+            cad += "<TD>Siguiendo a entrada " + String(salidaSeguimiento(i)) + "</TD>";
+            break;
+          default://Salida no configurada
+            cad += "<TD>¿?>/TD>";  
+          }
         
       cad += "</TR>\n";        
       }
