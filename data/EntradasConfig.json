@@ -4,52 +4,56 @@
 		"GPIO": 16, 
 		"nombre": "FcArriba", 
 		"tipo": "INPUT_PULLUP",
+		"estadoActivo": 0,
 		"Estados": [
-			{"valor": 0, "texto": "Activo"},
-			{"valor": 1, "texto": "Reposo"}
+			{"valor": 0, "texto": "Reposo"},
+			{"valor": 1, "texto": "Activo"}
 			],
 		"Mensajes": [
-			{"valor": 0, "texto": "Arriba"},
-			{"valor": 1, "texto": ""}
+			{"valor": 0, "texto": ""},
+			{"valor": 1, "texto": "Arriba"}
 			]
 		},
 		{
 		"GPIO": 17, 
 		"nombre": "FcAbajo", 
 		"tipo": "INPUT_PULLUP", 
+		"estadoActivo": 0,
 		"Estados": [
-			{"valor": 0, "texto": "Activo"},
-			{"valor": 1, "texto": "Reposo"}
+			{"valor": 0, "texto": "Reposo"},
+			{"valor": 1, "texto": "Activo"}
 			],
 		"Mensajes": [
-			{"valor": 0, "texto": "Abajo"},
-			{"valor": 1, "texto": ""}
+			{"valor": 0, "texto": ""},
+			{"valor": 1, "texto": "Abajo"}
 			]
 		},
 		{
 		"GPIO": 18, 
 		"nombre": "Pulsador", 
 		"tipo": "INPUT_PULLUP",
+		"estadoActivo": 0,
 		"Estados": [
-			{"valor": 0, "texto": "Activo"},
-			{"valor": 1, "texto": "Reposo"}
+			{"valor": 0, "texto": "Reposo"},
+			{"valor": 1, "texto": "Activo"}
 			],
 		"Mensajes": [
-			{"valor": 0, "texto": "Pulsado"},
-			{"valor": 1, "texto": ""}
+			{"valor": 0, "texto": ""},
+			{"valor": 1, "texto": "Pulsado"}
 			]
 		},
 		{
 		"GPIO": 19, 
 		"nombre": "Otra", 
 		"tipo": "INPUT_PULLUP",
+		"estadoActivo": 0,
 		"Estados": [
-			{"valor": 0, "texto": "Activo"},
-			{"valor": 1, "texto": "Reposo"}
+			{"valor": 0, "texto": "Reposo"},
+			{"valor": 1, "texto": "Activo"}
 			],
 		"Mensajes": [
-			{"valor": 0, "texto": "Esta actuando"},
-			{"valor": 1, "texto": "Paradito del todo"}
+			{"valor": 0, "texto": "Paradito del todo"},
+			{"valor": 1, "texto": "Esta actuando"}
 			]
 		}		
 	]

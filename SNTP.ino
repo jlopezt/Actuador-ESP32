@@ -112,18 +112,6 @@ int8_t diaSemana(void)
 /***********************************/
 /*        Solo para ordenes        */
 /***********************************/
-/*String getHora(void)
-  {
-  char cad[6]="00:00";
-  getLocalTime(&timeinfo);  
-  sprintf(cad,"%2.0i:%2.0i",timeinfo.tm_hour,timeinfo.tm_min);    
-  return String(cad);  
-  }
-*/
-  
-/***********************************/
-/*        Solo para ordenes        */
-/***********************************/
 void imprimeDatosReloj(void)
   {
   getLocalTime(&timeinfo);

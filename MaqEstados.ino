@@ -311,3 +311,6 @@ uint8_t getNumEstados(void){return numeroEstados;}
 uint8_t getNumTransiciones(void){return numeroTransiciones;}
 uint8_t getNumEntradasME(void){return numeroEntradas;}
 uint8_t getNumSalidasME(void){return numeroSalidas;}
+
+String getNombreEstado(uint8_t estado){return estados[estado].nombre;}
+String getNombreEstadoActual(void){return getNombreEstado(estadoActual);}

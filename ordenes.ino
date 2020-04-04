@@ -452,7 +452,8 @@ void func_comando_ES(int iParametro, char* sParametro, float fParametro)//"debug
   Serial.println("Entradas");  
   for(int8_t i=0;i<MAX_ENTRADAS;i++) Serial.printf("%i: nombre: %s | configurada: %i | estado: %i | tipo: %s | pin: %i\n",i,entradas[i].nombre.c_str(),entradas[i].configurada,entradas[i].estado,entradas[i].tipo.c_str(),entradas[i].pin);
   Serial.println("Salidas");  
-  for(int8_t i=0;i<MAX_SALIDAS;i++) Serial.printf("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i\n",i,salidas[i].nombre.c_str(),salidas[i].configurado,salidas[i].estado,salidas[i].inicio,salidas[i].pin);  
+  for(int8_t i=0;i<MAX_SALIDAS;i++) Serial.printf("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i | modo: %i | controlador: %i | ancho pulso: %i | fin pulso: %i\n",i,salidas[i].nombre.c_str(),salidas[i].configurado,salidas[i].estado,salidas[i].inicio,salidas[i].pin,salidas[i].modo,salidas[i].controlador,salidas[i].anchoPulso,salidas[i].finPulso);  
+  //for(int8_t i=0;i<MAX_SALIDAS;i++) Serial.printf("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i\n",i,salidas[i].nombre.c_str(),salidas[i].configurado,salidas[i].estado,salidas[i].inicio,salidas[i].pin);  
   } 
 
 void func_comando_actSec(int iParametro, char* sParametro, float fParametro)//"debug")

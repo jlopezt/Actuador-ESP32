@@ -20,41 +20,42 @@
 #define MODO_MANUAL       0
 #define MODO_SECUENCIADOR 1
 #define MODO_SEGUIMIENTO  2
+#define MODO_MAQUINA      3
 
 #define ESTADO_DESACTIVO  0
 #define ESTADO_ACTIVO     1
 #define ESTADO_PULSO      2
-#define ESTADO_MAQUINA    3
 
 #define TOPIC_MENSAJES    "mensajes"
 
 //definicion de los tipos de dataos para las entradas y salidas
 //Entradas
 typedef struct{
-  int8_t configurada;
-  String nombre;
-  int8_t estado;
-  int8_t estadoActivo;  
-  int8_t pin;
-  String tipo;        //Puede ser INPUT, INPUT_PULLUP, No valido!!-->INPUT_PULLDOWN
+  int8_t configurada;       //Si la entrada esta configurada o no
+  String nombre;            //Nombre de la entrada
+  int8_t estadoFisico;            //leido ESTADO_ACTIVO o ESTADO_DESACTIVO
+  int8_t estado;            //Estado logico asignado despues de leer el valo fisico
+  int8_t estadoActivo;      //Valor logico de referencia, se lee de la configuración
+  int8_t pin;               //Pin fisico alque esta conectada
+  String tipo;              //Puede ser INPUT, INPUT_PULLUP, No valido!!-->INPUT_PULLDOWN
   String nombreEstados[2];  //Son entradas binarias, solo puede haber 2 mensajes. El 0 nombre del estado en valor 0 y el 1 nombre del estado en valor 1
-  String mensajes[2]; //Son entradas binarias, solo puede haber 2 mensajes. El 0 cuando pasa a 0 y el 1 cuando pasa a 1
+  String mensajes[2];       //Son entradas binarias, solo puede haber 2 mensajes. El 0 cuando pasa a 0 y el 1 cuando pasa a 1
   }entrada_t; 
 entrada_t entradas[MAX_ENTRADAS];
 
 //Salidas
 typedef struct{
-  int8_t configurado;     //0 si el rele no esta configurado, 1 si lo esta
-  String nombre;          //nombre configurado para el rele
-  int8_t estado;          //1 activo, 0 no activo (respecto a nivelActivo)
-  int8_t modo;            //0: manual, 1: secuanciador, 2: seguimiento
-  int8_t pin;             // Pin al que esta conectado el rele
-  int16_t anchoPulso;     // Ancho en milisegundos del pulso para esa salida
-  int8_t controlador;    //1 si esta asociado a un secuenciador que controla la salida, 0 si no esta asociado
-  unsigned long finPulso; //fin en millis del pulso para la activacion de ancho definido
-  int8_t inicio;          // modo inicial del rele "on"-->1/"off"-->0
-  String nombreEstados[2];//Son salidas binarias, solo puede haber 2 mensajes. El 0 nombre del estado en valor 0 y el 1 nombre del estado en valor 1
-  String mensajes[2];     //Son salidas binarias, solo puede haber 2 mensajes. El 0 cuando pasa a 0 y el 1 cuando pasa a 1
+  int8_t configurado;       //0 si el rele no esta configurado, 1 si lo esta
+  String nombre;            //nombre configurado para el rele
+  int8_t estado;            //1 activo, 0 no activo (respecto a nivelActivo), modo pulso y modo maquina
+  int8_t modo;              //0: manual, 1: secuanciador, 2: seguimiento
+  int8_t pin;               // Pin al que esta conectado el rele
+  int16_t anchoPulso;       // Ancho en milisegundos del pulso para esa salida
+  int8_t controlador;       //1 si esta asociado a un secuenciador que controla la salida, 0 si no esta asociado
+  unsigned long finPulso;   //fin en millis del pulso para la activacion de ancho definido
+  int8_t inicio;            // modo inicial del rele "on"-->1/"off"-->0
+  String nombreEstados[2];  //Son salidas binarias, solo puede haber 2 mensajes. El 0 nombre del estado en valor 0 y el 1 nombre del estado en valor 1
+  String mensajes[2];       //Son salidas binarias, solo puede haber 2 mensajes. El 0 cuando pasa a 0 y el 1 cuando pasa a 1
   }salida_t; 
 salida_t salidas[MAX_SALIDAS];
 
@@ -69,10 +70,11 @@ void inicializaEntradas(void)
   for(int8_t i=0;i<MAX_ENTRADAS;i++)
     {
     //inicializo la parte logica
-    entradas[i].configurada=NO_CONFIGURADO ;//la inicializo a no configurada
+    entradas[i].configurada=NO_CONFIGURADO;  //la inicializo a no configurada
     entradas[i].nombre="No configurado";
-    entradas[i].estado=NO_CONFIGURADO;    
-    entradas[i].estadoActivo=NO_CONFIGURADO;
+    entradas[i].estado=NO_CONFIGURADO;   
+    entradas[i].estadoFisico=ESTADO_DESACTIVO; 
+    entradas[i].estadoActivo=ESTADO_ACTIVO;  //NO_CONFIGURADO;
     entradas[i].tipo="INPUT";
     entradas[i].pin=-1;
     entradas[i].nombreEstados[0]="0";
@@ -90,10 +92,13 @@ void inicializaEntradas(void)
       {
       if(entradas[i].configurada==CONFIGURADO)
         {  
-        Serial.printf("Nombre entrada[%i]=%s | pin entrada: %i | tipo: %s\n",i,entradas[i].nombre.c_str(),entradas[i].pin,entradas[i].tipo.c_str());
         if(entradas[i].tipo=="INPUT_PULLUP") pinMode(entradas[i].pin, INPUT_PULLUP);
         else if(entradas[i].tipo=="INPUT_PULLDOWN") pinMode(entradas[i].pin, INPUT_PULLDOWN);
         else pinMode(entradas[i].pin, INPUT); //PULLUP
+
+        Serial.printf("Nombre entrada[%i]=%s | pin entrada: %i | tipo: %s | estado activo %i\n",i,entradas[i].nombre.c_str(),entradas[i].pin,entradas[i].tipo.c_str(),entradas[i].estadoActivo);
+        Serial.printf("\tEstados y  mensajes:\n");
+        for(uint8_t j=0;j<2;j++) Serial.printf("\t\tEstado %i: %s | mensaje: %s\n",j,entradas[i].nombreEstados[j].c_str(),entradas[i].mensajes[j].c_str());        
         }
       }
     }  
@@ -142,7 +147,9 @@ void inicializaSalidas(void)
         else digitalWrite(salidas[i].pin, !nivelActivo);  //lo inicializo a apagado 
         
         Serial.printf("Nombre salida[%i]=%s | pin salida: %i | estado= %i | inicio: %i | modo: %i\n",i,salidas[i].nombre.c_str(),salidas[i].pin,salidas[i].estado,salidas[i].inicio, salidas[i].modo);
-        }      
+        Serial.printf("\tEstados y  mensajes:\n");
+        for(uint8_t j=0;j<2;j++) Serial.printf("\t\tEstado %i: %s | mensaje: %s\n",j,salidas[i].nombreEstados[j].c_str(),salidas[i].mensajes[j].c_str());
+        }
       }
     }  
   }
@@ -309,6 +316,11 @@ boolean parseaConfiguracionSalidas(String contenido)
     {
     //Serial.printf("%01i: %s| pin: %i| ancho del pulso: %i| configurado= %i| entrada asociada= %i\n",i,salidas[i].nombre.c_str(),salidas[i].pin,salidas[i].anchoPulso,salidas[i].configurado,salidas[i].entradaAsociada); 
     Serial.printf("%01i: %s | configurado= %i | pin: %i | modo: %i | controlador: %i | ancho del pulso: %i\n",i,salidas[i].nombre.c_str(),salidas[i].configurado,salidas[i].pin, salidas[i].modo,salidas[i].controlador, salidas[i].anchoPulso); 
+    Serial.printf("Estados:\n");
+    for(int8_t e=0;e<2;e++) 
+      {
+      Serial.printf("Estado[%02i]: %s\n",e,salidas[i].nombreEstados[e].c_str());     
+      }   
     Serial.printf("Mensajes:\n");
     for(int8_t m=0;m<2;m++) 
       {
@@ -473,6 +485,9 @@ int8_t pulsoRele(int8_t id)
 /********************************************************/ 
 int8_t actuaRele(int8_t id, int8_t estado)
   {
+  //Si esta en modo secuenciador o modo maquina no deberia actuar, solo si esta en modo manual o seguimiento
+  if(salidas[id].modo!=MODO_MANUAL || salidas[id].modo!=MODO_SEGUIMIENTO) return -1;
+   
   switch(estado)
     {
     case ESTADO_DESACTIVO:
@@ -484,8 +499,6 @@ int8_t actuaRele(int8_t id, int8_t estado)
     case ESTADO_PULSO:
       return pulsoRele(id);
       break;      
-    case ESTADO_MAQUINA:
-      break;
     default://no deberia pasar nunca!!
       return -1;
     }
@@ -499,7 +512,7 @@ int8_t salidaMaquinaEstados(int8_t id, int8_t estado)
   {
   //validaciones previas
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-  if(salidas[id].modo!=ESTADO_MAQUINA) return NO_CONFIGURADO;
+  if(salidas[id].modo!=MODO_MAQUINA) return NO_CONFIGURADO;
 
   return conmutaRele(id, estado, false);
   }
@@ -586,7 +599,6 @@ uint8_t getModoSalida(uint8_t id)
   {
   //validaciones previas
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-  if(salidas[id].modo!=MODO_SEGUIMIENTO) return NO_CONFIGURADO;
        
   return salidas[id].modo;  
   }   
@@ -605,15 +617,11 @@ void consultaEntradas(bool debug)
     {
     if(entradas[i].configurada==CONFIGURADO) 
       {
-      int8_t valor_inicial=  entradas[i].estado;
-      //entradas[i].estado=digitalRead(entradas[i].pin); //si la entrada esta configurada
-      if(digitalRead(entradas[i].pin)==ESTADO_ACTIVO) entradas[i].estado=entradas[i].estadoActivo;
-      else 
-        {
-        int temp=entradas[i].estadoActivo;
-        ++temp=temp % 2;
-        entradas[i].estado=temp;
-        }
+      int8_t valor_inicial = entradas[i].estado;
+
+      entradas[i].estadoFisico=digitalRead(entradas[i].pin); //si la entrada esta configurada     
+      if(entradas[i].estadoFisico==entradas[i].estadoActivo) entradas[i].estado=ESTADO_ACTIVO;
+      else entradas[i].estado=ESTADO_DESACTIVO;
       //Serial.printf("Entrada %i en pin %i leido %i\n",i,entradas[i].pin,entradas[i].estado);
 
       if(valor_inicial!=NO_CONFIGURADO && valor_inicial!=entradas[i].estado) enviaMensajeEntrada(i,entradas[i].estado);      
