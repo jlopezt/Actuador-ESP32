@@ -84,6 +84,7 @@ boolean leeFichero(String nombre, String &contenido)
   
   return leido;
   }
+
 /**********************************************************************/
 /* Salva la cadena pasada al fichero especificado                     */
 /* Si ya existe lo sobreescribe                                       */
@@ -125,6 +126,33 @@ boolean salvaFichero(String nombreFichero, String nombreFicheroBak, String conte
   return salvado;
   }
 
+/**********************************************************************/
+/* Salva la cadena pasada al fichero especificado                     */
+/* Si ya existe añade                                                 */
+/**********************************************************************/  
+boolean anadeFichero(String nombreFichero, String contenidoFichero)
+  {
+  boolean salvado=false;
+
+  Serial.print("Nombre fichero: ");
+  Serial.println(nombreFichero.c_str());
+  Serial.print("Contenido fichero: ");
+  Serial.println(contenidoFichero.c_str());
+   
+  File newFile = SPIFFS.open(nombreFichero.c_str(), FILE_APPEND);//abro el fichero, si existe añade
+  if (newFile) 
+    {
+    Serial.printf("Abierto fichero %s.\nGuardo contenido:\n#%s#\n",newFile.name(),contenidoFichero.c_str());
+  
+    newFile.print(contenidoFichero);
+    newFile.close();//cierro el fichero
+    Serial.println("Cierro el fichero");
+    salvado=true;
+    }
+  else Serial.println("El fichero no se pudo abrir para escritura.\n");
+      
+  return salvado;
+  }
 
 /****************************************************/
 /* Borra el fichero especificado                    */

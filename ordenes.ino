@@ -245,6 +245,10 @@ void inicializaOrden(void)
   comandos[i].descripcion="Debug de la maquina de estados";
   comandos[i++].p_func_comando=func_comando_debugMaquinaEstados;
 
+  comandos[i].comando="CheckConfig";
+  comandos[i].descripcion="Comprueba la configuracion del sistema";
+  comandos[i++].p_func_comando=func_comando_compruebaConfiguracion;
+
   //resto
   for(;i<MAX_COMANDOS;)
     {
@@ -503,5 +507,10 @@ void func_comando_debugMaquinaEstados(int iParametro, char* sParametro, float fP
   debugMaquinaEstados=!debugMaquinaEstados;
   if (debugMaquinaEstados) Serial.println("El debug de la maquina de estados esta on");
   else Serial.println("El debug de la maquina de estados esta off");
+  }  
+
+void func_comando_compruebaConfiguracion(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  compruebaConfiguracion(0);
   }  
 /***************************** FIN funciones para comandos ******************************************/ 

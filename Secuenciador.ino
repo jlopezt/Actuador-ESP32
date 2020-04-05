@@ -50,7 +50,7 @@ void inicializaSecuenciador()
       {
       if(planConfigurado(i)==CONFIGURADO)
         {  
-        if (releConfigurado(planes[i].rele)==NO_CONFIGURADO || getModoSalida(planes[i].rele)!=MODO_SECUENCIADOR)
+        if (releConfigurado(planes[i].rele)==NO_CONFIGURADO || modoSalida(planes[i].rele)!=MODO_SECUENCIADOR)
           {
           Serial.printf("La salida asociada al plan %i no esta configurada\n", planes[i].rele);
           planes[i].configurado=NO_CONFIGURADO;
@@ -162,6 +162,18 @@ int8_t getNumPlanes()
     if(planes[i].configurado==CONFIGURADO) resultado++;
     }
   return resultado; 
+  }  
+
+/**************************************************/
+/*                                                */
+/* Devuelve el nuemro de salida asociada a un plan*/
+/*                                                */
+/**************************************************/
+int8_t getSalidaPlan(uint8_t plan)
+  {
+  if(plan>MAX_PLANES) return NO_CONFIGURADO;
+
+  return planes[plan].rele;  
   }  
 
 /********************************************************/

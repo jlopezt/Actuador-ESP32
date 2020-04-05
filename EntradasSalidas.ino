@@ -17,11 +17,13 @@
 #define CONFIGURADO       1
 #endif
 
+//modos de las salidas
 #define MODO_MANUAL       0
 #define MODO_SECUENCIADOR 1
 #define MODO_SEGUIMIENTO  2
 #define MODO_MAQUINA      3
 
+//estados de las salidas
 #define ESTADO_DESACTIVO  0
 #define ESTADO_ACTIVO     1
 #define ESTADO_PULSO      2
@@ -33,7 +35,7 @@
 typedef struct{
   int8_t configurada;       //Si la entrada esta configurada o no
   String nombre;            //Nombre de la entrada
-  int8_t estadoFisico;            //leido ESTADO_ACTIVO o ESTADO_DESACTIVO
+  int8_t estadoFisico;      //leido ESTADO_ACTIVO o ESTADO_DESACTIVO
   int8_t estado;            //Estado logico asignado despues de leer el valo fisico
   int8_t estadoActivo;      //Valor logico de referencia, se lee de la configuración
   int8_t pin;               //Pin fisico alque esta conectada
@@ -586,11 +588,91 @@ void asociarSecuenciador(int8_t id, int8_t plan)
 
 /********************************************************/
 /*                                                      */
-/*     Devuelve si la salida esta asociada              */
-/*     a un plan de secuenciador                        */
+/*     Devuelve el nombre de la salida                  */
 /*                                                      */
 /********************************************************/ 
-int8_t asociadaASecuenciador(int8_t id)
+String nombreSalida(uint8_t id)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_SALIDAS) return "ERROR";
+       
+  return salidas[id].nombre;  
+  }   
+
+/********************************************************/
+/*                                                      */
+/*     Devuelve el modo de la salida                    */
+/*                                                      */
+/********************************************************/ 
+uint8_t pinSalida(uint8_t id)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
+       
+  return salidas[id].pin;  
+  }   
+
+/********************************************************/
+/*                                                      */
+/*     Devuelve el ancho del pulso de la salida         */
+/*                                                      */
+/********************************************************/ 
+uint16_t anchoPulsoSalida(uint8_t id)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
+       
+  return salidas[id].anchoPulso;  
+  }   
+
+/********************************************************/
+/*                                                      */
+/*     Devuelve el valor de inicio de la salida         */
+/*                                                      */
+/********************************************************/ 
+int8_t inicioSalida(uint8_t id)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
+       
+  return salidas[id].inicio;
+  }   
+
+/********************************************************/
+/*                                                      */
+/*  Devuelve el nombre del estado de una salida         */
+/*                                                      */
+/********************************************************/ 
+String nombreEstadoSalida(uint8_t id, uint8_t estado)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_SALIDAS) return "ERROR";
+  if(estado>2) return "ERROR";
+       
+  return salidas[id].nombreEstados[estado];
+  }   
+
+/********************************************************/
+/*                                                      */
+/*  Devuelve el mensaje de una salida en un estado      */
+/*                                                      */
+/********************************************************/ 
+String mensajeEstadoSalida(uint8_t id, uint8_t estado)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_SALIDAS) return "ERROR";
+  if(estado>2) return "ERROR";
+       
+  return salidas[id].mensajes[estado];
+  }   
+
+/********************************************************/
+/*                                                      */
+/*     Devuelve el controlador de la salida si esta     */
+/*     asociada a un plan de secuenciador               */
+/*                                                      */
+/********************************************************/ 
+int8_t controladorSalida(int8_t id)
   {
   //validaciones previas
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
@@ -619,7 +701,7 @@ int8_t salidaSeguimiento(int8_t id)
 /*     Devuelve el modo de la salida                    */
 /*                                                      */
 /********************************************************/ 
-uint8_t getModoSalida(uint8_t id)
+uint8_t modoSalida(uint8_t id)
   {
   //validaciones previas
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
@@ -682,6 +764,19 @@ int8_t estadoFisicoEntrada(int8_t id)
 
 /*************************************************/
 /*                                               */
+/* Devuelve el estado activo 0|1 de la entrada   */
+/*                                               */
+/*************************************************/
+int8_t estadoActivoEntrada(int8_t id)
+  {
+  if(id <0 || id>=MAX_ENTRADAS) return NO_CONFIGURADO; //Rele fuera de rango
+  if(entradas[id].configurada!=CONFIGURADO) return NO_CONFIGURADO;
+  
+  return entradas[id].estadoActivo;
+  }
+
+/*************************************************/
+/*                                               */
 /* Envia un mensaje MQTT para que se publique un */
 /* audio en un GHN                               */
 /*                                               */
@@ -698,6 +793,19 @@ void enviaMensajeEntrada(int8_t id_entrada, int8_t estado)
 
 /********************************************************/
 /*                                                      */
+/*     Devuelve si la entrada esta configurada          */
+/*                                                      */
+/********************************************************/ 
+boolean entradaConfigurada(uint8_t id)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_ENTRADAS) return NO_CONFIGURADO;
+       
+  return (entradas[id].configurada==CONFIGURADO);
+  }   
+
+/********************************************************/
+/*                                                      */
 /*  Devuelve el nombre del rele con el id especificado  */
 /*                                                      */
 /********************************************************/
@@ -706,6 +814,60 @@ String nombreEntrada(int8_t id)
   if(id <0 || id>=MAX_ENTRADAS) return "ERROR"; //Rele fuera de rango    
   return entradas[id].nombre;
   } 
+
+/********************************************************/
+/*                                                      */
+/*     Devuelve el pin de la entrada                    */
+/*                                                      */
+/********************************************************/ 
+uint8_t pinEntrada(uint8_t id)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_ENTRADAS) return NO_CONFIGURADO;
+       
+  return entradas[id].pin;
+  }   
+
+/********************************************************/
+/*                                                      */
+/*     Devuelve el tipo de la entrada                   */
+/*                                                      */
+/********************************************************/ 
+String tipoEntrada(uint8_t id)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_ENTRADAS) return "ERROR";
+       
+  return entradas[id].tipo;
+  }   
+
+/********************************************************/
+/*                                                      */
+/*  Devuelve el nombre del estado de una entrada        */
+/*                                                      */
+/********************************************************/ 
+String nombreEstadoEntrada(uint8_t id, uint8_t estado)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_ENTRADAS) return "ERROR";
+  if(estado>2) return "ERROR";
+       
+  return entradas[id].nombreEstados[estado];
+  }   
+
+/********************************************************/
+/*                                                      */
+/*  Devuelve el mensaje de una entrada en un estado     */
+/*                                                      */
+/********************************************************/ 
+String mensajeEstadoEntrada(uint8_t id, uint8_t estado)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_ENTRADAS) return "ERROR";
+  if(estado>2) return "ERROR";
+       
+  return entradas[id].mensajes[estado];
+  }   
 
 /********************************************************/
 /*                                                      */

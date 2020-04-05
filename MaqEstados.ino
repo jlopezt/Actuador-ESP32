@@ -24,7 +24,6 @@
 typedef struct {
   uint8_t id;
   String nombre;
-  uint8_t salidas;
   int8_t salidasAsociadas[MAX_SALIDAS];
   }estados_t;
 
@@ -32,7 +31,6 @@ typedef struct {
 typedef struct {
   int8_t estadoInicial;
   int8_t estadoFinal;
-  uint8_t entradas;
   int8_t valorEntradas[MAX_ENTRADAS];
   }transicionEstados_t;
   
@@ -84,7 +82,6 @@ void inicializaMaquinaEstados(void)
     //inicializo la parte logica
     estados[i].id=i;
     estados[i].nombre="Estado_" + String(i);
-    estados[i].salidas=0;
     for(uint8_t j=0;j<MAX_SALIDAS;j++) estados[i].salidasAsociadas[j]=NO_CONFIGURADO;
     }
 
@@ -94,7 +91,6 @@ void inicializaMaquinaEstados(void)
     //inicializo la parte logica
     transiciones[i].estadoInicial=NO_CONFIGURADO;
     transiciones[i].estadoFinal=NO_CONFIGURADO;
-    transiciones[i].entradas=0;
     for(uint8_t j=0;j<MAX_ENTRADAS;j++) transiciones[i].valorEntradas[j]=NO_CONFIGURADO;
     }
     
@@ -181,7 +177,7 @@ boolean parseaConfiguracionMaqEstados(String contenido)
       Serial.printf("Numero de salidas incorrecto en estado %i. definidas %i, esperadas %i\n",i,num_salidas,numeroSalidas);
       return false;
       }
-    
+    //////EL ID NO VALE PARA NADA, LA REFERENCIA ES POSICIONAL. QUITAR ID/////////
     for(int8_t s=0;s<num_salidas;s++) estados[i].salidasAsociadas[s]=Salidas[s]["valor"];
     }
 
@@ -315,6 +311,22 @@ uint8_t getNumEstados(void){return numeroEstados;}
 uint8_t getNumTransiciones(void){return numeroTransiciones;}
 uint8_t getNumEntradasME(void){return numeroEntradas;}
 uint8_t getNumSalidasME(void){return numeroSalidas;}
+
+uint8_t getNumEntradaME(uint8_t entrada)
+  {
+  if(entrada>numeroEntradas) return -1;
+  return mapeoEntradas[entrada];
+  }
+  
+uint8_t getNumSalidaME(uint8_t salida)
+  {
+  if(salida>numeroSalidas) return -1;
+  return mapeoSalidas[salida];
+  }
+
+int8_t getEstadoInicialTransicion(int8_t transicion) {return transiciones[transicion].estadoInicial;}
+int8_t getEstadoFinalTransicion(int8_t transicion) {return transiciones[transicion].estadoFinal;}
+int8_t getValorEntradaTransicion(int8_t transicion, int8_t entrada) {return transiciones[transicion].valorEntradas[entrada];}
 
 String getNombreEstado(uint8_t estado){return estados[estado].nombre;}
 String getNombreEstadoActual(void){return getNombreEstado(estadoActual);}

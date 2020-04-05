@@ -113,7 +113,7 @@ void handleRoot()
       cad += "<TD>" + nombreRele(i) + "-></TD><TD>" + String(estadoRele(i)) + "</TD>";            
 
       //acciones en funcion del modo
-      switch (getModoSalida(i))          
+      switch (modoSalida(i))          
         {
         case MODO_MANUAL:
           //Enlace para activar o desactivar
@@ -123,7 +123,7 @@ void handleRoot()
           cad += "<TD><a href=\"pulsoRele\?id=" + String(i) + "\" target=\"_self\">Pulso</a></TD>\n";
           break;
         case MODO_SECUENCIADOR:
-          cad += "<TD colspan=2> | Secuenciador " + String(asociadaASecuenciador(i)) + "</TD>";
+          cad += "<TD colspan=2> | Secuenciador " + String(controladorSalida(i)) + "</TD>";
           break;
         case MODO_SEGUIMIENTO:
           cad += "<TD>Siguiendo a entrada " + String(salidaSeguimiento(i)) + "</TD>";
@@ -159,6 +159,15 @@ void handleRoot()
   //Enlaces
   cad += "<BR><BR>\n";
   cad += enlaces;
+
+  cad += "<BR><BR>";
+  String contenido="";
+  leeFichero(FICHERO_ERRORES, contenido);
+  cad += "Comprobacion de la configuracion:<BR>";
+  cad += "<textarea readonly=true cols=100 rows=16 name=\"contenido\">";
+  cad += contenido;
+  cad += "</textarea>";
+  
   cad += "<BR><BR>" + nombre_dispositivo + " . Version " + String(VERSION) + ".";
 
   cad += pieHTML;
@@ -756,7 +765,7 @@ void handleManageFichero(void)
       cad += contenido.length();
       cad += " bytes.<BR>";
       cad += "El contenido del fichero es:<BR>";
-      cad += "<textarea readonly=true cols=75 rows=20 name=\"contenido\">";
+      cad += "<textarea readonly=true cols=100 rows=20 name=\"contenido\">";
       cad += contenido;
       cad += "</textarea>";
       cad += "<BR>";
@@ -774,7 +783,7 @@ void handleManageFichero(void)
       cad += "<form action=\"creaFichero\" target=\"_self\">";
       cad += "  <p>";
       cad += "    <input type=\"hidden\" name=\"nombre\" value=\"" + nombreFichero + "\">";
-      cad += "    contenido del fichero: <br><textarea cols=75 rows=20 name=\"contenido\">" + contenido + "</textarea>";
+      cad += "    contenido del fichero: <br><textarea cols=100 rows=20 name=\"contenido\">" + contenido + "</textarea>";
       cad += "    <BR>";
       cad += "    <input type=\"submit\" value=\"salvar\">";
       cad += "  </p>";

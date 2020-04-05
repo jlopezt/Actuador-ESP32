@@ -20,6 +20,7 @@
 
 //Ficheros de configuracion
 #define FICHERO_CANDADO                  "/Candado"
+#define FICHERO_ERRORES                  "/Errores.log"
 #define GLOBAL_CONFIG_FILE               "/Config.json"
 #define GLOBAL_CONFIG_BAK_FILE           "/Config.json.bak"
 #define ENTRADAS_CONFIG_FILE             "/EntradasConfig.json"
@@ -153,6 +154,8 @@ void setup()
   //Si ha llegado hasta aqui, todo ha ido bien y borro el candado
   if(borraFichero(FICHERO_CANDADO))Serial.println("Candado borrado");
   else Serial.println("ERROR - No se pudo borrar el candado");
+
+  compruebaConfiguracion(0);
   
   Serial.printf("\n\n");
   Serial.println("***************************************************************");
