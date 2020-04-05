@@ -179,15 +179,55 @@ void handleMaquinaEstados(void)
   //genero la respuesta por defecto
   cad += cabeceraHTML;
 
-  //Estados
+  //Estado actual
   cad += "Estado actual: " + getNombreEstadoActual();
+  cad += "<BR><BR>";
+  
+  //Entradas
   cad += "<TABLE style=\"border: 2px solid black\">\n";
-  cad += "<CAPTION>ESTADOS</CAPTION>\n";  
-
+  cad += "<CAPTION>Entradas actual</CAPTION>\n";  
   cad += "<TR>"; 
   cad += "<TD>id</TD>";  
   cad += "<TD>Nombre</TD>";
-  for(uint8_t i=0;i<getNumSalidasME();i++) cad += "<TD>Salida " + String(i) + "</TD>";
+  cad += "<TD>Ultimo estado leido</TD>";
+  cad += "</TR>";    
+  for(uint8_t i=0;i<getNumEntradasME();i++)
+    {
+    cad += "<TR>";  
+    cad += "<TD>" + String(i) + ":" + String(mapeoEntradas[i]) + "</TD>";  
+    cad += "<TD>" + String(entradas[mapeoEntradas[i]].nombre) + "</TD>";
+    cad += "<TD>" + String(entradasActual[i]) + ":" + String(estadoEntrada(mapeoEntradas[i])) + "</TD>";
+    cad += "</TR>";
+    }
+  cad += "</TABLE>";
+  cad += "<BR><BR>";
+  
+  //Salidas
+  cad += "<TABLE style=\"border: 2px solid black\">\n";
+  cad += "<CAPTION>Salidas actual</CAPTION>\n";  
+  cad += "<TR>"; 
+  cad += "<TD>id</TD>";  
+  cad += "<TD>Nombre</TD>";
+  cad += "<TD>Estado actual</TD>";
+  cad += "</TR>";    
+  for(uint8_t i=0;i<getNumSalidasME();i++)
+    {
+    cad += "<TR>";  
+    cad += "<TD>" + String(i) + ":" + String(mapeoSalidas[i]) + "</TD>";  
+    cad += "<TD>" + String(salidas[mapeoSalidas[i]].nombre) + "</TD>";
+    cad += "<TD>" + String(salidas[mapeoSalidas[i]].estado) + "</TD>";
+    cad += "</TR>";
+    }
+  cad += "</TABLE>";
+  cad += "<BR><BR>";
+  
+  //Estados  
+  cad += "<TABLE style=\"border: 2px solid black\">\n";
+  cad += "<CAPTION>ESTADOS</CAPTION>\n";  
+  cad += "<TR>"; 
+  cad += "<TD>id</TD>";  
+  cad += "<TD>Nombre</TD>";
+  for(uint8_t i=0;i<getNumSalidasME();i++) cad += "<TD>Salida[" + String(i) + "] salida asociada(" + mapeoSalidas[i] + ")</TD>";
   cad += "</TR>"; 
     
   for(uint8_t i=0;i<getNumEstados();i++)
@@ -199,7 +239,6 @@ void handleMaquinaEstados(void)
     cad += "</TR>";
     }
   cad += "</TABLE>";
-
   cad += "<BR><BR>";
   
   //Transiciones
@@ -221,7 +260,8 @@ void handleMaquinaEstados(void)
     cad += "</TR>";
     }
   cad += "</TABLE>";
-
+  cad += "<BR><BR>";
+  
   cad += pieHTML;
   server.send(200, "text/html", cad);
   }
@@ -367,7 +407,7 @@ void handleActivaRele(void)
     int8_t id=server.arg("id").toInt();
 
     //activaRele(id);
-    conmutaRele(id, nivelActivo, debugGlobal);
+    conmutaRele(id, ESTADO_ACTIVO, debugGlobal);
 
     handleRoot();
     }
@@ -388,7 +428,7 @@ void handleDesactivaRele(void)
     int8_t id=server.arg("id").toInt();
 
     //desactivaRele(id);
-    conmutaRele(id, !nivelActivo, debugGlobal);
+    conmutaRele(id, ESTADO_DESACTIVO, debugGlobal);
     
     handleRoot();
     }

@@ -5,6 +5,7 @@
 /*                                                       */
 /*                                                       */
 /*********************************************************/
+#define NO_CONECTAR "NO_CONECTAR"
 
 #include <esp8266-google-home-notifier.h>
 //#include "D:\arduino\desarrollos\libraries\esp8266-google-home-notifier\src\esp8266mDNS.h"
@@ -28,15 +29,14 @@ void inicializaGHN(void)
   //recupero datos del fichero de configuracion
   if (!recuperaDatosGHN(false)) Serial.printf("error al recuperar config de GHN.\nConfiguracion por defecto.\n");
     
-  if(activaGoogleHomeNotifier==0) //Si se configura copmo nombre de equipo el valor de NO_CONECTAR, no se intenta la conexion
+  if(activaGoogleHomeNotifier==0 || strcmp(nombreEquipo.c_str(),NO_CONECTAR)==0) //Si se configura copmo nombre de equipo el valor de NO_CONECTAR, no se intenta la conexion
     {
     Serial.println("Google Home desactivado por configuración.\n");
     return;
     }
 
   Serial.println("conectando a Google Home...");
-  //if (ghn.device((const char*)nombreEquipo.c_str(), (const char*)idioma.c_str()) != true) 
-  if (ghn.device("Salon","es") != true) 
+  if (ghn.device((const char*)nombreEquipo.c_str(), (const char*)idioma.c_str()) != true) 
     {
     Serial.println(ghn.getLastError());
     return;
@@ -104,7 +104,7 @@ boolean parseaConfiguracionGHN(String contenido)
 /***************************************************/
 boolean enviaNotificacion(char *mensaje)
   {  
-  if(activaGoogleHomeNotifier==0) return true; //Si se configura copmo nombre de equipo el valor de NO_CONECTAR, no se intenta la conexion
+  if(activaGoogleHomeNotifier==0) return true; //Si se configura como nombre de equipo el valor de NO_CONECTAR, no se intenta la conexion
     
   if (ghn.notify(mensaje) != true) 
     {

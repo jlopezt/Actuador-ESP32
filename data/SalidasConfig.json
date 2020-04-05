@@ -2,10 +2,10 @@
   "Salidas": [
     {
     "GPIO": 23, 
-    "nombre": "Subir",
+    "nombre": "Seguidor",
     "inicio": "off",
     "anchoPulso": 0,
-    "modo": 3,
+    "modo": 2,
     "controlador": 0,
     "Estados": [
       {"valor": 0, "texto": "Activo"},
@@ -20,8 +20,8 @@
     "GPIO": 22, 
     "nombre": "Bajar",
     "inicio": "off",
-    "anchoPulso": 0,
-    "modo": 3,
+    "anchoPulso": 3000,
+    "modo": 0,
     "controlador": 0,
     "Estados": [
       {"valor": 0, "texto": "Activo"},
@@ -33,11 +33,11 @@
       ]
     },
     {
-    "GPIO": 10, 
+    "GPIO": 21, 
     "nombre": "Luz",
     "inicio": "off",
-    "anchoPulso": 1000,
-    "modo": 0,
+    "anchoPulso": 0,
+    "modo": 3,
     "controlador": 0,
     "Estados": [
       {"valor": 0, "texto": "Encendida"},

@@ -237,6 +237,10 @@ void inicializaOrden(void)
   comandos[i].descripcion="JSON salidas";
   comandos[i++].p_func_comando=func_comando_Salidas;
 
+  comandos[i].comando="GHN";
+  comandos[i].descripcion="Datos de GHN";
+  comandos[i++].p_func_comando=func_comando_GHN;
+
   comandos[i].comando="debugME";
   comandos[i].descripcion="Debug de la maquina de estados";
   comandos[i++].p_func_comando=func_comando_debugMaquinaEstados;
@@ -289,13 +293,13 @@ void func_comando_nivelActivo(int iParametro, char* sParametro, float fParametro
 
 void func_comando_activa(int iParametro, char* sParametro, float fParametro)//"activa")
   {
-  conmutaRele(iParametro, nivelActivo, debugGlobal);  
+  conmutaRele(iParametro, ESTADO_ACTIVO, debugGlobal);  
   Serial.printf("\nRele %i activado\n",iParametro);
   }  
 
 void func_comando_desactiva(int iParametro, char* sParametro, float fParametro)//"desactiva")
   {
-  conmutaRele(iParametro, !nivelActivo, debugGlobal);
+  conmutaRele(iParametro, ESTADO_DESACTIVO, debugGlobal);
   Serial.printf("\nRele %i desactivado\n",iParametro);  
   }  
 
@@ -487,6 +491,11 @@ void func_comando_Salidas(int iParametro, char* sParametro, float fParametro)//"
 void func_comando_Entradas(int iParametro, char* sParametro, float fParametro)//"debug")
   {
   Serial.printf("%s\n",generaJsonEstadoEntradas().c_str());
+  }    
+  
+void func_comando_GHN(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  Serial.printf("Google Home Notifier:\n Nombre del equipo: %s | Idioma: %s | Activo: %i\n",nombreEquipo.c_str(),idioma.c_str(), activaGoogleHomeNotifier);
   }    
 
 void func_comando_debugMaquinaEstados(int iParametro, char* sParametro, float fParametro)//"debug")

@@ -11,7 +11,7 @@
 /***************************** Defines *****************************/
 //Defines generales
 #define NOMBRE_FAMILIA   "Actuador/Secuenciador (E/S)"
-#define VERSION          "4.5.1 (ESP32 1.0.2|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)" //Correccion en entradas y salidas
+#define VERSION          "4.5.2 (ESP32 1.0.2|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)" //Correccion en entradas y salidas
 #define SEPARADOR        '|'
 #define SUBSEPARADOR     '#'
 #define KO               -1

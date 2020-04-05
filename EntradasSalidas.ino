@@ -334,13 +334,17 @@ boolean parseaConfiguracionSalidas(String contenido)
 /**********************************************************Fin configuracion******************************************************************/  
 
 /**********************************************************SALIDAS******************************************************************/    
-void actualizaPulso(int8_t salida)
+int8_t actualizaPulso(int8_t salida)
   {
+  if(salida <0 || salida>=MAX_SALIDAS) return NO_CONFIGURADO; //Rele fuera de rango
+  if(salidas[salida].configurado!=CONFIGURADO) return NO_CONFIGURADO; //No configurado
+  if(salidas[salida].estado!=ESTADO_PULSO) return NO_CONFIGURADO; //No configurado
+    
   if(salidas[salida].finPulso>salidas[salida].anchoPulso)//el contador de millis no desborda durante el pulso
     {
     if(millis()>=salidas[salida].finPulso) //El pulso ya ha acabado
       {
-      conmutaRele(salida,!nivelActivo,debugGlobal);  
+      conmutaRele(salida,ESTADO_DESACTIVO,debugGlobal);  
       Serial.printf("Fin del pulso. millis()= %i\n",millis());
       }//del if del fin de pulso
     }//del if de desboda
@@ -350,11 +354,13 @@ void actualizaPulso(int8_t salida)
       {
       if(millis()>=salidas[salida].finPulso) //El pulso ha acabado
         {
-        conmutaRele(salida,!nivelActivo,debugGlobal);
+        conmutaRele(salida,ESTADO_DESACTIVO,debugGlobal);
         Serial.printf("Fin del pulso. millis()= %i\n",millis());
         }//del if del fin de pulso
       }//del if ha desbordado ya
     }//else del if de no desborda  
+
+  return CONFIGURADO;  
   }
   
 /******************************************************/
@@ -371,18 +377,25 @@ void actualizaSalida(int8_t salida)
     case MODO_MANUAL://manual
       if(salidas[salida].estado==ESTADO_PULSO) actualizaPulso(salida);//si esta en modo pulso
       break;
-    case MODO_SECUENCIADOR://Secuenciador
+    case MODO_SECUENCIADOR://Controlada por un secuenciador
       break;
-    case MODO_SEGUIMIENTO://seguimiento
+    case MODO_SEGUIMIENTO://Sigue a una entradaseguimiento
       //Serial.printf("Salida %i en modo seguimiento\n",salida);
-      //Serial.printf("Entrada Asociada: %i\n Estado de la entrada asociada: %i\n\n",salidas[salida].controlador,entradas[salidas[salida].controlador].estado);
-      if(entradas[salidas[salida].controlador].estado==entradas[salidas[salida].controlador].estadoActivo)//ESTADO_ACTIVO)//nivelActivo) 
+      //Serial.printf("Entrada Asociada: %i\nEstado de la entrada asociada: %i\n",salidas[salida].controlador,estadoEntrada(salidas[salida].controlador));
+      
+      //Si es un seguidor de pulso
+      if(salidas[salida].anchoPulso>0)
         {
-        actuaRele(salida, ESTADO_PULSO);
-        //Serial.printf("Pulso generado, salida: %i\n",salidas[salida].finPulso);
+        if(estadoEntrada(salidas[salida].controlador)==ESTADO_ACTIVO) pulsoRele(salida); //Si la entrada esta activa, actualizo
+        else if(salidas[salida].estado==ESTADO_PULSO) actualizaPulso(salida);//si no esta activa, reviso el pulso
         }
+      
+      //Si es un seguidor tal cual
+      else if(actuaRele(salida, estadoEntrada(salidas[salida].controlador))==-1) Serial.printf("Error al actualizar la salida seguidor %i\n\n",salida);
 
-      if(salidas[salida].estado==ESTADO_PULSO) actualizaPulso(salida);//si esta en modo pulso
+
+      break;
+    case MODO_MAQUINA://Controlada por una maquina de estados  
       break;
     default:  
       break;    
@@ -399,8 +412,7 @@ void actualizaSalidas(bool debug)
   {
   for(int8_t id=0;id<MAX_SALIDAS;id++)
     {
-    if (salidas[id].configurado!=CONFIGURADO) continue;
-    actualizaSalida(id);
+    if (salidas[id].configurado==CONFIGURADO) actualizaSalida(id);
     }//del for    
   }//de la funcion
 
@@ -432,19 +444,29 @@ String nombreRele(int8_t id)
 /*************************************************/
 /*conmuta el rele indicado en id                 */
 /*devuelve 1 si ok, -1 si ko                     */
+/* LA ENTRADA ES EL ESTADO LOGICO. ADAPTO EL     */
+/*  ESTADO FISICO SEGUN nivelActivo              */
 /*************************************************/
-int8_t conmutaRele(int8_t id, boolean estado_final, int debug)
+int8_t conmutaRele(int8_t id, int8_t estado_final, int debug)
   {
   //validaciones previas
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO; //Rele fuera de rango
-  if(salidas[id].configurado==NO_CONFIGURADO) return -1; //El rele no esta configurado
+  if(salidas[id].configurado==NO_CONFIGURADO) return NO_CONFIGURADO; //El rele no esta configurado
   
+/*Version antigua. He cambiado en las llamdas !nivelActivo por ESTADO_DESACTIVO y nivelActivo por ESTADO_ACTIVO  
   //parte logica
   if(estado_final==nivelActivo) salidas[id].estado=ESTADO_ACTIVO;//1;
   else salidas[id].estado=ESTADO_DESACTIVO;//0;
   
   //parte fisica
   digitalWrite(salidas[id].pin, estado_final); //controlo el rele
+*/
+  //parte logica
+  salidas[id].estado=estado_final;//Lo que llega es el estado logico. No hace falta mapeo
+  
+  //parte fisica. Me he hecho un mapa de karnaugh y sale asi
+  if(estado_final==nivelActivo) digitalWrite(salidas[id].pin, HIGH); //controlo el rele
+  else digitalWrite(salidas[id].pin, LOW); //controlo el rele
   
   if(debug)
     {
@@ -464,9 +486,10 @@ int8_t pulsoRele(int8_t id)
   //validaciones previas
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
   if(salidas[id].configurado==NO_CONFIGURADO) return -1; //El rele no esta configurado
+  if(salidas[id].modo!=MODO_MANUAL && salidas[id].modo!=MODO_SEGUIMIENTO) return NO_CONFIGURADO;
       
   //Pongo el rele en nivel Activo  
-  if(!conmutaRele(id, nivelActivo, debugGlobal)) return 0; //Si no puede retorna -1
+  if(!conmutaRele(id, ESTADO_ACTIVO, debugGlobal)) return 0; //Si no puede retorna -1
 
   //cargo el campo con el valor definido para el ancho del pulso
   salidas[id].estado=ESTADO_PULSO;//estado EN_PULSO
@@ -485,16 +508,17 @@ int8_t pulsoRele(int8_t id)
 /********************************************************/ 
 int8_t actuaRele(int8_t id, int8_t estado)
   {
+  //Serial.printf("salida: %i | modo: %i | estado: %i\n",id,salidas[id].modo,estado);
   //Si esta en modo secuenciador o modo maquina no deberia actuar, solo si esta en modo manual o seguimiento
-  if(salidas[id].modo!=MODO_MANUAL || salidas[id].modo!=MODO_SEGUIMIENTO) return -1;
+  if(salidas[id].modo!=MODO_MANUAL && salidas[id].modo!=MODO_SEGUIMIENTO) return -1;
    
   switch(estado)
     {
     case ESTADO_DESACTIVO:
-      return conmutaRele(id, !nivelActivo, debugGlobal);
+      return conmutaRele(id, ESTADO_DESACTIVO, debugGlobal);
       break;
     case ESTADO_ACTIVO:
-      return conmutaRele(id, nivelActivo, debugGlobal);
+      return conmutaRele(id, ESTADO_ACTIVO, debugGlobal);
       break;
     case ESTADO_PULSO:
       return pulsoRele(id);
@@ -619,14 +643,41 @@ void consultaEntradas(bool debug)
       {
       int8_t valor_inicial = entradas[i].estado;
 
-      entradas[i].estadoFisico=digitalRead(entradas[i].pin); //si la entrada esta configurada     
+      entradas[i].estadoFisico=digitalRead(entradas[i].pin);     
       if(entradas[i].estadoFisico==entradas[i].estadoActivo) entradas[i].estado=ESTADO_ACTIVO;
       else entradas[i].estado=ESTADO_DESACTIVO;
-      //Serial.printf("Entrada %i en pin %i leido %i\n",i,entradas[i].pin,entradas[i].estado);
+      if (debug) Serial.printf("Entrada %i en pin %i leido %i, alor logico %i\n",i,entradas[i].pin,entradas[i].estadoFisico,entradas[i].estado);
 
       if(valor_inicial!=NO_CONFIGURADO && valor_inicial!=entradas[i].estado) enviaMensajeEntrada(i,entradas[i].estado);      
       }
     }
+  }
+
+/*************************************************/
+/*                                               */
+/*Devuelve el estado 0|1 del rele indicado en id */
+/*                                               */
+/*************************************************/
+int8_t estadoEntrada(int8_t id)
+  {
+  if(id <0 || id>=MAX_ENTRADAS) return NO_CONFIGURADO; //Rele fuera de rango
+  if(entradas[id].configurada!=CONFIGURADO) return NO_CONFIGURADO;
+  
+  return (entradas[id].estado);
+  }
+
+/*************************************************/
+/*                                               */
+/* Devuelve el estado 0|1 de la entrada tal cual */
+/* se ha leido, sin cruzar con nada              */
+/*                                               */
+/*************************************************/
+int8_t estadoFisicoEntrada(int8_t id)
+  {
+  if(id <0 || id>=MAX_ENTRADAS) return NO_CONFIGURADO; //Rele fuera de rango
+  if(entradas[id].configurada!=CONFIGURADO) return NO_CONFIGURADO;
+  
+  return entradas[id].estadoFisico;
   }
 
 /*************************************************/
@@ -644,36 +695,6 @@ void enviaMensajeEntrada(int8_t id_entrada, int8_t estado)
   Serial.printf("A enviar: topic %s\nmensaje %s\n", TOPIC_MENSAJES,mensaje.c_str());
   enviarMQTT(TOPIC_MENSAJES, mensaje);
   }
-
-/*************************************************/
-/*                                               */
-/*Devuelve el estado 0|1 del rele indicado en id */
-/*                                               */
-/*************************************************/
-int8_t estadoEntrada(int8_t id)
-  {
-  if(id <0 || id>=MAX_ENTRADAS) return NO_CONFIGURADO; //Rele fuera de rango
-  
-  if(entradas[id].configurada!=NO_CONFIGURADO) return (entradas[id].estado); //si la entrada esta configurada
-  else return NO_CONFIGURADO;
- }
-
-/*************************************************/
-/*                                               */
-/* Devuelve el estado 0|1 de la entrada cruzado  */
-/* con el nivel activo                           */
-/*                                               */
-/*************************************************/
-int8_t estadoLogicoEntrada(int8_t id)
-  {
-  if(id <0 || id>=MAX_ENTRADAS) return NO_CONFIGURADO; //Rele fuera de rango
-  if(entradas[id].configurada!=CONFIGURADO) return NO_CONFIGURADO;
-  
-  //if(entradas[id].estado==nivelActivo) return 1;
-  //else return 0;
-  if(entradas[id].estado==entradas[id].estadoActivo) return ESTADO_ACTIVO;
-  else return ESTADO_DESACTIVO;
- }
 
 /********************************************************/
 /*                                                      */

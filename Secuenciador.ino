@@ -50,7 +50,7 @@ void inicializaSecuenciador()
       {
       if(planConfigurado(i)==CONFIGURADO)
         {  
-        if (releConfigurado(planes[i].rele)==NO_CONFIGURADO)
+        if (releConfigurado(planes[i].rele)==NO_CONFIGURADO || getModoSalida(planes[i].rele)!=MODO_SECUENCIADOR)
           {
           Serial.printf("La salida asociada al plan %i no esta configurada\n", planes[i].rele);
           planes[i].configurado=NO_CONFIGURADO;
@@ -141,9 +141,9 @@ void actualizaSecuenciador(bool debug)
       mascara<<=limite;//calculo la mascara para leer el bit correspondiente al minuto adecuado
 
       if(debug) Serial.printf("Hora: %02i:%02i\nMascara: %i | intervalo: %i\n",hora(),minuto(),mascara,planes[i].horas[hora()]);
-      
-      if(planes[i].horas[hora()] & mascara) conmutaRele(planes[i].rele, nivelActivo, debugGlobal);
-      else conmutaRele(planes[i].rele, !nivelActivo, debugGlobal);
+
+      if(planes[i].horas[hora()] & mascara) conmutaRele(planes[i].rele, ESTADO_ACTIVO, debugGlobal);
+      else conmutaRele(planes[i].rele, ESTADO_DESACTIVO, debugGlobal);
       }  
     }
   }
