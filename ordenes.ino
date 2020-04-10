@@ -313,7 +313,7 @@ void func_comando_estadoRele(int iParametro, char* sParametro, float fParametro)
   if (estadoRele(iParametro))Serial.printf("activado");
   else Serial.printf("desactivado");
 
-  Serial.printf("\nEl estado fisico del rele %i es %i\nPines:\npin rele: %i\n",iParametro, digitalRead(salidas[iParametro].pin),salidas[iParametro].pin);
+  Serial.printf("\nEl estado fisico del rele %i es %i\nPines:\npin rele: %i\n",iParametro, digitalRead(pinSalida(iParametro)),pinSalida(iParametro));
   }  
     
 void func_comando_restart(int iParametro, char* sParametro, float fParametro)//"restart")
@@ -458,10 +458,9 @@ void func_comando_debug(int iParametro, char* sParametro, float fParametro)//"de
 void func_comando_ES(int iParametro, char* sParametro, float fParametro)//"debug")
   {
   Serial.println("Entradas");  
-  for(int8_t i=0;i<MAX_ENTRADAS;i++) Serial.printf("%i: nombre: %s | configurada: %i | estado: %i | tipo: %s | pin: %i\n",i,entradas[i].nombre.c_str(),entradas[i].configurada,entradas[i].estado,entradas[i].tipo.c_str(),entradas[i].pin);
+  for(int8_t i=0;i<MAX_ENTRADAS;i++) Serial.printf("%i: nombre: %s | configurada: %i | estado: %i | tipo: %s | pin: %i\n",i,nombreEntrada(i).c_str(),entradaConfigurada(i),estadoEntrada(i),tipoEntrada(i).c_str(),pinEntrada(i));
   Serial.println("Salidas");  
-  for(int8_t i=0;i<MAX_SALIDAS;i++) Serial.printf("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i | modo: %i | controlador: %i | ancho pulso: %i | fin pulso: %i\n",i,salidas[i].nombre.c_str(),salidas[i].configurado,salidas[i].estado,salidas[i].inicio,salidas[i].pin,salidas[i].modo,salidas[i].controlador,salidas[i].anchoPulso,salidas[i].finPulso);  
-  //for(int8_t i=0;i<MAX_SALIDAS;i++) Serial.printf("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i\n",i,salidas[i].nombre.c_str(),salidas[i].configurado,salidas[i].estado,salidas[i].inicio,salidas[i].pin);  
+  for(int8_t i=0;i<MAX_SALIDAS;i++) Serial.printf("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i | modo: %i | controlador: %i | ancho pulso: %i | fin pulso: %i\n",i,nombreSalida(i).c_str(),releConfigurado(i),estadoRele(i),inicioSalida(i),pinSalida(i),modoSalida(i),controladorSalida(i),anchoPulsoSalida(i),finPulsoSalida(i));  
   } 
 
 void func_comando_actSec(int iParametro, char* sParametro, float fParametro)//"debug")

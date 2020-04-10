@@ -24,7 +24,7 @@
 typedef struct {
   uint8_t id;
   String nombre;
-  int8_t salidasAsociadas[MAX_SALIDAS];
+  int8_t valorSalidas[MAX_SALIDAS];
   }estados_t;
 
 //Los lazos del grafo. Estado inicial, estado final y los valores de las entradas que gobiernan la transicion
@@ -82,7 +82,7 @@ void inicializaMaquinaEstados(void)
     //inicializo la parte logica
     estados[i].id=i;
     estados[i].nombre="Estado_" + String(i);
-    for(uint8_t j=0;j<MAX_SALIDAS;j++) estados[i].salidasAsociadas[j]=NO_CONFIGURADO;
+    for(uint8_t j=0;j<MAX_SALIDAS;j++) estados[i].valorSalidas[j]=NO_CONFIGURADO;
     }
 
   //Transiciones
@@ -178,7 +178,7 @@ boolean parseaConfiguracionMaqEstados(String contenido)
       return false;
       }
     //////EL ID NO VALE PARA NADA, LA REFERENCIA ES POSICIONAL. QUITAR ID/////////
-    for(int8_t s=0;s<num_salidas;s++) estados[i].salidasAsociadas[s]=Salidas[s]["valor"];
+    for(int8_t s=0;s<num_salidas;s++) estados[i].valorSalidas[s]=Salidas.get<int>(s);//Salidas[s]["valor"];
     }
 
   Serial.printf("*************************\nEstados:\n"); 
@@ -189,7 +189,7 @@ boolean parseaConfiguracionMaqEstados(String contenido)
     Serial.printf("salidas:\n");
     for(int8_t s=0;s<numeroSalidas;s++) 
       {
-      Serial.printf("salida[%02i]: valor: %i\n",s,estados[i].salidasAsociadas[s]);
+      Serial.printf("salida[%02i]: valor: %i\n",s,estados[i].valorSalidas[s]);
       }
     }
   Serial.printf("*************************\n");  
@@ -213,7 +213,7 @@ boolean parseaConfiguracionMaqEstados(String contenido)
       return false;
       }
     
-    for(int8_t e=0;e<num_entradas;e++) transiciones[i].valorEntradas[e]=atoi(Entradas[e]["valor"]);//Puede ser -1, significa que no importa el valor
+    for(int8_t e=0;e<num_entradas;e++) transiciones[i].valorEntradas[e]=Entradas.get<int>(e);//atoi(Entradas[e]["valor"]);//Puede ser -1, significa que no importa el valor
     }
 
   Serial.printf("*************************\nTransiciones:\n"); 
@@ -297,7 +297,7 @@ int8_t actualizaSalidasMaquinaEstados(uint8_t estado)
   //Serial.printf("Estado: %s\n",estados[estado].nombre);
   for(uint8_t i=0;i<numeroSalidas;i++) 
     {
-    if(salidaMaquinaEstados(mapeoSalidas[i], estados[estado].salidasAsociadas[i])==NO_CONFIGURADO) retorno=0;
+    if(salidaMaquinaEstados(mapeoSalidas[i], estados[estado].valorSalidas[i])==NO_CONFIGURADO) retorno=0;
     }
 
   return retorno;

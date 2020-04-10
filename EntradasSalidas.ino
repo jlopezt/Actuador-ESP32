@@ -5,8 +5,8 @@
 /*****************************************/
 
 //Definicion de pines
-#define MAX_PINES         7 //numero de pines disponibles para entradas y salidas
-#define MAX_ENTRADAS      4 //numero maximo de reles soportado
+#define MAX_PINES         20 //numero de pines disponibles para entradas y salidas
+#define MAX_ENTRADAS      10 //numero maximo de reles soportado
 #define MAX_SALIDAS       MAX_PINES-MAX_ENTRADAS //numero maximo de salidas
 
 #ifndef NO_CONFIGURADO 
@@ -623,6 +623,19 @@ uint16_t anchoPulsoSalida(uint8_t id)
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
        
   return salidas[id].anchoPulso;  
+  }   
+
+/********************************************************/
+/*                                                      */
+/*     Devuelve el fin del pulso de la salida           */
+/*                                                      */
+/********************************************************/ 
+uint16_t finPulsoSalida(uint8_t id)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
+       
+  return salidas[id].finPulso;  
   }   
 
 /********************************************************/

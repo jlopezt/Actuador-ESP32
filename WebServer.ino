@@ -95,9 +95,9 @@ void handleRoot()
   cad += "<TABLE style=\"border: 2px solid black\">\n";
   cad += "<CAPTION>Entradas</CAPTION>\n";  
   for(int8_t i=0;i<MAX_ENTRADAS;i++)
-    {
-    //if(entradas[i].configurada==CONFIGURADO) cad += "<TR><TD>" + entradas[i].nombre + "-></TD><TD>" + String(entradas[i].estado) + "</TD></TR>\n";
-    if(entradas[i].configurada==CONFIGURADO) cad += "<TR><TD>" + entradas[i].nombre + "-></TD><TD>" + String(entradas[i].nombreEstados[entradas[i].estado]) + "</TD></TR>\n";
+    {    
+    //if(entradas[i].configurada==CONFIGURADO) cad += "<TR><TD>" + entradas[i].nombre + "-></TD><TD>" + String(entradas[i].nombreEstados[entradas[i].estado]) + "</TD></TR>\n";
+    if(entradaConfigurada(i)==CONFIGURADO) cad += "<TR><TD>" + nombreEntrada(i) + "-></TD><TD>" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD></TR>\n";    
     }
   cad += "</TABLE>\n";
   cad += "<BR>";
@@ -204,7 +204,7 @@ void handleMaquinaEstados(void)
     {
     cad += "<TR>";  
     cad += "<TD>" + String(i) + ":" + String(mapeoEntradas[i]) + "</TD>";  
-    cad += "<TD>" + String(entradas[mapeoEntradas[i]].nombre) + "</TD>";
+    cad += "<TD>" + nombreEntrada(mapeoEntradas[i])+ "</TD>";
     cad += "<TD>" + String(entradasActual[i]) + ":" + String(estadoEntrada(mapeoEntradas[i])) + "</TD>";
     cad += "</TR>";
     }
@@ -223,8 +223,8 @@ void handleMaquinaEstados(void)
     {
     cad += "<TR>";  
     cad += "<TD>" + String(i) + ":" + String(mapeoSalidas[i]) + "</TD>";  
-    cad += "<TD>" + String(salidas[mapeoSalidas[i]].nombre) + "</TD>";
-    cad += "<TD>" + String(salidas[mapeoSalidas[i]].estado) + "</TD>";
+    cad += "<TD>" + String(nombreSalida(mapeoSalidas[i])) + "</TD>";
+    cad += "<TD>" + String(estadoRele(mapeoSalidas[i])) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
@@ -244,7 +244,7 @@ void handleMaquinaEstados(void)
     cad += "<TR>";  
     cad += "<TD>" + String(i) + "</TD>";  
     cad += "<TD>" + estados[i].nombre + "</TD>";
-    for(uint8_t j=0;j<getNumSalidasME();j++) cad += "<TD>" + String(estados[i].salidasAsociadas[j]) + "</TD>";
+    for(uint8_t j=0;j<getNumSalidasME();j++) cad += "<TD>" + String(estados[i].valorSalidas[j]) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
@@ -325,17 +325,17 @@ void handleEstadoSalidas(void)
     {
     cad += "<TR>"; 
     cad += "<TD>" + String(salida) + "</TD>";
-    cad += "<TD>" + String(salidas[salida].nombre) + "</TD>";  
-    cad += "<TD>" + String(salidas[salida].configurado) + "</TD>";
-    cad += "<TD>" + String(salidas[salida].pin) + "</TD>";
-    cad += "<TD>" + String(salidas[salida].controlador) + "</TD>";
-    cad += "<TD>" + String(salidas[salida].modo) + "</TD>";
-    cad += "<TD>" + String(salidas[salida].anchoPulso) + "</TD>";
-    cad += "<TD>" + String(salidas[salida].inicio) + "</TD>";
-    cad += "<TD>" + String(salidas[salida].finPulso) + "</TD>";
-    cad += "<TD>" + String(salidas[salida].estado) + "</TD>";
-    cad += "<TD>" + String(salidas[salida].nombreEstados[salidas[salida].estado]) + "</TD>";
-    cad += "<TD>" + String(salidas[salida].mensajes[salidas[salida].estado]) + "</TD>";
+    cad += "<TD>" + String(nombreSalida(salida)) + "</TD>";  
+    cad += "<TD>" + String(releConfigurado(salida)) + "</TD>";
+    cad += "<TD>" + String(pinSalida(salida)) + "</TD>";
+    cad += "<TD>" + String(controladorSalida(salida)) + "</TD>";
+    cad += "<TD>" + String(modoSalida(salida)) + "</TD>";
+    cad += "<TD>" + String(anchoPulsoSalida(salida)) + "</TD>";
+    cad += "<TD>" + String(inicioSalida(salida)) + "</TD>";
+    cad += "<TD>" + String(finPulsoSalida(salida)) + "</TD>";
+    cad += "<TD>" + String(estadoRele(salida)) + "</TD>";
+    cad += "<TD>" + String(nombreEstadoSalida(salida,estadoRele(salida))) + "</TD>";
+    cad += "<TD>" + String(mensajeEstadoSalida(salida,estadoRele(salida))) + "</TD>";
     cad += "</TR>";     
     }
   cad += "</TABLE>";
@@ -382,15 +382,15 @@ void handleEstadoEntradas(void)
     {
     cad += "<TR>"; 
     cad += "<TD>" + String(entrada) + "</TD>";
-    cad += "<TD>" + String(entradas[entrada].nombre) + "</TD>";  
-    cad += "<TD>" + String(entradas[entrada].configurada) + "</TD>";
-    cad += "<TD>" + String(entradas[entrada].tipo) + "</TD>";
-    cad += "<TD>" + String(entradas[entrada].pin) + "</TD>";
-    cad += "<TD>" + String(entradas[entrada].estadoActivo) + "</TD>";
-    cad += "<TD>" + String(entradas[entrada].estadoFisico) + "</TD>";    
-    cad += "<TD>" + String(entradas[entrada].estado) + "</TD>";
-    cad += "<TD>" + String(entradas[entrada].nombreEstados[entradas[entrada].estado]) + "</TD>";
-    cad += "<TD>" + String(entradas[entrada].mensajes[entradas[entrada].estado]) + "</TD>";
+    cad += "<TD>" + String(nombreEntrada(entrada)) + "</TD>";  
+    cad += "<TD>" + String(entradaConfigurada(entrada)) + "</TD>";
+    cad += "<TD>" + String(tipoEntrada(entrada)) + "</TD>";
+    cad += "<TD>" + String(pinEntrada(entrada)) + "</TD>";
+    cad += "<TD>" + String(estadoActivoEntrada(entrada)) + "</TD>";
+    cad += "<TD>" + String(estadoFisicoEntrada(entrada)) + "</TD>";    
+    cad += "<TD>" + String(estadoEntrada(entrada)) + "</TD>";
+    cad += "<TD>" + String(nombreEstadoEntrada(entrada,estadoEntrada(entrada))) + "</TD>";
+    cad += "<TD>" + String(mensajeEstadoEntrada(entrada,estadoEntrada(entrada))) + "</TD>";
     cad += "</TR>";     
     }
   cad += "</TABLE>";

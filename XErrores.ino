@@ -182,7 +182,7 @@ String compruebaMaquinaEstados(void)
       boolean correcto=true;    
       for(int8_t j=0;j<nSalidas;j++) 
         {
-        if(estados[estado].salidasAsociadas[i]!=ESTADO_DESACTIVO && estados[estado].salidasAsociadas[i]!=ESTADO_ACTIVO) cad += "Estado " + String(estado) + " Salida " + String(j) + " | el valor configurado no es valido\n";  
+        if(estados[estado].valorSalidas[i]!=ESTADO_DESACTIVO && estados[estado].valorSalidas[i]!=ESTADO_ACTIVO) cad += "Estado " + String(estado) + " Salida " + String(j) + " | el valor configurado no es valido\n";  
         }
       }
     }
