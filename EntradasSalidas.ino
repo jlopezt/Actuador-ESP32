@@ -37,7 +37,7 @@ typedef struct{
   String nombre;            //Nombre de la entrada
   int8_t estadoFisico;      //leido ESTADO_ACTIVO o ESTADO_DESACTIVO
   int8_t estado;            //Estado logico asignado despues de leer el valo fisico
-  int8_t estadoActivo;      //Valor logico de referencia, se lee de la configuración
+  int8_t estadoActivo;      //Valor logico de referencia, se lee de la configuracion
   int8_t pin;               //Pin fisico alque esta conectada
   String tipo;              //Puede ser INPUT, INPUT_PULLUP, No valido!!-->INPUT_PULLDOWN
   String nombreEstados[2];  //Son entradas binarias, solo puede haber 2 mensajes. El 0 nombre del estado en valor 0 y el 1 nombre del estado en valor 1

@@ -158,7 +158,7 @@ boolean parseaConfiguracionMaqEstados(String contenido)
 
   Serial.printf("Salidas asociadas a la maquina de estados: %i\n",numeroSalidas);
   for(uint8_t i=0;i<numeroSalidas;i++) Serial.printf("orden %i | id general %i\n", i,mapeoSalidas[i]);
-  //////FALTA CONFIRMAR QUE LA SALIDA SE CONFIGURO COMO CONTROLADA POR LA MAQUINA DE ESTADOS//////////
+  
   /********************Estados******************************/
   JsonArray& Estados = json["Estados"];
 

@@ -52,12 +52,8 @@
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/
-//#include <FS.h>                   //this needs to be first, or it all crashes and burns...
-//#include <TimeLib.h>  // download from: http://www.arduino.cc/playground/Code/Time
-//#include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include <ArduinoJson.h>
-//#include <SPIFFS.h> //para el ESP32
 #include <rom/rtc.h> //<esp32/rom/rtc.h>
 /***************************** Includes *****************************/
 
