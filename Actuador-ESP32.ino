@@ -49,6 +49,14 @@
 #define FRECUENCIA_MQTT           10 //cada cuantas vueltas de loop envia y lee del broker MQTT
 #define FRECUENCIA_ENVIO_DATOS   100 //cada cuantas vueltas de loop envia al broker el estado de E/S
 #define FRECUENCIA_ORDENES         2 //cada cuantas vueltas de loop atiende las ordenes via serie 
+#define FRECUENCIA_WIFI_WATCHDOG 100 //cada cuantas vueltas comprueba si se ha perdido la conexion WiFi
+
+//configuracion del watchdog del sistema
+#define TIMER_WATCHDOG        0 //Utilizo el timer 0 para el watchdog
+#define PREESCALADO_WATCHDOG 80 //el relog es de 80Mhz, lo preesalo entre 80 para pasarlo a 1Mhz
+#define TIEMPO_WATCHDOG      1000*1000*ANCHO_INTERVALO //Si en N ANCHO_INTERVALO no se atiende el watchdog, saltara. ESTA EN microsegundos
+
+#define LED_BUILTIN                2 //GPIO del led de la placa en los ESP32   
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/
@@ -61,15 +69,34 @@
 //Indica si el rele se activa con HIGH o LOW
 int nivelActivo;
 
+hw_timer_t *timer = NULL;//Puntero al timer del watchdog
+
 String nombre_dispositivo;//(NOMBRE_FAMILIA);//Nombre del dispositivo, por defecto el de la familia
-uint16_t vuelta = MAX_VUELTAS-100;//0; //vueltas de loop
+uint16_t vuelta = 0; //MAX_VUELTAS-100; //vueltas de loop
 int debugGlobal=0; //por defecto desabilitado
 boolean candado=false; //Candado de configuracion. true implica que la ultima configuracion fue mal
 /***************************** variables globales *****************************/
+/************************* FUNCIONES PARA EL BUITIN LED ***************************/
+void configuraLed(void){pinMode(LED_BUILTIN, OUTPUT);}
+void enciendeLed(void){digitalWrite(LED_BUILTIN, HIGH);}
+void apagaLed(void){digitalWrite(LED_BUILTIN, LOW);}
+void parpadeaLed(uint8_t veces, uint8_t delayed=100)
+  {
+  for(uint8_t i=0;i<2*veces;i++)
+    {  
+    delay(delayed);
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    }
+  }
+/***********************************************************************************/  
 
+/*************************************** SETUP ***************************************/
 void setup()
   {
   Serial.begin(115200);
+  configuraLed();
+  enciendeLed();
+  
   Serial.printf("\n\n\n");
   Serial.printf("*************** %s ***************\n",NOMBRE_FAMILIA);
   Serial.printf("*************** %s ***************\n",VERSION);
@@ -103,30 +130,37 @@ void setup()
   //Configuracion general
   Serial.printf("\n\nInit General ---------------------------------------------------------------------\n");
   inicializaConfiguracion(debugGlobal);
-
+  parpadeaLed(1);
+  
   //Wifi
   Serial.println("\n\nInit WiFi -----------------------------------------------------------------------\n");
-  if (inicializaWifi(1))//debugGlobal)) No tiene sentido debugGlobal, no hay manera de activarlo
+  if (inicializaWifi(1))
     {
+    parpadeaLed(5,200); 
     /*----------------Inicializaciones que necesitan red-------------*/
     //OTA
     Serial.println("\n\nInit OTA ------------------------------------------------------------------------\n");
     inicializaOTA(debugGlobal);
+    parpadeaLed(1);
     //SNTP
     Serial.printf("\n\nInit SNTP ------------------------------------------------------------------------\n");
     inicializaReloj();    
+    parpadeaLed(2);
     //MQTT
     Serial.println("\n\nInit MQTT -----------------------------------------------------------------------\n");
     inicializaMQTT();
+    parpadeaLed(3);
     //WebServer
     Serial.println("\n\nInit Web ------------------------------------------------------------------------\n");
     inicializaWebServer();
+    parpadeaLed(4);
     //Google Home Notifier
     Serial.println("\n\nInit Google Home Notifier -------------------------------------------------------\n");
     inicializaGHN();
     }
   else Serial.println("No se pudo conectar al WiFi");
-
+  apagaLed();
+  
   //Entradas
   Serial.println("\n\nInit entradas ------------------------------------------------------------------------\n");
   inicializaEntradas();
@@ -152,6 +186,8 @@ void setup()
   else Serial.println("ERROR - No se pudo borrar el candado");
 
   compruebaConfiguracion(0);
+  parpadeaLed(2);
+  apagaLed();//Por si acaso...
   
   Serial.printf("\n\n");
   Serial.println("***************************************************************");
@@ -160,6 +196,9 @@ void setup()
   Serial.println("*                                                             *");    
   Serial.println("***************************************************************");
   Serial.printf("\n\n");  
+
+  //activo el watchdog
+  configuraWatchdog();  
   }  
 
 void loop()
@@ -168,6 +207,9 @@ void loop()
   time_t EntradaBucle=0;
   EntradaBucle=millis();//Hora de entrada en la rodaja de tiempo
 
+  //reinicio el watchdog del sistema
+  timerWrite(timer, 0);
+  
   //------------- EJECUCION DE TAREAS --------------------------------------
   //Acciones a realizar en el bucle   
   //Prioridad 0: OTA es prioritario.
@@ -182,7 +224,9 @@ void loop()
   if ((vuelta % FRECUENCIA_MQTT)==0) atiendeMQTT();      
   if ((vuelta % FRECUENCIA_ENVIO_DATOS)==0) enviaDatos(debugGlobal); //publica via MQTT los datos de entradas y salidas, segun configuracion
   if ((vuelta % FRECUENCIA_ORDENES)==0) while(HayOrdenes(debugGlobal)) EjecutaOrdenes(debugGlobal); //Lee ordenes via serie
-  //------------- FIN EJECUCION DE TAREAS ---------------------------------  
+  //Prioridad 4: WatchDog
+  if ((vuelta % FRECUENCIA_WIFI_WATCHDOG)==0) WifiWD();    
+//------------- FIN EJECUCION DE TAREAS ---------------------------------  
 
   //sumo una vuelta de loop, si desborda inicializo vueltas a cero
   vuelta++;//sumo una vuelta de loop  
@@ -285,6 +329,32 @@ String generaJsonConfiguracionNivelActivo(String configActual, int nivelAct)
 
   return salida;  
   }  
+  
+/***************************************AUXILIARES**************************************************/
+/***************************************************************/
+/*                                                             */
+/*  Funcion de interrupcion del watchdog                       */
+/*                                                             */
+/***************************************************************/
+//funcion de interrupcion que reseteara el ESP si no se atiende el watchdog
+void IRAM_ATTR resetModule(void) {
+  ets_printf("Watchdog!!! reboot\n");
+  esp_restart();
+}
+
+/***************************************************************/
+/*                                                             */
+/*  Configuracion del watchdog del sistema                     */
+/*                                                             */
+/***************************************************************/
+void configuraWatchdog(void)
+{
+  timer = timerBegin(TIMER_WATCHDOG, PREESCALADO_WATCHDOG, true); //timer 0, div 80 para que cuente microsegundos y hacia arriba         //hw_timer_t * timerBegin(uint8_t timer, uint16_t divider, bool countUp);
+  timerAttachInterrupt(timer, &resetModule, true);                //asigno la funcion de interrupcion al contador                        //void timerAttachInterrupt(hw_timer_t *timer, void (*fn)(void), bool edge);
+  timerAlarmWrite(timer, TIEMPO_WATCHDOG, false);                  //configuro el limite del contador para generar interrupcion en us    //void timerAlarmWrite(hw_timer_t *timer, uint64_t interruptAt, bool autoreload);
+  timerWrite(timer, 0);                                           //lo pongo a cero                                                      //void timerWrite(hw_timer_t *timer, uint64_t val);
+  timerAlarmEnable(timer);                                        //habilito el contador                                                 //void timerAlarmEnable(hw_timer_t *timer);
+}
 
 const char* reset_reason(RESET_REASON reason)
 {

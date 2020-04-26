@@ -2,10 +2,10 @@
   "Salidas": [
     {
     "GPIO": 23, 
-    "nombre": "Subir",
+    "nombre": "Seguidor",
     "inicio": "off",
     "anchoPulso": 0,
-    "modo": 3,
+    "modo": 2,
     "controlador": 0,
     "Estados": [
       {"valor": 0, "texto": "Activo"},
@@ -18,10 +18,10 @@
     },
     {
     "GPIO": 22, 
-    "nombre": "Bajar",
+    "nombre": "Manual",
     "inicio": "off",
-    "anchoPulso": 0,
-    "modo": 3,
+    "anchoPulso": 3000,
+    "modo": 0,
     "controlador": 0,
     "Estados": [
       {"valor": 0, "texto": "Activo"},
@@ -33,11 +33,11 @@
       ]
     },
     {
-    "GPIO": 10, 
+    "GPIO": 21, 
     "nombre": "Luz",
     "inicio": "off",
-    "anchoPulso": 1000,
-    "modo": 0,
+    "anchoPulso": 0,
+    "modo": 3,
     "controlador": 0,
     "Estados": [
       {"valor": 0, "texto": "Encendida"},
@@ -47,6 +47,22 @@
       {"valor": 0, "texto": "Luz encendida"},
       {"valor": 1, "texto": "Luz apagada"}
       ]
-    }
+    },
+    {
+    "GPIO": 19, 
+    "nombre": "Maquina2",
+    "inicio": "on",
+    "anchoPulso": 0,
+    "modo": 3,
+    "controlador": 0,
+    "Estados": [
+      {"valor": 0, "texto": "Encendida"},
+      {"valor": 1, "texto": "Apagada"}
+      ],
+    "Mensajes": [
+      {"valor": 0, "texto": "Maquina encendida"},
+      {"valor": 1, "texto": "Maquina apagada"}
+      ]
+    }    
   ]
 }

@@ -310,7 +310,8 @@ void func_comando_desactiva(int iParametro, char* sParametro, float fParametro)/
 void func_comando_estadoRele(int iParametro, char* sParametro, float fParametro)//"estadoRele")
   { 
   Serial.printf("\nEl estado logico del rele %i es ",iParametro);  
-  if (estadoRele(iParametro))Serial.printf("activado");
+  if (estadoRele(iParametro)==ESTADO_ACTIVO)Serial.printf("activado");
+  else if (estadoRele(iParametro)==ESTADO_PULSO)Serial.printf("pulso");
   else Serial.printf("desactivado");
 
   Serial.printf("\nEl estado fisico del rele %i es %i\nPines:\npin rele: %i\n",iParametro, digitalRead(pinSalida(iParametro)),pinSalida(iParametro));

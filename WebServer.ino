@@ -7,9 +7,10 @@ Test                           http://IP/test          N/A             HTML     
 Reinicia el actuador           http://IP/restart
 Informacion del Hw del sistema http://IP/info
 ************************************************************************************************/
-
 //Configuracion de los servicios web
 #define PUERTO_WEBSERVER 80
+#define ACTIVO    String("#EEEE00")
+#define DESACTIVO String("#AAAAAA")
 
 //Includes
 #include <WebServer.h>
@@ -37,6 +38,9 @@ void inicializaWebServer(void)
   server.on("/estadoEntradas", handleEstadoEntradas); //Servicio de estdo de reles    
   server.on("/activaRele", handleActivaRele); //Servicio de activacion de rele
   server.on("/desactivaRele", handleDesactivaRele);  //Servicio de desactivacion de rele
+  server.on("/fuerzaManualSalida", handleFuerzaManual);  //Servicio para formar ua salida a modo manual
+  server.on("/recuperaManualSalida", handleRecuperaManual);  //Servicio para formar ua salida a modo manual  
+
   server.on("/pulsoRele", handlePulsoRele);  //Servicio de pulso de rele
   server.on("/planes", handlePlanes);  //Servicio de representacion del plan del secuenciador
   server.on("/activaSecuenciador", handleActivaSecuenciador);  //Servicio para activar el secuenciador
@@ -86,7 +90,6 @@ void webServer(int debug)
 void handleRoot() 
   {
   String cad="";
-  String orden="";
 
   //genero la respuesta por defecto
   cad += cabeceraHTML;
@@ -96,7 +99,14 @@ void handleRoot()
   cad += "<CAPTION>Entradas</CAPTION>\n";  
   for(int8_t i=0;i<MAX_ENTRADAS;i++)
     {    
-    if(entradaConfigurada(i)==CONFIGURADO) cad += "<TR><TD>" + nombreEntrada(i) + "-></TD><TD>" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD></TR>\n";    
+    if(entradaConfigurada(i)==CONFIGURADO) 
+      {
+      //cad += "<TR><TD>" + nombreEntrada(i) + "-></TD><TD>" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD></TR>\n";    
+      cad += "<TR>";
+      cad += "<TD STYLE=\"color: #000000; text-align: center; background-color: #DDDDDD\">" + nombreEntrada(i) + "</TD>";
+      cad += "<TD STYLE=\"color: #000000; text-align: center; background-color: " + String((estadoEntrada(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 100px\">" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD>";
+      cad += "</TR>";
+      }
     }
   cad += "</TABLE>\n";
   cad += "<BR>";
@@ -107,31 +117,53 @@ void handleRoot()
   for(int8_t i=0;i<MAX_SALIDAS;i++)
     {
     if(releConfigurado(i)==CONFIGURADO)
-      {      
+      {
+      String orden="";
+      if (estadoRele(i)!=ESTADO_DESACTIVO) orden="desactiva"; 
+      else orden="activa";
+
       cad += "<TR>\n";
-      cad += "<TD>" + nombreRele(i) + "-></TD><TD>" + String(estadoRele(i)) + "</TD>";            
+      cad += "<TD STYLE=\"color: #000000; text-align: center; background-color: #DDDDDD\">" + nombreRele(i) + "</TD>\n";
+      cad += "<TD STYLE=\"color: #000000; text-align: center; background-color: " + String((estadoRele(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 100px\">" + nombreEstadoSalidaActual(i) + "</TD>\n";
 
       //acciones en funcion del modo
       switch (modoSalida(i))          
         {
         case MODO_MANUAL:
-          //Enlace para activar o desactivar
-          if (estadoRele(i)==1) orden="desactiva"; else orden="activa";//para 0 y 2 (apagado y en pulso) activa
-          cad += "<TD><a href=\"" + orden + "Rele\?id=" + String(i) + "\" target=\"_self\">" + orden + " rele</a></TD>\n";  
-          //Enlace para generar un pulso
-          cad += "<TD><a href=\"pulsoRele\?id=" + String(i) + "\" target=\"_self\">Pulso</a></TD>\n";
+          //Enlace para activar o desactivar y para generar un pulso
+          cad += "<TD>Manual</TD>\n";
+          cad += "<td>\n";
+          cad += "<form action=\"" + orden + "Rele\">\n";
+          cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
+          cad += "<input STYLE=\"color: #000000; text-align: center; background-color: " + String((estadoRele(i)==ESTADO_DESACTIVO?ACTIVO:DESACTIVO)) + "; width: 80px\" type=\"submit\" value=\"" + orden + "r\">\n";
+          cad += "</form>\n";
+          cad += "<form action=\"pulsoRele\">\n";
+          cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
+          cad += "<input STYLE=\"color: #000000; text-align: center; background-color: " + ACTIVO + "; width: 80px\" type=\"submit\" value=\"pulso\">\n";
+          cad += "</form>\n";
+          cad += "</td>\n";    
           break;
         case MODO_SECUENCIADOR:
-          cad += "<TD colspan=2> | Secuenciador " + String(controladorSalida(i)) + "</TD>";
+          cad += "<TD colspan=2> | Secuenciador " + String(controladorSalida(i)) + "</TD>\n";
           break;
         case MODO_SEGUIMIENTO:
-          cad += "<TD>Siguiendo a entrada " + String(salidaSeguimiento(i)) + "</TD>";
+          cad += "<TD>Siguiendo a entrada " + String(controladorSalida(i)) + "</TD>\n";
+          cad += "<td>\n";
+          cad += "<form action=\"" + orden + "Rele\">\n";
+          cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
+          cad += "<input STYLE=\"color: #000000; text-align: center; background-color: " + String((estadoRele(i)==ESTADO_DESACTIVO?ACTIVO:DESACTIVO)) + "; width: 80px\" type=\"submit\" value=\"" + orden + "r\">\n";
+          cad += "</form>\n";
+          cad += "<form action=\"pulsoRele\">\n";
+          cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
+          cad += "<input STYLE=\"color: #000000; text-align: center; background-color: " + ACTIVO + "; width: 80px\" type=\"submit\" value=\"pulso\">\n";
+          cad += "</form>\n";
+          cad += "</td>\n";    
           break;
         case MODO_MAQUINA:
-          cad += "<TD>Controlado por la logica de la maquina de estados. Estado actual: " + getNombreEstadoActual() + "</TD>";
+          cad += "<TD>Controlado por la logica de la maquina de estados. Estado actual: " + getNombreEstadoActual() + "</TD>\n";
           break;            
         default://Salida no configurada
-          cad += "<TD>No configurada</TD>";  
+          cad += "<TD>No configurada</TD>\n";
         }
         
       cad += "</TR>\n";        
@@ -160,13 +192,14 @@ void handleRoot()
   cad += enlaces;
 
   cad += "<BR><BR>";
+  /*
   String contenido="";
   leeFichero(FICHERO_ERRORES, contenido);
   cad += "Comprobacion de la configuracion:<BR>";
   cad += "<textarea readonly=true cols=100 rows=16 name=\"contenido\">";
   cad += contenido;
   cad += "</textarea>";
-  
+  */
   cad += "<BR><BR>" + nombre_dispositivo + " . Version " + String(VERSION) + ".";
 
   cad += pieHTML;
@@ -458,6 +491,49 @@ void handlePulsoRele(void)
 
     //desactivaRele(id);
     pulsoRele(id);
+    
+    handleRoot();
+    }
+  else server.send(404, "text/plain", ""); 
+  }
+
+/*********************************************/
+/*                                           */
+/*  Servicio para forzar el modo manual      */
+/*  del rele                                 */
+/*                                           */
+/*********************************************/  
+void handleFuerzaManual(void)
+  {
+  int8_t id=0;
+
+  if(server.hasArg("id")) 
+    {
+    int8_t id=server.arg("id").toInt();
+
+    forzarModoManualSalida(id);
+    
+    handleRoot();
+    }
+  else server.send(404, "text/plain", ""); 
+  }
+
+
+/*********************************************/
+/*                                           */
+/*  Servicio para recuperar el modo inicial  */
+/*  del rele                                 */
+/*                                           */
+/*********************************************/  
+void handleRecuperaManual(void)
+  {
+  int8_t id=0;
+
+  if(server.hasArg("id")) 
+    {
+    int8_t id=server.arg("id").toInt();
+
+    recuperarModoSalida(id);
     
     handleRoot();
     }

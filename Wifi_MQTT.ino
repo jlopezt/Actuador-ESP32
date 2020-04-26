@@ -182,13 +182,20 @@ void respondeGenericoMQTT(char* topic, byte* payload, unsigned int length)
   //Leo el rele y el valor a setear
   if(root.containsKey("id") && root.containsKey("estado"))
     {
-    int id=atoi(root["id"]);      
+    /*
+    int id=atoi(root["id"]); 
     int estado;
     if(root["estado"]=="off") estado=0;       
     else if(root["estado"]=="on") estado=1;           
     else if(root["estado"]=="pulso") estado=2;     
+    */
+    int id=root.get<int>("id"); 
+    int estado;
+    if(root.get<String>("estado")=="off") estado=0;       
+    else if(root.get<String>("estado")=="on") estado=1;           
+    else if(root.get<String>("estado")=="pulso") estado=2;     
      
-    actuaRele(id, estado);
+    if(actuaRele(id, estado)==-1) Serial.print("Se intento actuar sobre una salida que no esta en modo manual\n");
     }
   else Serial.printf("Mensaje no esperado: %s\n",mensaje);
   /**********************Fin JSON***********************/    
