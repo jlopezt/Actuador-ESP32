@@ -1,0 +1,20 @@
+{
+  "Salidas": [
+    {
+    "GPIO": 23,
+    "nombre": "Manual",
+    "inicio": "off",
+    "anchoPulso": 1000,
+    "modo": 0,
+    "controlador": 0,
+    "Estados": [
+      {"valor": 0, "texto": "Activo"},
+      {"valor": 1, "texto": "Reposo"}
+      ],
+    "Mensajes": [
+      {"valor": 0, "texto": "Abriendo"},
+      {"valor": 1, "texto": ""}
+      ]
+    }
+  ]
+}

@@ -7,16 +7,29 @@ Test                           http://IP/test          N/A             HTML     
 Reinicia el actuador           http://IP/restart
 Informacion del Hw del sistema http://IP/info
 ************************************************************************************************/
+
 //Configuracion de los servicios web
 #define PUERTO_WEBSERVER 80
-#define ACTIVO    String("#EEEE00")
-#define DESACTIVO String("#AAAAAA")
+//#define ACTIVO    String("#EEEE00")
+//#define DESACTIVO String("#AAAAAA")
+#define FONDO     String("#DDDDDD")
+#define TEXTO     String("#000000")
+#define ACTIVO    String("#FFFF00")
+#define DESACTIVO String("#DDDDDD")
 
+#ifdef ESP32
 //Includes
 #include <WebServer.h>
 
 //Variables globales
 WebServer server(PUERTO_WEBSERVER);
+#else
+//Includes
+#include <ESP8266WebServer.h>
+
+//Variables globales
+ESP8266WebServer server(PUERTO_WEBSERVER);
+#endif
 
 //Cadenas HTML precargadas
 String cabeceraHTML="";
@@ -56,11 +69,16 @@ void inicializaWebServer(void)
   server.on("/borraFichero", handleBorraFichero);  //URI de borrar fichero
   server.on("/leeFichero", handleLeeFichero);  //URI de leer fichero
   server.on("/manageFichero", handleManageFichero);  //URI de leer fichero  
+#ifdef ESP8266
+  server.on("/infoFS", handleInfoFS);  //URI de info del FS
+#endif
 
   server.on("/edit.html",  HTTP_POST, []() {  // If a POST request is sent to the /edit.html address,
                                            server.send(200, "text/plain", ""); 
                                            }, handleFileUpload);                       // go to 'handleFileUpload'
+#ifdef ESP32
   server.on("/speech", handleSpeechPath);
+#endif
   
   server.onNotFound(handleNotFound);//pagina no encontrada
 
@@ -103,8 +121,8 @@ void handleRoot()
       {
       //cad += "<TR><TD>" + nombreEntrada(i) + "-></TD><TD>" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD></TR>\n";    
       cad += "<TR>";
-      cad += "<TD STYLE=\"color: #000000; text-align: center; background-color: #DDDDDD\">" + nombreEntrada(i) + "</TD>";
-      cad += "<TD STYLE=\"color: #000000; text-align: center; background-color: " + String((estadoEntrada(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 100px\">" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD>";
+      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + FONDO + "\">" + nombreEntrada(i) + "</TD>";
+      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoEntrada(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 100px\">" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD>";
       cad += "</TR>";
       }
     }
@@ -123,8 +141,8 @@ void handleRoot()
       else orden="activa";
 
       cad += "<TR>\n";
-      cad += "<TD STYLE=\"color: #000000; text-align: center; background-color: #DDDDDD\">" + nombreRele(i) + "</TD>\n";
-      cad += "<TD STYLE=\"color: #000000; text-align: center; background-color: " + String((estadoRele(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 100px\">" + nombreEstadoSalidaActual(i) + "</TD>\n";
+      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + FONDO + "; width: 100px\">" + nombreRele(i) + "</TD>\n";
+      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoRele(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 100px\">" + nombreEstadoSalidaActual(i) + "</TD>\n";
 
       //acciones en funcion del modo
       switch (modoSalida(i))          
@@ -135,12 +153,19 @@ void handleRoot()
           cad += "<td>\n";
           cad += "<form action=\"" + orden + "Rele\">\n";
           cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
-          cad += "<input STYLE=\"color: #000000; text-align: center; background-color: " + String((estadoRele(i)==ESTADO_DESACTIVO?ACTIVO:DESACTIVO)) + "; width: 80px\" type=\"submit\" value=\"" + orden + "r\">\n";
+          cad += "<input STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoRele(i)==ESTADO_DESACTIVO?ACTIVO:DESACTIVO)) + "; width: 80px\" type=\"submit\" value=\"" + orden + "r\">\n";
           cad += "</form>\n";
           cad += "<form action=\"pulsoRele\">\n";
           cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
-          cad += "<input STYLE=\"color: #000000; text-align: center; background-color: " + ACTIVO + "; width: 80px\" type=\"submit\" value=\"pulso\">\n";
+          cad += "<input STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + ACTIVO + "; width: 80px\" type=\"submit\" value=\"pulso\">\n";
           cad += "</form>\n";
+          if(modoInicalSalida(i)!=MODO_MANUAL)
+            {
+            cad += "<form action=\"recuperaManualSalida\">\n";
+            cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
+            cad += "<input STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + ACTIVO + "; width: 160px\" type=\"submit\" value=\"recupera manual\">\n";
+            cad += "</form>\n";
+            }          
           cad += "</td>\n";    
           break;
         case MODO_SECUENCIADOR:
@@ -149,13 +174,9 @@ void handleRoot()
         case MODO_SEGUIMIENTO:
           cad += "<TD>Siguiendo a entrada " + String(controladorSalida(i)) + "</TD>\n";
           cad += "<td>\n";
-          cad += "<form action=\"" + orden + "Rele\">\n";
+          cad += "<form action=\"fuerzaManualSalida\">\n";
           cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
-          cad += "<input STYLE=\"color: #000000; text-align: center; background-color: " + String((estadoRele(i)==ESTADO_DESACTIVO?ACTIVO:DESACTIVO)) + "; width: 80px\" type=\"submit\" value=\"" + orden + "r\">\n";
-          cad += "</form>\n";
-          cad += "<form action=\"pulsoRele\">\n";
-          cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
-          cad += "<input STYLE=\"color: #000000; text-align: center; background-color: " + ACTIVO + "; width: 80px\" type=\"submit\" value=\"pulso\">\n";
+          cad += "<input STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + ACTIVO + "; width: 160px\" type=\"submit\" value=\"fuerza manual\">\n";
           cad += "</form>\n";
           cad += "</td>\n";    
           break;
@@ -165,7 +186,6 @@ void handleRoot()
         default://Salida no configurada
           cad += "<TD>No configurada</TD>\n";
         }
-        
       cad += "</TR>\n";        
       }
     }
@@ -191,15 +211,6 @@ void handleRoot()
   cad += "<BR><BR>\n";
   cad += enlaces;
 
-  cad += "<BR><BR>";
-  /*
-  String contenido="";
-  leeFichero(FICHERO_ERRORES, contenido);
-  cad += "Comprobacion de la configuracion:<BR>";
-  cad += "<textarea readonly=true cols=100 rows=16 name=\"contenido\">";
-  cad += contenido;
-  cad += "</textarea>";
-  */
   cad += "<BR><BR>" + nombre_dispositivo + " . Version " + String(VERSION) + ".";
 
   cad += pieHTML;
@@ -632,7 +643,11 @@ void handleInfo(void)
 
   cad+= "<BR>-----------------Uptime---------------------<BR>";
   char tempcad[20]="";
+#ifdef ESP32
   sprintf(tempcad,"%lu", (esp_timer_get_time()/(unsigned long)1000000)); //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años  
+#else
+  sprintf(tempcad,"%lu", (millis()/(unsigned long)1000000)); //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años  
+#endif  
   cad += "Uptime: " + String(tempcad) + " segundos"; //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años
   cad += "<BR>-----------------------------------------------<BR>";  
 
@@ -677,17 +692,74 @@ void handleInfo(void)
   cad += "<BR>-----------------Hardware info-----------------<BR>";
   cad += "FreeHeap: " + String(ESP.getFreeHeap());
   cad += "<BR>";
+#ifdef ESP32
   cad += "ChipId: " + String(ESP.getChipRevision());
+#else
+  cad += "ChipId: " + String(ESP.getChipId());
+#endif  
   cad += "<BR>";  
   cad += "SdkVersion: " + String(ESP.getSdkVersion());
   cad += "<BR>";  
   cad += "CpuFreqMHz: " + String(ESP.getCpuFreqMHz());
   cad += "<BR>";  
+     //gets the size of the flash as set by the compiler
   cad += "FlashChipSize: " + String(ESP.getFlashChipSize());
   cad += "<BR>";  
   cad += "FlashChipSpeed: " + String(ESP.getFlashChipSpeed());
   cad += "<BR>";  
+#ifdef ESP8266  
+  cad += "Vcc: " + String(ESP.getVcc());
+  cad += "<BR>";  
+  cad += "CoreVersion: " + ESP.getCoreVersion();
+  cad += "<BR>";  
+  cad += "FullVersion: " + ESP.getFullVersion();
+  cad += "<BR>";  
+  cad += "BootVersion: " + String(ESP.getBootVersion());
+  cad += "<BR>";  
+  cad += "BootMode: " + String(ESP.getBootMode());
+  cad += "<BR>";  
+  cad += "FlashChipId: " + String(ESP.getFlashChipId());
+  cad += "<BR>";  
+     //gets the actual chip size based on the flash id
+  cad += "FlashChipRealSize: " + String(ESP.getFlashChipRealSize());
+  cad += "<BR>";  
+     //FlashMode_t ESP.getFlashChipMode());
+  cad += "FlashChipSizeByChipId: " + String(ESP.getFlashChipSizeByChipId());  
+  cad += "<BR>";  
+#endif  
   cad += "-----------------------------------------------<BR>";  
+
+#ifdef ESP8266
+  cad += "<BR>-----------------info fileSystem-----------------<BR>";   
+  FSInfo fs_info;
+  if(SPIFFS.info(fs_info)) 
+    {
+    /*        
+     struct FSInfo {
+        size_t totalBytes;
+        size_t usedBytes;
+        size_t blockSize;
+        size_t pageSize;
+        size_t maxOpenFiles;
+        size_t maxPathLength;
+    };
+     */
+    cad += "totalBytes: ";
+    cad += fs_info.totalBytes;
+    cad += "<BR>usedBytes: ";
+    cad += fs_info.usedBytes;
+    cad += "<BR>blockSize: ";
+    cad += fs_info.blockSize;
+    cad += "<BR>pageSize: ";
+    cad += fs_info.pageSize;    
+    cad += "<BR>maxOpenFiles: ";
+    cad += fs_info.maxOpenFiles;
+    cad += "<BR>maxPathLength: ";
+    cad += fs_info.maxPathLength;
+    }
+  else cad += "Error al leer info";
+  cad += "<BR>-----------------------------------------------<BR>"; 
+#endif
   
   cad += pieHTML;
   server.send(200, "text/html", cad);     
@@ -713,7 +785,12 @@ void handleCreaFichero(void)
     nombreFichero=server.arg("nombre");
     contenidoFichero=server.arg("contenido");
 
-    if(salvaFichero( nombreFichero, nombreFichero+".bak", contenidoFichero)) cad += "Fichero salvado con exito<br>";
+    if(salvaFichero( nombreFichero, nombreFichero+".bak", contenidoFichero)) 
+	  {
+	  //cad += "Fichero salvado con exito<br>";
+	  handleListaFicheros();
+	  return;
+	  }  
     else cad += "No se pudo salvar el fichero<br>"; 
     }
   else cad += "Falta el argumento <nombre de fichero>"; 
@@ -740,7 +817,12 @@ void handleBorraFichero(void)
     {
     nombreFichero=server.arg("nombre");
 
-    if(borraFichero(nombreFichero)) cad += "El fichero " + nombreFichero + " ha sido borrado.\n";
+    if(borraFichero(nombreFichero)) 
+      {
+      //cad += "El fichero " + nombreFichero + " ha sido borrado.\n";
+      handleListaFicheros();
+      return;
+      }
     else cad += "No sepudo borrar el fichero " + nombreFichero + ".\n"; 
     }
   else cad += "Falta el argumento <nombre de fichero>"; 
@@ -783,6 +865,59 @@ void handleLeeFichero(void)
   cad += pieHTML;
   server.send(200, "text/html", cad); 
   }
+
+#ifdef ESP8266
+/*********************************************/
+/*                                           */
+/*  Lee info del FS                          */
+/*  peticion HTTP                            */ 
+/*                                           */
+/*********************************************/  
+void handleInfoFS(void)
+  {
+  String cad="";
+
+  cad += cabeceraHTML;
+  
+  //inicializo el sistema de ficheros
+  if (SPIFFS.begin()) 
+    {
+    Serial.println("---------------------------------------------------------------\nmounted file system");  
+    FSInfo fs_info;
+    if(SPIFFS.info(fs_info)) 
+      {
+      /*        
+       struct FSInfo {
+          size_t totalBytes;
+          size_t usedBytes;
+          size_t blockSize;
+          size_t pageSize;
+          size_t maxOpenFiles;
+          size_t maxPathLength;
+      };
+       */
+      cad += "totalBytes: ";
+      cad += fs_info.totalBytes;
+      cad += "<BR>usedBytes: ";
+      cad += fs_info.usedBytes;
+      cad += "<BR>blockSize: ";
+      cad += fs_info.blockSize;
+      cad += "<BR>pageSize: ";
+      cad += fs_info.pageSize;    
+      cad += "<BR>maxOpenFiles: ";
+      cad += fs_info.maxOpenFiles;
+      cad += "<BR>maxPathLength: ";
+      cad += fs_info.maxPathLength;
+      }
+    else cad += "Error al leer info";
+
+    Serial.println("unmounted file system\n---------------------------------------------------------------");
+    }//La de abrir el sistema de ficheros
+
+  cad += pieHTML;
+  server.send(200, "text/html", cad); 
+  }
+#endif
 
 /*********************************************/
 /*                                           */
@@ -1018,6 +1153,7 @@ void handleFileUpload()
   }
 
 /****************************Google Home Notifier ******************************/
+#ifdef ESP32
 void handleSpeechPath() 
   {
   String phrase = server.arg("phrase");
@@ -1030,3 +1166,4 @@ void handleSpeechPath()
   if(enviaNotificacion((char*)phrase.c_str())) server.send(200, "text / plain", "OK");
   else server.send(404, "text / plain", "KO");  
   }
+#endif

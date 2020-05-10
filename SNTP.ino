@@ -1,7 +1,9 @@
 /***********************************************************
  *    Modulo de gestion de SNTP
- * 
+ * ESP32:
  *    https://github.com/espressif/arduino-esp32/issues/680
+ * ESP8266
+ *    https://github.com/gmag11/NtpClient 
  ***********************************************************/
 #define MES_CAMBIO_HORARIO_UP   3 //marzo
 #define MES_CAMBIO_HORARIO_DOWN 10 //octubre

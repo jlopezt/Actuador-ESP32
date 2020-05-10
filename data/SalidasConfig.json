@@ -1,19 +1,19 @@
 {
   "Salidas": [
     {
-    "GPIO": 23,
-    "nombre": "Manual",
+    "GPIO": 23, 
+    "nombre": "Luz",
     "inicio": "off",
-    "anchoPulso": 1000,
-    "modo": 0,
+    "anchoPulso": 3000,
+    "modo": 2,
     "controlador": 0,
     "Estados": [
-      {"valor": 0, "texto": "Activo"},
-      {"valor": 1, "texto": "Reposo"}
+      {"valor": 0, "texto": "Apagado"},
+      {"valor": 1, "texto": "Encendido"}
       ],
     "Mensajes": [
-      {"valor": 0, "texto": "Abriendo"},
-      {"valor": 1, "texto": ""}
+      {"valor": 0, "texto": "Apagado"},
+      {"valor": 1, "texto": "Encendido"}
       ]
     }
   ]

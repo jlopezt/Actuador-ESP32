@@ -5,7 +5,16 @@
 /*                                              */
 /************************************************/
 #include <FS.h>     //this needs to be first, or it all crashes and burns...
+#ifdef ESP32
 #include <SPIFFS.h> //para el ESP32
+#endif
+
+#ifndef FILE_APPEND
+#define FILE_APPEND "a"
+#endif
+#ifndef FILE_WRITE
+#define FILE_WRITE "w"
+#endif
 
 /************************************************/
 /* Inicializa el sistema de ficheros del modulo */
@@ -13,7 +22,11 @@
 boolean inicializaFicheros(int debug)
 {
   //inicializo el sistema de ficheros
+#ifdef ESP32
   if (!SPIFFS.begin(true)) 
+#else
+  if (!SPIFFS.begin()) 
+#endif
     {
     Serial.println("No se puede inicializar el sistema de ficheros");
     return (false);
@@ -130,23 +143,26 @@ boolean salvaFichero(String nombreFichero, String nombreFicheroBak, String conte
 /* Salva la cadena pasada al fichero especificado                     */
 /* Si ya existe añade                                                 */
 /**********************************************************************/  
-boolean anadeFichero(String nombreFichero, String contenidoFichero)
+boolean anadeFichero(String nombreFichero, String contenidoFichero,int debug=0)
   {
   boolean salvado=false;
 
-  Serial.print("Nombre fichero: ");
-  Serial.println(nombreFichero.c_str());
-  Serial.print("Contenido fichero: ");
-  Serial.println(contenidoFichero.c_str());
-   
+  if(debug==1)
+    {
+    Serial.print("Nombre fichero: ");
+    Serial.println(nombreFichero.c_str());
+    Serial.print("Contenido fichero: ");
+    Serial.println(contenidoFichero.c_str());
+    }
+    
   File newFile = SPIFFS.open(nombreFichero.c_str(), FILE_APPEND);//abro el fichero, si existe añade
   if (newFile) 
     {
-    Serial.printf("Abierto fichero %s.\nGuardo contenido:\n#%s#\n",newFile.name(),contenidoFichero.c_str());
+    if(debug==1) Serial.printf("Abierto fichero %s.\nGuardo contenido:\n#%s#\n",newFile.name(),contenidoFichero.c_str());
   
     newFile.print(contenidoFichero);
     newFile.close();//cierro el fichero
-    Serial.println("Cierro el fichero");
+    if(debug==1) Serial.println("Cierro el fichero");
     salvado=true;
     }
   else Serial.println("El fichero no se pudo abrir para escritura.\n");
@@ -185,6 +201,7 @@ boolean listaFicheros(String &contenido)
   {   
   contenido="";
 
+#ifdef ESP32
   File root = SPIFFS.open("/");
   File file = root.openNextFile();
  
@@ -197,6 +214,16 @@ boolean listaFicheros(String &contenido)
     contenido += SEPARADOR;
       
     file = root.openNextFile();
+#else
+  Dir dir = SPIFFS.openDir("/");
+  while (dir.next()) 
+    {
+    Serial.print("FILE: ");
+    Serial.println(dir.fileName());
+
+    contenido += String(dir.fileName());
+    contenido += SEPARADOR;
+#endif    
     }
     
   return (true);

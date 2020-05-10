@@ -5,7 +5,8 @@
     "nombre": "Rele",
     "inicio": "off",
     "anchoPulso": 1000,
-    "entradaAsociada": 0,
+    "modo": 2,
+    "controlador": 0,
     "Estados": [
       {"valor": 0, "texto": "Encendida"},
       {"valor": 1, "texto": "Apagada"}

@@ -271,6 +271,12 @@ boolean conectaMQTT(void)
     return (false);//SI la IP del Broker es 0.0.0.0 (IP por defecto) no intentaq conectar y sale con error
     }
   
+  if(WiFi.status()!=WL_CONNECTED) 
+    {
+    if(debugGlobal) Serial.println("La conexion WiFi no se encuentra disponible.");
+    return (false);
+    }
+
   while (!clienteMQTT.connected()) 
     {    
     if(debugGlobal) Serial.println("No conectado, intentando conectar.");

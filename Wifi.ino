@@ -6,10 +6,17 @@
 /*                                            */
 /**********************************************/
 //needed for library
-#include <WiFi.h> //#include <ESP8266WiFi.h>
+#ifdef ESP32
+  #include <WiFi.h> 
+  #include <WiFiMulti.h>
+#else
+  #include <ESP8266WiFi.h>
+  #include <ESP8266WiFiMulti.h>
+  #include <ESP8266WebServer.h>
+#endif
+
 #include <DNSServer.h>
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager
-#include <WiFiMulti.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -27,7 +34,11 @@ IPAddress wifiDNS2(0, 0, 0, 0);
 const char* ssid;
 const char* password;
 
-WiFiMulti MiWiFiMulti;
+#ifdef ESP32
+  WiFiMulti MiWiFiMulti;
+#else
+  ESP8266WiFiMulti MiWiFiMulti;
+#endif  
 
 boolean conectado=false; //Si el portal de configuracion devolvio OK a la conexion
 

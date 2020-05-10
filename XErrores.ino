@@ -20,28 +20,31 @@ uint8_t compruebaConfiguracion(uint8_t nivelTraza)
   boolean salvar=false;
   String cad="";
 
+  Serial.printf("Init Verificar errores configuracion---------------------------------------------------\n");
+  Serial.printf("     ficheros--------------------------------------------------------------------------\n");
   salvar=compruebaFicheros();
-
+  Serial.printf("     GHN-------------------------------------------------------------------------------\n");
   cad=compruebaGHN();
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-
+  Serial.printf("     Wifi------------------------------------------------------------------------------\n");
   cad=compruebaWifi(); 
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-
+  Serial.printf("     WebServer-------------------------------------------------------------------------\n");
   cad=compruebaWebserver();
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-
+  Serial.printf("     MQTT------------------------------------------------------------------------------\n");
   cad=comrpuebaMQTT();
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-
+  Serial.printf("     E/S-------------------------------------------------------------------------------\n");
   cad=compruebaES();
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-
+  Serial.printf("     Secuenciador----------------------------------------------------------------------\n");
   cad=compruebaSecuenciador();
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-
+  Serial.printf("     MaquinaEstados--------------------------------------------------------------------\n");
   cad=compruebaMaquinaEstados();  
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
+  Serial.printf("Fin Verificar errores configuracion----------------------------------------------------\n");
 
   return 1;
   }
@@ -126,7 +129,8 @@ String compruebaSecuenciador(void)
   {
   String cad = "";  
   uint8_t nPlanes=getNumPlanes();
-  
+
+  cad += "Secuenciador\n";
   cad += "configurados " + String(nPlanes) + " planes de secuenciador\n";
   for(uint8_t plan=0;plan<nPlanes;plan++)
     {

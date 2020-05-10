@@ -1,3 +1,18 @@
 {
-	"Entradas": []
-}
+	"Entradas": [
+		{
+		"GPIO": 13, 
+		"nombre": "PIR", 
+		"tipo": "INPUT",
+		"estadoActivo": 1,
+		"Estados": [
+			{"valor": 0, "texto": "Inactivo"},
+			{"valor": 1, "texto": "Activo"}
+			],
+		"Mensajes": [
+			{"valor": 0, "texto": "Reposo"},
+			{"valor": 1, "texto": "Movimiento detectado"}
+			]
+		}
+	]
+}	

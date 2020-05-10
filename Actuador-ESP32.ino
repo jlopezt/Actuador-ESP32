@@ -80,11 +80,11 @@ boolean candado=false; //Candado de configuracion. true implica que la ultima co
 void configuraLed(void){pinMode(LED_BUILTIN, OUTPUT);}
 void enciendeLed(void){digitalWrite(LED_BUILTIN, HIGH);}
 void apagaLed(void){digitalWrite(LED_BUILTIN, LOW);}
-void parpadeaLed(uint8_t veces, uint8_t delayed=100)
+void parpadeaLed(uint8_t veces, uint16_t espera=100)
   {
   for(uint8_t i=0;i<2*veces;i++)
     {  
-    delay(delayed);
+    delay(espera/2);
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
     }
   }
@@ -157,6 +157,10 @@ void setup()
     //Google Home Notifier
     Serial.println("\n\nInit Google Home Notifier -------------------------------------------------------\n");
     inicializaGHN();
+    //mDNS
+    Serial.println("\n\nInit mDNS -----------------------------------------------------------------------\n");
+    inicializamDNS(NULL);
+    parpadeaLed(3);
     }
   else Serial.println("No se pudo conectar al WiFi");
   apagaLed();

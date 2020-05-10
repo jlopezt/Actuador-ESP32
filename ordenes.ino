@@ -172,7 +172,11 @@ void inicializaOrden(void)
   comandos[i].comando="fexist";
   comandos[i].descripcion="Indica si existe un fichero en el sistema de ficheros";
   comandos[i++].p_func_comando=func_comando_fexist;
-  
+#ifdef ESP8266  
+  comandos[i].comando="finfo";
+  comandos[i].descripcion="Devuelve informacion del sistema de ficheros";
+  comandos[i++].p_func_comando=func_comando_finfo;
+#endif
   comandos[i].comando="fopen";
   comandos[i].descripcion="Devuelve el contenido del fichero especificado";
   comandos[i++].p_func_comando=func_comando_fopen;
@@ -236,11 +240,11 @@ void inicializaOrden(void)
   comandos[i].comando="salidas";
   comandos[i].descripcion="JSON salidas";
   comandos[i++].p_func_comando=func_comando_Salidas;
-
+#ifdef ESP32
   comandos[i].comando="GHN";
   comandos[i].descripcion="Datos de GHN";
   comandos[i++].p_func_comando=func_comando_GHN;
-
+#endif
   comandos[i].comando="debugME";
   comandos[i].descripcion="Debug de la maquina de estados";
   comandos[i++].p_func_comando=func_comando_debugMaquinaEstados;
@@ -324,8 +328,12 @@ void func_comando_restart(int iParametro, char* sParametro, float fParametro)//"
   
 void func_comando_info(int iParametro, char* sParametro, float fParametro)//"info")
   {
-  Serial.printf("\n-----------------info logica-----------------\n");
+  Serial.printf("\n-----------------info uptime-----------------\n");
+#ifdef ESP32  
   Serial.printf("Uptime: %lu segundos\n", (esp_timer_get_time()/(unsigned long)1000000)); //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años
+#else
+  Serial.printf("Uptime: %lu segundos\n", (millis()/(unsigned long)1000000)); 
+#endif  
   Serial.printf("-----------------------------------------------\n");  
 
   Serial.printf("\n-----------------info logica-----------------\n");
@@ -341,26 +349,29 @@ void func_comando_info(int iParametro, char* sParametro, float fParametro)//"inf
   Serial.printf("-----------------------------------------------\n");   
       
   Serial.printf("-----------------Hardware info-----------------\n");
-  //Serial.printf("Vcc: %i\n",ESP.getVcc());
   Serial.printf("FreeHeap: %i\n",ESP.getFreeHeap());
+#ifdef ESP32
   Serial.printf("ChipId: %i\n",ESP.getChipRevision());
+#else
+  Serial.printf("ChipId: %i\n",ESP.getChipId());
+#endif
   Serial.printf("SdkVersion: %s\n",ESP.getSdkVersion());
-  //Serial.printf("CoreVersion: %s\n",ESP.getCoreVersion().c_str());
-  //Serial.printf("FullVersion: %s\n",ESP.getFullVersion().c_str());
-  //Serial.printf("BootVersion: %i\n",ESP.getBootVersion());
-  //Serial.printf("BootMode: %i\n",ESP.getBootMode());
   Serial.printf("CpuFreqMHz: %i\n",ESP.getCpuFreqMHz());
-
-  //Serial.printf("FlashChipId: %i\n",ESP.getFlashChipId());
-      //gets the actual chip size based on the flash id
-  //Serial.printf("FlashChipRealSize: %i\n",ESP.getFlashChipRealSize());
-
       //gets the size of the flash as set by the compiler
   Serial.printf("FlashChipSize: %i\n",ESP.getFlashChipSize());
   Serial.printf("FlashChipSpeed: %i\n",ESP.getFlashChipSpeed());
-      //FlashMode_t ESP.getFlashChipMode());
-      
-  //Serial.printf("FlashChipSizeByChipId: %i\n",ESP.getFlashChipSizeByChipId()); 
+
+#ifdef ESP8266      
+  Serial.printf("Vcc: %i\n",ESP.getVcc());
+  Serial.printf("CoreVersion: %s\n",ESP.getCoreVersion().c_str());
+  Serial.printf("FullVersion: %s\n",ESP.getFullVersion().c_str());
+  Serial.printf("BootVersion: %i\n",ESP.getBootVersion());
+  Serial.printf("BootMode: %i\n",ESP.getBootMode());
+  Serial.printf("FlashChipId: %i\n",ESP.getFlashChipId());
+      //gets the actual chip size based on the flash id
+  Serial.printf("FlashChipRealSize: %i\n",ESP.getFlashChipRealSize());     
+  Serial.printf("FlashChipSizeByChipId: %i\n",ESP.getFlashChipSizeByChipId()); 
+#endif  
   Serial.printf("-----------------------------------------------\n");
   }  
 
@@ -384,6 +395,28 @@ void func_comando_fexist(int iParametro, char* sParametro, float fParametro)//"f
     else Serial.printf("NO existe el fichero %s.\n",sParametro);
     }
   }
+
+#ifdef ESP8266
+void func_comando_finfo(int iParametro, char* sParametro, float fParametro)//"finfo")
+  {
+  FSInfo fs_info;
+  if(SPIFFS.info(fs_info)) 
+    {
+    /*        
+     struct FSInfo {
+        size_t totalBytes;
+        size_t usedBytes;
+        size_t blockSize;
+        size_t pageSize;
+        size_t maxOpenFiles;
+        size_t maxPathLength;
+    };
+     */
+    Serial.printf("totalBytes: %i\nusedBytes: %i\nblockSize: %i\npageSize: %i\nmaxOpenFiles: %i\nmaxPathLength: %i\n",fs_info.totalBytes, fs_info.usedBytes ,fs_info.blockSize ,fs_info.pageSize ,fs_info.maxOpenFiles ,fs_info.maxPathLength);
+    }
+  else Serial.println("Error al leer info");  
+  }
+#endif
 
 void func_comando_fopen(int iParametro, char* sParametro, float fParametro)//"fopen")
   {
@@ -496,11 +529,13 @@ void func_comando_Entradas(int iParametro, char* sParametro, float fParametro)//
   {
   Serial.printf("%s\n",generaJsonEstadoEntradas().c_str());
   }    
-  
+
+#ifdef ESP32  
 void func_comando_GHN(int iParametro, char* sParametro, float fParametro)//"debug")
   {
   Serial.printf("Google Home Notifier:\n Nombre del equipo: %s | Idioma: %s | Activo: %i\n",nombreEquipo.c_str(),idioma.c_str(), activaGoogleHomeNotifier);
   }    
+#endif
 
 void func_comando_debugMaquinaEstados(int iParametro, char* sParametro, float fParametro)//"debug")
   {
