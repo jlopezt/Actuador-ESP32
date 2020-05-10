@@ -45,7 +45,6 @@
 #define FRECUENCIA_SALIDAS         5 //cada cuantas vueltas de loop atiende las salidas
 #define FRECUENCIA_SECUENCIADOR   10 //cada cuantas vueltas de loop atiende al secuenciador
 #define FRECUENCIA_MAQUINAESTADOS 10 //cada cuantas vueltas de loop atiende a la maquina de estados
-#define FRECUENCIA_SERVIDOR_WEB    1 //cada cuantas vueltas de loop atiende el servidor web
 #define FRECUENCIA_MQTT           10 //cada cuantas vueltas de loop envia y lee del broker MQTT
 #define FRECUENCIA_ENVIO_DATOS   100 //cada cuantas vueltas de loop envia al broker el estado de E/S
 #define FRECUENCIA_ORDENES         2 //cada cuantas vueltas de loop atiende las ordenes via serie 
@@ -83,7 +82,7 @@ void apagaLed(void){digitalWrite(LED_BUILTIN, LOW);}
 void parpadeaLed(uint8_t veces, uint16_t espera=100)
   {
   for(uint8_t i=0;i<2*veces;i++)
-    {  
+    {
     delay(espera/2);
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
     }
@@ -224,7 +223,6 @@ void loop()
   if ((vuelta % FRECUENCIA_SECUENCIADOR)==0) actualizaSecuenciador(debugGlobal); //Actualiza la salida del secuenciador
   if ((vuelta % FRECUENCIA_MAQUINAESTADOS)==0) actualizaMaquinaEstados(debugGlobal); //Actualiza la maquina de estados
   //Prioridad 3: Interfaces externos de consulta    
-  if ((vuelta % FRECUENCIA_SERVIDOR_WEB)==0) webServer(debugGlobal); //atiende el servidor web
   if ((vuelta % FRECUENCIA_MQTT)==0) atiendeMQTT();      
   if ((vuelta % FRECUENCIA_ENVIO_DATOS)==0) enviaDatos(debugGlobal); //publica via MQTT los datos de entradas y salidas, segun configuracion
   if ((vuelta % FRECUENCIA_ORDENES)==0) while(HayOrdenes(debugGlobal)) EjecutaOrdenes(debugGlobal); //Lee ordenes via serie

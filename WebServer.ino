@@ -10,6 +10,8 @@ Informacion del Hw del sistema http://IP/info
 
 //Configuracion de los servicios web
 #define PUERTO_WEBSERVER 80
+#define ACTIVO    String("#EEEE00")
+#define DESACTIVO String("#AAAAAA")
 //#define ACTIVO    String("#EEEE00")
 //#define DESACTIVO String("#AAAAAA")
 #define FONDO     String("#DDDDDD")
@@ -17,24 +19,51 @@ Informacion del Hw del sistema http://IP/info
 #define ACTIVO    String("#FFFF00")
 #define DESACTIVO String("#DDDDDD")
 
+//Includes
 #ifdef ESP32
-//Includes
-#include <WebServer.h>
-
-//Variables globales
-WebServer server(PUERTO_WEBSERVER);
-#else
-//Includes
-#include <ESP8266WebServer.h>
-
-//Variables globales
-ESP8266WebServer server(PUERTO_WEBSERVER);
+  #include <WiFi.h>
+  #include <AsyncTCP.h>
+#elif defined(ESP8266)
+  #include <ESP8266WiFi.h>
+  #include <ESPAsyncTCP.h>
 #endif
+
+#include "ESPAsyncWebServer.h"
+
+//Variables globales
+//WebServer server(PUERTO_WEBSERVER);
+AsyncWebServer serverX(PUERTO_WEBSERVER);
 
 //Cadenas HTML precargadas
 String cabeceraHTML="";
 String enlaces="<TABLE>\n<CAPTION>Enlaces</CAPTION>\n<TR><TD><a href=\"info\" target=\"_self\">Info</a></TD></TR>\n<TR><TD><a href=\"test\" target=\"_self\">Test</a></TD></TR>\n<TR><TD><a href=\"restart\" target=\"_self\">Restart</a></TD></TR>\n<TR><TD><a href=\"listaFicheros\" target=\"_self\">Lista ficheros</a></TD></TR>\n<TR><TD><a href=\"estado\" target=\"_self\">Estado</a></TD></TR>\n<TR><TD><a href=\"estadoSalidas\" target=\"_self\">Estado salidas</a></TD></TR>\n<TR><TD><a href=\"estadoEntradas\" target=\"_self\">Estado entradas</a></TD></TR>\n<TR><TD><a href=\"planes\" target=\"_self\">Planes del secuenciador</a></TD></TR>\n<TR><TD><a href=\"maquinaEstados\" target=\"_self\">Maquina de estados</a></TD></TR></TABLE>\n"; 
 String pieHTML="</BODY></HTML>";
+
+void handleNotFound(AsyncWebServerRequest *request);
+bool handleFileRead(AsyncWebServerRequest *request);
+void handleSpeechPath(AsyncWebServerRequest *request);
+void handleFileUpload(AsyncWebServerRequest *request);
+void handleManageFichero(AsyncWebServerRequest *request);
+void handleLeeFichero(AsyncWebServerRequest *request);
+void handleBorraFichero(AsyncWebServerRequest *request);
+void handleCreaFichero(AsyncWebServerRequest *request);
+void handleListaFicheros(AsyncWebServerRequest *request);
+void handleInfo(AsyncWebServerRequest *request);
+void handleRestart(AsyncWebServerRequest *request);
+void handleTest(AsyncWebServerRequest *request);
+void handleMaquinaEstados(AsyncWebServerRequest *request);
+void handleDesactivaSecuenciador(AsyncWebServerRequest *request);
+void handleActivaSecuenciador(AsyncWebServerRequest *request);
+void handlePlanes(AsyncWebServerRequest *request);
+void handlePulsoRele(AsyncWebServerRequest *request);
+void handleRecuperaManual(AsyncWebServerRequest *request);
+void handleFuerzaManual(AsyncWebServerRequest *request);
+void handleDesactivaRele(AsyncWebServerRequest *request);
+void handleActivaRele(AsyncWebServerRequest *request);
+void handleEstadoEntradas(AsyncWebServerRequest *request);
+void handleEstadoSalidas(AsyncWebServerRequest *request);
+void handleEstado(AsyncWebServerRequest *request);
+void handleRoot(AsyncWebServerRequest *request);
 
 /*********************************** Inicializacion y configuracion *****************************************************************/
 void inicializaWebServer(void)
@@ -45,56 +74,47 @@ void inicializaWebServer(void)
   /*******Configuracion del Servicio Web***********/  
   //Inicializo los serivcios  
   //decalra las URIs a las que va a responder
-  server.on("/", handleRoot); //Responde con la iodentificacion del modulo
-  server.on("/estado", handleEstado); //Servicio de estdo de reles
-  server.on("/estadoSalidas", handleEstadoSalidas); //Servicio de estdo de reles
-  server.on("/estadoEntradas", handleEstadoEntradas); //Servicio de estdo de reles    
-  server.on("/activaRele", handleActivaRele); //Servicio de activacion de rele
-  server.on("/desactivaRele", handleDesactivaRele);  //Servicio de desactivacion de rele
-  server.on("/fuerzaManualSalida", handleFuerzaManual);  //Servicio para formar ua salida a modo manual
-  server.on("/recuperaManualSalida", handleRecuperaManual);  //Servicio para formar ua salida a modo manual  
+  serverX.on("/", HTTP_ANY, handleRoot); //Responde con la iodentificacion del modulo
+  serverX.on("/estado", HTTP_ANY, handleEstado); //Servicio de estdo de reles
+  serverX.on("/estadoSalidas", HTTP_ANY, handleEstadoSalidas); //Servicio de estdo de reles
+  serverX.on("/estadoEntradas", HTTP_ANY, handleEstadoEntradas); //Servicio de estdo de reles    
+  serverX.on("/activaRele", HTTP_ANY, handleActivaRele); //Servicio de activacion de rele
+  serverX.on("/desactivaRele", HTTP_ANY, handleDesactivaRele);  //Servicio de desactivacion de rele
+  serverX.on("/fuerzaManualSalida", HTTP_ANY, handleFuerzaManual);  //Servicio para formar ua salida a modo manual
+  serverX.on("/recuperaManualSalida", HTTP_ANY, handleRecuperaManual);  //Servicio para formar ua salida a modo manual  
 
-  server.on("/pulsoRele", handlePulsoRele);  //Servicio de pulso de rele
-  server.on("/planes", handlePlanes);  //Servicio de representacion del plan del secuenciador
-  server.on("/activaSecuenciador", handleActivaSecuenciador);  //Servicio para activar el secuenciador
-  server.on("/desactivaSecuenciador", handleDesactivaSecuenciador);  //Servicio para desactivar el secuenciador
-  server.on("/maquinaEstados", handleMaquinaEstados);  //Servicio de representacion de las transiciones d ela maquina de estados
+  serverX.on("/pulsoRele", HTTP_ANY, handlePulsoRele);  //Servicio de pulso de rele
+  serverX.on("/planes", HTTP_ANY, handlePlanes);  //Servicio de representacion del plan del secuenciador
+  serverX.on("/activaSecuenciador", HTTP_ANY, handleActivaSecuenciador);  //Servicio para activar el secuenciador
+  serverX.on("/desactivaSecuenciador", HTTP_ANY, handleDesactivaSecuenciador);  //Servicio para desactivar el secuenciador
+  serverX.on("/maquinaEstados", HTTP_ANY, handleMaquinaEstados);  //Servicio de representacion de las transiciones d ela maquina de estados
       
-  server.on("/test", handleTest);  //URI de test
-  server.on("/restart", handleRestart);  //URI de test
-  server.on("/info", handleInfo);  //URI de test
+  serverX.on("/test", HTTP_ANY, handleTest);  //URI de test
+  serverX.on("/restart", HTTP_ANY, handleRestart);  //URI de test
+  serverX.on("/info", HTTP_ANY, handleInfo);  //URI de test
   
-  server.on("/listaFicheros", handleListaFicheros);  //URI de leer fichero
-  server.on("/creaFichero", handleCreaFichero);  //URI de crear fichero
-  server.on("/borraFichero", handleBorraFichero);  //URI de borrar fichero
-  server.on("/leeFichero", handleLeeFichero);  //URI de leer fichero
-  server.on("/manageFichero", handleManageFichero);  //URI de leer fichero  
+  serverX.on("/listaFicheros", HTTP_ANY, handleListaFicheros);  //URI de leer fichero
+  serverX.on("/creaFichero", HTTP_ANY, handleCreaFichero);  //URI de crear fichero
+  serverX.on("/borraFichero", HTTP_ANY, handleBorraFichero);  //URI de borrar fichero
+  serverX.on("/leeFichero", HTTP_ANY, handleLeeFichero);  //URI de leer fichero
+  serverX.on("/manageFichero", HTTP_ANY, handleManageFichero);  //URI de leer fichero  
 #ifdef ESP8266
   server.on("/infoFS", handleInfoFS);  //URI de info del FS
 #endif
-
-  server.on("/edit.html",  HTTP_POST, []() {  // If a POST request is sent to the /edit.html address,
-                                           server.send(200, "text/plain", ""); 
+/*
+  serverX.on("/edit.html",  HTTP_POST, [](AsyncWebServerRequest *request) {  // If a POST request is sent to the /edit.html address,
+                                           request->send(200, "text/plain", ""); 
                                            }, handleFileUpload);                       // go to 'handleFileUpload'
-#ifdef ESP32
-  server.on("/speech", handleSpeechPath);
-#endif
+  */
+#ifdef ESP32  
+  serverX.on("/speech", HTTP_ANY, handleSpeechPath);
+#endif  
   
-  server.onNotFound(handleNotFound);//pagina no encontrada
+  serverX.onNotFound(handleNotFound);//pagina no encontrada
 
-  server.begin();
+  serverX.begin();
 
   Serial.printf("Servicio web iniciado en puerto %i\n", PUERTO_WEBSERVER);
-  }
-
-/*******************************************************/
-/*                                                     */ 
-/* Invocado desde Loop, gestiona las peticiones web    */
-/*                                                     */
-/*******************************************************/
-void webServer(int debug)
-  {
-  server.handleClient();
   }
 /********************************* FIn inicializacion y configuracion ***************************************************************/
 
@@ -105,7 +125,7 @@ void webServer(int debug)
 /*  Enlaces a las principales funciones          */
 /*                                               */
 /*************************************************/  
-void handleRoot() 
+void handleRoot(AsyncWebServerRequest *request) 
   {
   String cad="";
 
@@ -214,7 +234,7 @@ void handleRoot()
   cad += "<BR><BR>" + nombre_dispositivo + " . Version " + String(VERSION) + ".";
 
   cad += pieHTML;
-  server.send(200, "text/html", cad);
+  request->send(200, "text/html", cad);
   }
 
 /*************************************************/
@@ -223,7 +243,7 @@ void handleRoot()
 /*  la maquina de estados                        */
 /*                                               */
 /*************************************************/  
-void handleMaquinaEstados(void)
+void handleMaquinaEstados(AsyncWebServerRequest *request)
   {
   String cad="";
   String orden="";
@@ -315,7 +335,7 @@ void handleMaquinaEstados(void)
   cad += "<BR><BR>";
   
   cad += pieHTML;
-  server.send(200, "text/html", cad);
+  request->send(200, "text/html", cad);
   }
 
 /*************************************************/
@@ -325,11 +345,11 @@ void handleMaquinaEstados(void)
 /*  devuelve un formato json                     */
 /*                                               */
 /*************************************************/  
-void handleEstado(void)
+void handleEstado(AsyncWebServerRequest *request)
   {
   String cad=generaJsonEstado();
   
-  server.send(200, "text/json", cad); 
+  request->send(200, "text/json", cad); 
   }  
 
 /***************************************************/
@@ -338,7 +358,7 @@ void handleEstado(void)
 /*  devuelve un formato json                       */
 /*                                                 */
 /***************************************************/  
-void handleEstadoSalidas(void)
+void handleEstadoSalidas(AsyncWebServerRequest *request)
   {
   String cad="";
 
@@ -384,11 +404,7 @@ void handleEstadoSalidas(void)
   cad += "</TABLE>";
 
   cad += pieHTML;
-  server.send(200, "text/HTML", cad);     
-
-  //String cad=generaJsonEstadoSalidas();
-  
-  //server.send(200, "text/json", cad); 
+  request->send(200, "text/HTML", cad);
   }
   
 /*****************************************************/
@@ -397,7 +413,7 @@ void handleEstadoSalidas(void)
 /*  devuelve un formato json                         */
 /*                                                   */
 /*****************************************************/  
-void handleEstadoEntradas(void)
+void handleEstadoEntradas(AsyncWebServerRequest *request)
   {
   String cad="";
 
@@ -439,10 +455,7 @@ void handleEstadoEntradas(void)
   cad += "</TABLE>";
 
   cad += pieHTML;
-  server.send(200, "text/HTML", cad); 
-  //String cad=generaJsonEstadoEntradas();
-  
-  //server.send(200, "text/json", cad); 
+  request->send(200, "text/HTML", cad); 
   }
   
 /*********************************************/
@@ -450,20 +463,20 @@ void handleEstadoEntradas(void)
 /*  Servicio de actuacion de rele            */
 /*                                           */
 /*********************************************/  
-void handleActivaRele(void)
+void handleActivaRele(AsyncWebServerRequest *request)
   {
   int8_t id=0;
 
-  if(server.hasArg("id") ) 
+  if(request->hasArg("id") ) 
     {
-    int8_t id=server.arg("id").toInt();
+    int8_t id=request->arg("id").toInt();
 
     //activaRele(id);
     conmutaRele(id, ESTADO_ACTIVO, debugGlobal);
 
-    handleRoot();
+    handleRoot(request);
     }
-    else server.send(404, "text/plain", "");  
+    else request->send(404, "text/plain", "");  
   }
 
 /*********************************************/
@@ -471,20 +484,20 @@ void handleActivaRele(void)
 /*  Servicio de desactivacion de rele        */
 /*                                           */
 /*********************************************/  
-void handleDesactivaRele(void)
+void handleDesactivaRele(AsyncWebServerRequest *request)
   {
   int8_t id=0;
 
-  if(server.hasArg("id") ) 
+  if(request->hasArg("id") ) 
     {
-    int8_t id=server.arg("id").toInt();
+    int8_t id=request->arg("id").toInt();
 
     //desactivaRele(id);
     conmutaRele(id, ESTADO_DESACTIVO, debugGlobal);
     
-    handleRoot();
+    handleRoot(request);
     }
-  else server.send(404, "text/plain", ""); 
+  else request->send(404, "text/plain", ""); 
   }
 
 /*********************************************/
@@ -492,20 +505,20 @@ void handleDesactivaRele(void)
 /*  Servicio de pulso de rele                */
 /*                                           */
 /*********************************************/  
-void handlePulsoRele(void)
+void handlePulsoRele(AsyncWebServerRequest *request)
   {
   int8_t id=0;
 
-  if(server.hasArg("id") ) 
+  if(request->hasArg("id") ) 
     {
-    int8_t id=server.arg("id").toInt();
+    int8_t id=request->arg("id").toInt();
 
     //desactivaRele(id);
     pulsoRele(id);
     
-    handleRoot();
+    handleRoot(request);
     }
-  else server.send(404, "text/plain", ""); 
+  else request->send(404, "text/plain", ""); 
   }
 
 /*********************************************/
@@ -514,19 +527,19 @@ void handlePulsoRele(void)
 /*  del rele                                 */
 /*                                           */
 /*********************************************/  
-void handleFuerzaManual(void)
+void handleFuerzaManual(AsyncWebServerRequest *request)
   {
   int8_t id=0;
 
-  if(server.hasArg("id")) 
+  if(request->hasArg("id")) 
     {
-    int8_t id=server.arg("id").toInt();
+    int8_t id=request->arg("id").toInt();
 
     forzarModoManualSalida(id);
     
-    handleRoot();
+    handleRoot(request);
     }
-  else server.send(404, "text/plain", ""); 
+  else request->send(404, "text/plain", ""); 
   }
 
 
@@ -536,19 +549,19 @@ void handleFuerzaManual(void)
 /*  del rele                                 */
 /*                                           */
 /*********************************************/  
-void handleRecuperaManual(void)
+void handleRecuperaManual(AsyncWebServerRequest *request)
   {
   int8_t id=0;
 
-  if(server.hasArg("id")) 
+  if(request->hasArg("id")) 
     {
-    int8_t id=server.arg("id").toInt();
+    int8_t id=request->arg("id").toInt();
 
     recuperarModoSalida(id);
     
-    handleRoot();
+    handleRoot(request);
     }
-  else server.send(404, "text/plain", ""); 
+  else request->send(404, "text/plain", ""); 
   }
 
 /*********************************************/
@@ -557,7 +570,7 @@ void handleRecuperaManual(void)
 /*  planes del secuenciador                  */
 /*                                           */
 /*********************************************/  
-void handlePlanes(void)
+void handlePlanes(AsyncWebServerRequest *request)
   {
   int8_t numPlanes=getNumPlanes();  
   String cad=cabeceraHTML;
@@ -571,7 +584,7 @@ void handlePlanes(void)
     }
   
   cad += pieHTML;
-  server.send(200, "text/html", cad); 
+  request->send(200, "text/html", cad); 
   
   }
 
@@ -580,10 +593,10 @@ void handlePlanes(void)
 /*  Servicio para activar el secuenciador    */
 /*                                           */
 /*********************************************/  
-void handleActivaSecuenciador(void)
+void handleActivaSecuenciador(AsyncWebServerRequest *request)
   {
   activarSecuenciador();
-  handleRoot();
+  handleRoot(request);
   }
 
 /*********************************************/
@@ -591,10 +604,10 @@ void handleActivaSecuenciador(void)
 /*  Servicio para desactivar el secuenciador */
 /*                                           */
 /*********************************************/  
-void handleDesactivaSecuenciador(void)
+void handleDesactivaSecuenciador(AsyncWebServerRequest *request)
   {
   desactivarSecuenciador();
-  handleRoot();
+  handleRoot(request);
   }
 
 /*********************************************/
@@ -602,14 +615,14 @@ void handleDesactivaSecuenciador(void)
 /*  Servicio de test                         */
 /*                                           */
 /*********************************************/  
-void handleTest(void)
+void handleTest(AsyncWebServerRequest *request)
   {
   String cad="";
 
   cad += cabeceraHTML;
   cad += "Test OK<br>";
   cad += pieHTML;
-  server.send(200, "text/html", cad); 
+  request->send(200, "text/html", cad); 
   }
   
 /*********************************************/
@@ -618,14 +631,14 @@ void handleTest(void)
 /*  peticion HTTP                            */ 
 /*                                           */
 /*********************************************/  
-void handleRestart(void)
+void handleRestart(AsyncWebServerRequest *request)
   {
   String cad="";
 
   cad += cabeceraHTML;
   cad += "Reiniciando...<br>";
   cad += pieHTML;
-  server.send(200, "text/html", cad);     
+  request->send(200, "text/html", cad);     
   delay(100);
   ESP.restart();
   }
@@ -636,7 +649,7 @@ void handleRestart(void)
 /*  peticion HTTP                            */ 
 /*                                           */
 /*********************************************/  
-void handleInfo(void)
+void handleInfo(AsyncWebServerRequest *request)
   {
   String cad=cabeceraHTML;
   cad += "<h1>" + nombre_dispositivo + "</h1>";
@@ -762,7 +775,7 @@ void handleInfo(void)
 #endif
   
   cad += pieHTML;
-  server.send(200, "text/html", cad);     
+  request->send(200, "text/html", cad);     
   }
 
 /*********************************************/
@@ -771,7 +784,7 @@ void handleInfo(void)
 /*  peticion HTTP                            */ 
 /*                                           */
 /*********************************************/  
-void handleCreaFichero(void)
+void handleCreaFichero(AsyncWebServerRequest *request)
   {
   String cad="";
   String nombreFichero="";
@@ -780,15 +793,15 @@ void handleCreaFichero(void)
 
   cad += cabeceraHTML;
 
-  if(server.hasArg("nombre") && server.hasArg("contenido")) //si existen esos argumentos
+  if(request->hasArg("nombre") && request->hasArg("contenido")) //si existen esos argumentos
     {
-    nombreFichero=server.arg("nombre");
-    contenidoFichero=server.arg("contenido");
+    nombreFichero=request->arg("nombre");
+    contenidoFichero=request->arg("contenido");
 
     if(salvaFichero( nombreFichero, nombreFichero+".bak", contenidoFichero)) 
 	  {
 	  //cad += "Fichero salvado con exito<br>";
-	  handleListaFicheros();
+	  handleListaFicheros(request);
 	  return;
 	  }  
     else cad += "No se pudo salvar el fichero<br>"; 
@@ -796,7 +809,7 @@ void handleCreaFichero(void)
   else cad += "Falta el argumento <nombre de fichero>"; 
 
   cad += pieHTML;
-  server.send(200, "text/html", cad); 
+  request->send(200, "text/html", cad); 
   }
 
 /*********************************************/
@@ -805,7 +818,7 @@ void handleCreaFichero(void)
 /*  peticion HTTP                            */ 
 /*                                           */
 /*********************************************/  
-void handleBorraFichero(void)
+void handleBorraFichero(AsyncWebServerRequest *request)
   {
   String nombreFichero="";
   String contenidoFichero="";
@@ -813,14 +826,14 @@ void handleBorraFichero(void)
 
   cad += cabeceraHTML;
   
-  if(server.hasArg("nombre") ) //si existen esos argumentos
+  if(request->hasArg("nombre") ) //si existen esos argumentos
     {
-    nombreFichero=server.arg("nombre");
+    nombreFichero=request->arg("nombre");
 
     if(borraFichero(nombreFichero)) 
       {
       //cad += "El fichero " + nombreFichero + " ha sido borrado.\n";
-      handleListaFicheros();
+      handleListaFicheros(request);
       return;
       }
     else cad += "No sepudo borrar el fichero " + nombreFichero + ".\n"; 
@@ -828,7 +841,7 @@ void handleBorraFichero(void)
   else cad += "Falta el argumento <nombre de fichero>"; 
 
   cad += pieHTML;
-  server.send(200, "text/html", cad); 
+  request->send(200, "text/html", cad); 
   }
 
 /*********************************************/
@@ -837,15 +850,15 @@ void handleBorraFichero(void)
 /*  peticion HTTP                            */ 
 /*                                           */
 /*********************************************/  
-void handleLeeFichero(void)
+void handleLeeFichero(AsyncWebServerRequest *request)
   {
   String cad=cabeceraHTML;
   String nombreFichero="";
   String contenido="";
    
-  if(server.hasArg("nombre") ) //si existen esos argumentos
+  if(request->hasArg("nombre") ) //si existen esos argumentos
     {
-    nombreFichero=server.arg("nombre");
+    nombreFichero=request->arg("nombre");
 
     if(leeFichero(nombreFichero, contenido))
       {
@@ -863,7 +876,7 @@ void handleLeeFichero(void)
   else cad += "Falta el argumento <nombre de fichero>"; 
 
   cad += pieHTML;
-  server.send(200, "text/html", cad); 
+  request->send(200, "text/html", cad); 
   }
 
 #ifdef ESP8266
@@ -924,28 +937,31 @@ void handleInfoFS(void)
 /*  Pagina no encontrada                     */
 /*                                           */
 /*********************************************/
-void handleNotFound()
+void handleNotFound(AsyncWebServerRequest *request)
   {
-  if(handleFileRead(server.uri()))return;
-    
+  //Serial.printf("URL no encontrada: %s\n",request->url().c_str());  
+  if(!handleFileRead(request))
+    {
+  Serial.printf("No se encontro el fichero en SPIFFS\n");  
   String message = "";
 
   message = "<h1>" + nombre_dispositivo + "<br></h1>";
   message += "File Not Found\n\n";
   message += "URI: ";
-  message += server.uri();
+  message += request->url();
   message += "\nMethod: ";
-  message += (server.method() == HTTP_GET)?"GET":"POST";
+  message += request->methodToString();// == HTTP_GET)?"GET":"POST";
   message += "\nArguments: ";
-  message += server.args();
+  message += request->args();
   message += "\n";
 
-  for (uint8_t i=0; i<server.args(); i++)
+  for (uint8_t i=0; i<request->args(); i++)
     {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+    message += " " + request->argName(i) + ": " + request->arg(i) + "\n";
     }
     
-  server.send(404, "text/html", message);
+  request->send(404, "text/html", message);
+    }
   }
 
 /*********************************************/
@@ -955,7 +971,7 @@ void handleNotFound()
 /*  peticion HTTP                            */ 
 /*                                           */
 /*********************************************/ 
-void handleManageFichero(void)
+void handleManageFichero(AsyncWebServerRequest *request)
   {
   String nombreFichero="";
   String contenido="";
@@ -964,9 +980,9 @@ void handleManageFichero(void)
   cad += cabeceraHTML;
   cad += "<h1>" + nombre_dispositivo + "</h1>";
   
-  if(server.hasArg("nombre") ) //si existen esos argumentos
+  if(request->hasArg("nombre") ) //si existen esos argumentos
     {
-    nombreFichero=server.arg("nombre");
+    nombreFichero=request->arg("nombre");
     cad += "<h2>Fichero: " + nombreFichero + "</h2><BR>";  
 
     if(leeFichero(nombreFichero, contenido))
@@ -1004,7 +1020,7 @@ void handleManageFichero(void)
   else cad += "Falta el argumento <nombre de fichero>"; 
 
   cad += pieHTML;
-  server.send(200, "text/html", cad); 
+  request->send(200, "text/html", cad); 
   }
 
 /*********************************************/
@@ -1013,7 +1029,7 @@ void handleManageFichero(void)
 /*  traves de una peticion HTTP              */ 
 /*                                           */
 /*********************************************/  
-void handleListaFicheros(void)
+void handleListaFicheros(AsyncWebServerRequest *request)
   {
   String nombreFichero="";
   String contenidoFichero="";
@@ -1073,7 +1089,7 @@ void handleListaFicheros(void)
   else cad += "<TR><TD>No se pudo recuperar la lista de ficheros</TD></TR>"; 
 
   cad += pieHTML;
-  server.send(200, "text/html", cad); 
+  request->send(200, "text/html", cad); 
   }
 
 /**********************************************************************/
@@ -1086,8 +1102,10 @@ String getContentType(String filename) { // determine the filetype of a given fi
   return "text/plain";
 }
 
-bool handleFileRead(String path) 
-  { // send the right file to the client (if it exists)
+bool handleFileRead(AsyncWebServerRequest *request) 
+  {
+  String path=request->url();
+  // send the right file to the client (if it exists)
   Serial.println("handleFileRead: " + path);
   
   if (!path.startsWith("/")) path += "/";
@@ -1098,72 +1116,28 @@ bool handleFileRead(String path)
   String pathWithGz = path + ".gz";
   if (SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)) 
     { // If the file exists, either as a compressed archive, or normal
-    if (SPIFFS.exists(pathWithGz))                         // If there's a compressed version available
-      path += ".gz";                                         // Use the compressed verion
-    File file = SPIFFS.open(path, "r");                    // Open the file
-    size_t sent = server.streamFile(file, contentType);    // Send it to the client
-    file.close();                                          // Close the file again
-    Serial.println(String("\tSent file: ") + path);
+    if (SPIFFS.exists(pathWithGz)) path += ".gz"; // Si hay una version comprimida del fichero disponible, usa la version comprimida
+                                             
+    request->send(SPIFFS, path, contentType);
+    
+    Serial.printf("\tfichero enviado: %s | contentType: %s\n",path.c_str(),contentType.c_str());
     return true;
     }
-  Serial.println(String("\tFile Not Found: ") + path);   // If the file doesn't exist, return false
+  Serial.println(String("\tfichero no encontrado en SPIFFS: ") + path);   // If the file doesn't exist, return false
   return false;
   }
-
-void handleFileUpload()
-  {
-  File fsUploadFile;
-  HTTPUpload& upload = server.upload();
-  String path;
- 
-  if(upload.status == UPLOAD_FILE_START)
-    {
-    path = upload.filename;
-    if(!path.startsWith("/")) path = "/"+path;
-    if(!path.startsWith("/www")) path = "/www"+path;
-    if(!path.endsWith(".gz")) 
-      {                          // The file server always prefers a compressed version of a file 
-      String pathWithGz = path+".gz";                    // So if an uploaded file is not compressed, the existing compressed
-      if(SPIFFS.exists(pathWithGz))                      // version of that file must be deleted (if it exists)
-         SPIFFS.remove(pathWithGz);
-      }
-      
-    Serial.print("handleFileUpload Name: "); Serial.println(path);
-    fsUploadFile = SPIFFS.open(path, "w");            // Open the file for writing in SPIFFS (create if it doesn't exist)
-    path = String();
-    }
-  else if(upload.status == UPLOAD_FILE_WRITE)
-    {
-    if(fsUploadFile) fsUploadFile.write(upload.buf, upload.currentSize); // Write the received bytes to the file
-    } 
-  else if(upload.status == UPLOAD_FILE_END)
-    {
-    if(fsUploadFile) 
-      {                                    // If the file was successfully created
-      fsUploadFile.close();                               // Close the file again
-      Serial.print("handleFileUpload Size: "); Serial.println(upload.totalSize);
-      server.sendHeader("Location","/success.html");      // Redirect the client to the success page
-      server.send(303);
-      }
-    else 
-      {
-      server.send(500, "text/plain", "500: couldn't create file");
-      }
-    }
-  }
-
 /****************************Google Home Notifier ******************************/
 #ifdef ESP32
-void handleSpeechPath() 
+void handleSpeechPath(AsyncWebServerRequest *request) 
   {
-  String phrase = server.arg("phrase");
+  String phrase = request->arg("phrase");
   if (phrase == "") 
     {
-    server.send(401, "text / plain", "query 'phrase' is not found");
+    request->send(401, "text / plain", "query 'phrase' is not found");
     return;
     }
 
-  if(enviaNotificacion((char*)phrase.c_str())) server.send(200, "text / plain", "OK");
-  else server.send(404, "text / plain", "KO");  
+  if(enviaNotificacion((char*)phrase.c_str())) request->send(200, "text / plain", "OK");
+  else request->send(404, "text / plain", "KO");  
   }
 #endif
