@@ -40,7 +40,7 @@ int HayOrdenes(int debug)
       {
       case ';':
         //Recibido final de orden
-        if (debug) Serial.printf("Orden recibida: %s\n",ordenRecibida);
+        if (debug) Traza.mensaje("Orden recibida: %s\n",ordenRecibida);
         return(1);
         break;
       default:
@@ -61,7 +61,7 @@ int EjecutaOrdenes(int debug){
   float fParametro;
   int inicioParametro=0;
 
-  if (debug) Serial.printf("Orden recibida: %s\n",ordenRecibida);
+  if (debug) Traza.mensaje("Orden recibida: %s\n",ordenRecibida);
   
   for(int i=0;i<LONG_COMANDO;i++)
     {
@@ -99,13 +99,13 @@ int EjecutaOrdenes(int debug){
   lonOrden=0;
   ordenRecibida[0]=0;
 
-  if (debug) Serial.printf("comando: %s\niParametro: %i\nsParametro: %s\nfParametro: %f\n",comando.c_str(),iParametro,sParametro,fParametro);
+  if (debug) Traza.mensaje("comando: %s\niParametro: %i\nsParametro: %s\nfParametro: %f\n",comando.c_str(),iParametro,sParametro,fParametro);
     
 /**************Nueva funcion ***************************/
   int8_t indice=0;
   for(indice=0;indice<MAX_COMANDOS;indice++)
     {
-    if (debug) Serial.printf("Comando[%i]: {%s} - {%s}\n",indice,comando.c_str(),comandos[indice].comando.c_str());
+    if (debug) Traza.mensaje("Comando[%i]: {%s} - {%s}\n",indice,comando.c_str(),comandos[indice].comando.c_str());
 
     if (comandos[indice].comando==comando) 
       {
@@ -116,7 +116,7 @@ int EjecutaOrdenes(int debug){
     }
 
   //Si llega aqui es que no ha encontrado el comando
-  Serial.println("Comando no encontrado");
+  Traza.mensaje("Comando no encontrado\n");
   return(-1);//Comando no encontrado  
 /*******************************************************/
 }
@@ -172,11 +172,7 @@ void inicializaOrden(void)
   comandos[i].comando="fexist";
   comandos[i].descripcion="Indica si existe un fichero en el sistema de ficheros";
   comandos[i++].p_func_comando=func_comando_fexist;
-#ifdef ESP8266  
-  comandos[i].comando="finfo";
-  comandos[i].descripcion="Devuelve informacion del sistema de ficheros";
-  comandos[i++].p_func_comando=func_comando_finfo;
-#endif
+
   comandos[i].comando="fopen";
   comandos[i].descripcion="Devuelve el contenido del fichero especificado";
   comandos[i++].p_func_comando=func_comando_fopen;
@@ -240,11 +236,11 @@ void inicializaOrden(void)
   comandos[i].comando="salidas";
   comandos[i].descripcion="JSON salidas";
   comandos[i++].p_func_comando=func_comando_Salidas;
-#ifdef ESP32
+
   comandos[i].comando="GHN";
   comandos[i].descripcion="Datos de GHN";
   comandos[i++].p_func_comando=func_comando_GHN;
-#endif
+
   comandos[i].comando="debugME";
   comandos[i].descripcion="Debug de la maquina de estados";
   comandos[i++].p_func_comando=func_comando_debugMaquinaEstados;
@@ -252,6 +248,14 @@ void inicializaOrden(void)
   comandos[i].comando="CheckConfig";
   comandos[i].descripcion="Comprueba la configuracion del sistema";
   comandos[i++].p_func_comando=func_comando_compruebaConfiguracion;
+
+  comandos[i].comando="setPWM";
+  comandos[i].descripcion="Actualiza el valor de activo para la salida PWM";
+  comandos[i++].p_func_comando=func_comando_setPWM;
+
+  comandos[i].comando="getPWM";
+  comandos[i].descripcion="Devuelve el valor de activo para la salida PWM";
+  comandos[i++].p_func_comando=func_comando_getPWM;
 
   //resto
   for(;i<MAX_COMANDOS;)
@@ -273,15 +277,15 @@ void func_comando_vacio(int iParametro, char* sParametro, float fParametro) //"v
 
 void func_comando_help(int iParametro, char* sParametro, float fParametro) //"help"
   {
-  Serial.printf("\n\nComandos:");  
-  for(int8_t i=0;i<MAX_COMANDOS;i++) if (comandos[i].comando!=String("vacio")) Serial.printf("Comando %i: [%s]\n",i, comandos[i].comando.c_str());
-  Serial.printf("\n------------------------------------------------------------------------------\n");
+  Traza.mensaje("\n\nComandos:");  
+  for(int8_t i=0;i<MAX_COMANDOS;i++) if (comandos[i].comando!=String("vacio")) Traza.mensaje("Comando %i: [%s]\n",i, comandos[i].comando.c_str());
+  Traza.mensaje("\n------------------------------------------------------------------------------\n");
   }
 
 void func_comando_IP(int iParametro, char* sParametro, float fParametro) //"IP"
   {
   boolean debug=false;
-  Serial.println(getIP(debug));  
+  Traza.mensaje("%s\n",getIP(debug).c_str());  
   }  
 
 void func_comando_nivelActivo(int iParametro, char* sParametro, float fParametro) //"nivelActivo"
@@ -292,33 +296,33 @@ void func_comando_nivelActivo(int iParametro, char* sParametro, float fParametro
 
     String cad="";
     
-    if(!leeFicheroConfig(GLOBAL_CONFIG_FILE, cad)) Serial.println("No se pudo leer el fichero");
+    if(!leeFicheroConfig(GLOBAL_CONFIG_FILE, cad)) Traza.mensaje("No se pudo leer el fichero\n");
     cad=generaJsonConfiguracionNivelActivo(cad, nivelActivo);
-    if(!salvaFicheroConfig(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad)) Serial.println("No se pudo salvar el fichero");      
+    if(!salvaFicheroConfig(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad)) Traza.mensaje("No se pudo salvar el fichero\n");      
     }
-  Serial.printf("\nNivel activo: %i\n",nivelActivo);  
+  Traza.mensaje("\nNivel activo: %i\n",nivelActivo);  
   }  
 
 void func_comando_activa(int iParametro, char* sParametro, float fParametro)//"activa")
   {
   conmutaRele(iParametro, ESTADO_ACTIVO, debugGlobal);  
-  Serial.printf("\nRele %i activado\n",iParametro);
+  Traza.mensaje("\nRele %i activado\n",iParametro);
   }  
 
 void func_comando_desactiva(int iParametro, char* sParametro, float fParametro)//"desactiva")
   {
   conmutaRele(iParametro, ESTADO_DESACTIVO, debugGlobal);
-  Serial.printf("\nRele %i desactivado\n",iParametro);  
+  Traza.mensaje("\nRele %i desactivado\n",iParametro);  
   }  
 
 void func_comando_estadoRele(int iParametro, char* sParametro, float fParametro)//"estadoRele")
   { 
-  Serial.printf("\nEl estado logico del rele %i es ",iParametro);  
-  if (estadoRele(iParametro)==ESTADO_ACTIVO)Serial.printf("activado");
-  else if (estadoRele(iParametro)==ESTADO_PULSO)Serial.printf("pulso");
-  else Serial.printf("desactivado");
+  Traza.mensaje("\nEl estado logico del rele %i es ",iParametro);  
+  if (estadoRele(iParametro)==ESTADO_ACTIVO)Traza.mensaje("activado");
+  else if (estadoRele(iParametro)==ESTADO_PULSO)Traza.mensaje("pulso");
+  else Traza.mensaje("desactivado");
 
-  Serial.printf("\nEl estado fisico del rele %i es %i\nPines:\npin rele: %i\n",iParametro, digitalRead(pinSalida(iParametro)),pinSalida(iParametro));
+  Traza.mensaje("\nEl estado fisico del rele %i es %i\nPines:\npin rele: %i\n",iParametro, digitalRead(salidas[iParametro].pin),salidas[iParametro].pin);
   }  
     
 void func_comando_restart(int iParametro, char* sParametro, float fParametro)//"restart")
@@ -328,51 +332,32 @@ void func_comando_restart(int iParametro, char* sParametro, float fParametro)//"
   
 void func_comando_info(int iParametro, char* sParametro, float fParametro)//"info")
   {
-  Serial.printf("\n-----------------info uptime-----------------\n");
-#ifdef ESP32  
-  Serial.printf("Uptime: %lu segundos\n", (esp_timer_get_time()/(unsigned long)1000000)); //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años
-#else
-  Serial.printf("Uptime: %lu segundos\n", (millis()/(unsigned long)1000000)); 
-#endif  
-  Serial.printf("-----------------------------------------------\n");  
+  Traza.mensaje("\n-----------------info uptime-----------------\n");
+  Traza.mensaje("Uptime: %lu segundos\n", (esp_timer_get_time()/(unsigned long)1000000)); //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años
+  Traza.mensaje("-----------------------------------------------\n");  
 
-  Serial.printf("\n-----------------info logica-----------------\n");
-  Serial.printf("IP: %s\n", String(getIP(debugGlobal)).c_str());
-  Serial.printf("nivelActivo: %s\n", String(nivelActivo).c_str());  
-  for(int8_t i=0;i<MAX_SALIDAS;i++) Serial.printf("Rele %i | nombre: %s | estado: %i\n", i,nombreRele(i).c_str(), estadoRele(i));
-  Serial.printf("-----------------------------------------------\n");  
+  Traza.mensaje("\n-----------------info logica-----------------\n");
+  Traza.mensaje("IP: %s\n", String(getIP(debugGlobal)).c_str());
+  Traza.mensaje("nivelActivo: %s\n", String(nivelActivo).c_str());  
+  for(int8_t i=0;i<MAX_SALIDAS;i++) Traza.mensaje("Rele %i | nombre: %s | estado: %i\n", i,nombreRele(i).c_str(), estadoRele(i));
+  Traza.mensaje("-----------------------------------------------\n");  
   
-  Serial.printf("-------------------WiFi info-------------------\n");
-  Serial.printf("SSID: %s\n",nombreSSID().c_str());
-  Serial.printf("IP: %s\n", WiFi.localIP().toString().c_str());
-  Serial.printf("Potencia: %s\n",String(WiFi.RSSI()).c_str());
-  Serial.printf("-----------------------------------------------\n");   
+  Traza.mensaje("-------------------WiFi info-------------------\n");
+  Traza.mensaje("SSID: %s\n",nombreSSID().c_str());
+  Traza.mensaje("IP: %s\n", WiFi.localIP().toString().c_str());
+  Traza.mensaje("Potencia: %s\n",String(WiFi.RSSI()).c_str());
+  Traza.mensaje("-----------------------------------------------\n");   
       
-  Serial.printf("-----------------Hardware info-----------------\n");
-  Serial.printf("FreeHeap: %i\n",ESP.getFreeHeap());
-#ifdef ESP32
-  Serial.printf("ChipId: %i\n",ESP.getChipRevision());
-#else
-  Serial.printf("ChipId: %i\n",ESP.getChipId());
-#endif
-  Serial.printf("SdkVersion: %s\n",ESP.getSdkVersion());
-  Serial.printf("CpuFreqMHz: %i\n",ESP.getCpuFreqMHz());
+  Traza.mensaje("-----------------Hardware info-----------------\n");
+  Traza.mensaje("FreeHeap: %i\n",ESP.getFreeHeap());
+  Traza.mensaje("ChipId: %i\n",ESP.getChipRevision());
+  Traza.mensaje("SdkVersion: %s\n",ESP.getSdkVersion());
+  Traza.mensaje("CpuFreqMHz: %i\n",ESP.getCpuFreqMHz());
       //gets the size of the flash as set by the compiler
-  Serial.printf("FlashChipSize: %i\n",ESP.getFlashChipSize());
-  Serial.printf("FlashChipSpeed: %i\n",ESP.getFlashChipSpeed());
+  Traza.mensaje("FlashChipSize: %i\n",ESP.getFlashChipSize());
+  Traza.mensaje("FlashChipSpeed: %i\n",ESP.getFlashChipSpeed());
 
-#ifdef ESP8266      
-  Serial.printf("Vcc: %i\n",ESP.getVcc());
-  Serial.printf("CoreVersion: %s\n",ESP.getCoreVersion().c_str());
-  Serial.printf("FullVersion: %s\n",ESP.getFullVersion().c_str());
-  Serial.printf("BootVersion: %i\n",ESP.getBootVersion());
-  Serial.printf("BootMode: %i\n",ESP.getBootMode());
-  Serial.printf("FlashChipId: %i\n",ESP.getFlashChipId());
-      //gets the actual chip size based on the flash id
-  Serial.printf("FlashChipRealSize: %i\n",ESP.getFlashChipRealSize());     
-  Serial.printf("FlashChipSizeByChipId: %i\n",ESP.getFlashChipSizeByChipId()); 
-#endif  
-  Serial.printf("-----------------------------------------------\n");
+  Traza.mensaje("-----------------------------------------------\n");
   }  
 
 void func_comando_flist(int iParametro, char* sParametro, float fParametro)//"fexist")
@@ -381,120 +366,98 @@ void func_comando_flist(int iParametro, char* sParametro, float fParametro)//"fe
   if(listaFicheros(contenido)) 
     {
     contenido.replace("|","\n");
-    Serial.printf("Contendio del sistema de ficheros:\n%s\n",contenido.c_str());
+    Traza.mensaje("Contendio del sistema de ficheros:\n%s\n",contenido.c_str());
     }
-  else Serial.printf("Ha habido un problema.....\n");
+  else Traza.mensaje("Ha habido un problema.....\n");
   }
 
 void func_comando_fexist(int iParametro, char* sParametro, float fParametro)//"fexist")
   {
-  if (sParametro=="") Serial.println("Es necesario indicar un nombre de fichero");
+  if (sParametro=="") Traza.mensaje("Es necesario indicar un nombre de fichero\n");
   else
     {
-    if(SPIFFS.exists(sParametro)) Serial.printf("El fichero %s existe.\n",sParametro);
-    else Serial.printf("NO existe el fichero %s.\n",sParametro);
+    if(SPIFFS.exists(sParametro)) Traza.mensaje("El fichero %s existe.\n",sParametro);
+    else Traza.mensaje("NO existe el fichero %s.\n",sParametro);
     }
   }
-
-#ifdef ESP8266
-void func_comando_finfo(int iParametro, char* sParametro, float fParametro)//"finfo")
-  {
-  FSInfo fs_info;
-  if(SPIFFS.info(fs_info)) 
-    {
-    /*        
-     struct FSInfo {
-        size_t totalBytes;
-        size_t usedBytes;
-        size_t blockSize;
-        size_t pageSize;
-        size_t maxOpenFiles;
-        size_t maxPathLength;
-    };
-     */
-    Serial.printf("totalBytes: %i\nusedBytes: %i\nblockSize: %i\npageSize: %i\nmaxOpenFiles: %i\nmaxPathLength: %i\n",fs_info.totalBytes, fs_info.usedBytes ,fs_info.blockSize ,fs_info.pageSize ,fs_info.maxOpenFiles ,fs_info.maxPathLength);
-    }
-  else Serial.println("Error al leer info");  
-  }
-#endif
 
 void func_comando_fopen(int iParametro, char* sParametro, float fParametro)//"fopen")
   {
-  if (sParametro=="") Serial.println("Es necesario indicar un nombre de fichero");
+  if (sParametro=="") Traza.mensaje("Es necesario indicar un nombre de fichero\n");
   else
     {
     File f = SPIFFS.open(sParametro, "r");
     if (f)
       { 
-      Serial.println("Fichero abierto");
+      Traza.mensaje("Fichero abierto\n");
       size_t tamano_fichero=f.size();
-      Serial.printf("El fichero tiene un tamaño de %i bytes.\n",tamano_fichero);
+      Traza.mensaje("El fichero tiene un tamaño de %i bytes.\n",tamano_fichero);
       char buff[tamano_fichero+1];
       f.readBytes(buff,tamano_fichero);
       buff[tamano_fichero+1]=0;
-      Serial.printf("El contenido del fichero es:\n******************************************\n%s\n******************************************\n",buff);
+      Traza.mensaje("El contenido del fichero es:\n******************************************\n%s\n******************************************\n",buff);
       f.close();
       }
-    else Serial.printf("Error al abrir el fichero %s.\n", sParametro);
+    else Traza.mensaje("Error al abrir el fichero %s.\n", sParametro);
     } 
   } 
 
 void func_comando_fremove(int iParametro, char* sParametro, float fParametro)//"fremove")
   {
-  if (sParametro=="") Serial.println("Es necesario indicar un nombre de fichero");
+  if (sParametro=="") Traza.mensaje("Es necesario indicar un nombre de fichero\n");
   else
     { 
-    if (SPIFFS.remove(sParametro)) Serial.printf("Fichero %s borrado\n",sParametro);
-    else Serial.printf("Error al borrar el fichero%s\n",sParametro);
+    if (SPIFFS.remove(sParametro)) Traza.mensaje("Fichero %s borrado\n",sParametro);
+    else Traza.mensaje("Error al borrar el fichero%s\n",sParametro);
     } 
  }
 
 void func_comando_format(int iParametro, char* sParametro, float fParametro)//"format")
   {     
-  if (formatearFS()) Serial.println("Sistema de ficheros formateado");
-  else Serial.println("Error al formatear el sistema de ficheros");
+  if (formatearFS()) Traza.mensaje("Sistema de ficheros formateado\n");
+  else Traza.mensaje("Error al formatear el sistema de ficheros\n");
   } 
 
 void func_comando_hora(int iParametro, char* sParametro, float fParametro)//"hora"    
   {
-  Serial.printf("La hora es %i\n",hora());
+  Traza.mensaje("La hora es %i\n",hora());
   }
   
 void func_comando_minuto(int iParametro, char* sParametro, float fParametro)//"minuto"    
   {
-  Serial.printf("Los minutos son %i\n",minuto());
+  Traza.mensaje("Los minutos son %i\n",minuto());
   }
   
 void func_comando_segundo(int iParametro, char* sParametro, float fParametro)//"segundo"
   {
-  Serial.printf("Los segundos son %i\n",segundo());
+  Traza.mensaje("Los segundos son %i\n",segundo());
   }
 
 void func_comando_reloj(int iParametro, char* sParametro, float fParametro)//"reloj") 
   {
   imprimeDatosReloj();  
-  if(cambioHorario()==1) Serial.println("Horario de verano");
-  else Serial.println("Horario de invierno");
+  if(cambioHorario()==1) Traza.mensaje("Horario de verano\n");
+  else Traza.mensaje("Horario de invierno\n");
   } 
   
 void func_comando_echo(int iParametro, char* sParametro, float fParametro)//"echo") 
   {
-  Serial.printf("echo; %s\n",sParametro);
+  Traza.mensaje("echo; %s\n",sParametro);
   }
 
 void func_comando_debug(int iParametro, char* sParametro, float fParametro)//"debug")
   {
   ++debugGlobal=debugGlobal % 2;
-  if (debugGlobal) Serial.println("debugGlobal esta on");
-  else Serial.println("debugGlobal esta off");
+  if (debugGlobal) Traza.mensaje("debugGlobal esta on\n");
+  else Traza.mensaje("debugGlobal esta off\n");
   }
 
 void func_comando_ES(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  Serial.println("Entradas");  
-  for(int8_t i=0;i<MAX_ENTRADAS;i++) Serial.printf("%i: nombre: %s | configurada: %i | estado: %i | tipo: %s | pin: %i\n",i,nombreEntrada(i).c_str(),entradaConfigurada(i),estadoEntrada(i),tipoEntrada(i).c_str(),pinEntrada(i));
-  Serial.println("Salidas");  
-  for(int8_t i=0;i<MAX_SALIDAS;i++) Serial.printf("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i | modo: %i | controlador: %i | ancho pulso: %i | fin pulso: %i\n",i,nombreSalida(i).c_str(),releConfigurado(i),estadoRele(i),inicioSalida(i),pinSalida(i),modoSalida(i),controladorSalida(i),anchoPulsoSalida(i),finPulsoSalida(i));  
+  Traza.mensaje("Entradas\n");
+  for(int8_t i=0;i<MAX_ENTRADAS;i++) Traza.mensaje("%i: nombre: %s | configurada: %i | estado: %i | tipo: %s | pin: %i\n",i,nombreEntrada(i).c_str(),entradaConfigurada(i),estadoEntrada(i),tipoEntrada(i).c_str(),pinEntrada(i));
+  Traza.mensaje("Salidas\n");
+  for(int8_t i=0;i<MAX_SALIDAS;i++) Traza.mensaje("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i | modo: %i | controlador: %i | ancho pulso: %i | fin pulso: %i\n",i,nombreSalida(i).c_str(),releConfigurado(i),estadoRele(i),inicioSalida(i),pinSalida(i),modoSalida(i),controladorSalida(i),anchoPulsoSalida(i),finPulsoSalida(i));  
   } 
 
 void func_comando_actSec(int iParametro, char* sParametro, float fParametro)//"debug")
@@ -509,43 +472,52 @@ void func_comando_desSec(int iParametro, char* sParametro, float fParametro)//"d
   
 void func_comando_estSec(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  if(estadoSecuenciador()) Serial.println("Secuenciador activado");
-  else Serial.println("Secuenciador desactivado");
+  if(estadoSecuenciador()) Traza.mensaje("Secuenciador activado\n");
+  else Traza.mensaje("Secuenciador desactivado\n");
 
-  Serial.printf("Hay %i planes definidos\n",getNumPlanes());
+  Traza.mensaje("Hay %i planes definidos\n",getNumPlanes());
   }   
 
 void func_comando_MQTTConfig(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  Serial.printf("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nIP Puerto del broker: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\nWill topic: %s\nWill msg: %s\nCelan session: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),puertoBroker,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),publicarEntradas,publicarSalidas,(topicRoot+"/"+String(WILL_TOPIC)).c_str(),String(WILL_MSG).c_str(), CLEAN_SESSION);
+  Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nIP Puerto del broker: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\nWill topic: %s\nWill msg: %s\nCelan session: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),puertoBroker,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),publicarEntradas,publicarSalidas,(topicRoot+"/"+String(WILL_TOPIC)).c_str(),String(WILL_MSG).c_str(), CLEAN_SESSION);
   }  
 
 void func_comando_Salidas(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  Serial.printf("%s\n",generaJsonEstadoSalidas().c_str());
+  Traza.mensaje("%s\n",generaJsonEstadoSalidas().c_str());
   }  
 
 void func_comando_Entradas(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  Serial.printf("%s\n",generaJsonEstadoEntradas().c_str());
+  Traza.mensaje("%s\n",generaJsonEstadoEntradas().c_str());
   }    
 
-#ifdef ESP32  
 void func_comando_GHN(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  Serial.printf("Google Home Notifier:\n Nombre del equipo: %s | Idioma: %s | Activo: %i\n",nombreEquipo.c_str(),idioma.c_str(), activaGoogleHomeNotifier);
+  Traza.mensaje("Google Home Notifier:\n Nombre del equipo: %s | Idioma: %s | Activo: %i\n",nombreEquipo.c_str(),idioma.c_str(), activaGoogleHomeNotifier);
   }    
-#endif
 
 void func_comando_debugMaquinaEstados(int iParametro, char* sParametro, float fParametro)//"debug")
   {
   debugMaquinaEstados=!debugMaquinaEstados;
-  if (debugMaquinaEstados) Serial.println("El debug de la maquina de estados esta on");
-  else Serial.println("El debug de la maquina de estados esta off");
+  if (debugMaquinaEstados) Traza.mensaje("El debug de la maquina de estados esta on\n");
+  else Traza.mensaje("El debug de la maquina de estados esta off\n");
   }  
 
 void func_comando_compruebaConfiguracion(int iParametro, char* sParametro, float fParametro)//"debug")
   {
   compruebaConfiguracion(0);
   }  
+
+  void func_comando_setPWM(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  setValorPWM(0,iParametro);
+  Serial.printf("valor: %i\n",getValorPWM(0));
+  }  
+
+void func_comando_getPWM(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  Serial.printf("valor: %i\n",getValorPWM(0));
+  }
 /***************************** FIN funciones para comandos ******************************************/ 

@@ -30,12 +30,12 @@ void gestionaOTA(void)
 
 void inicioOTA(void)
   {
-  Serial.println("Actualizacion OTA");
+  Traza.mensaje("Actualizacion OTA\n");
   }
   
 void finOTA(void)
   {
-  Serial.println("Fin actualizacion");
+  Traza.mensaje("Fin actualizacion\n");
   }
 
 void progresoOTA(unsigned int progress, unsigned int total)
@@ -43,18 +43,18 @@ void progresoOTA(unsigned int progress, unsigned int total)
   String cad="";
   float avance=100*(float)progress/total;
 
-  Serial.printf("actualizacion OTA en progreso: %5.1f %%\r",avance);
+  Traza.mensaje("actualizacion OTA en progreso: %5.1f %%\r",avance);
   }
 
 void erroresOTA(ota_error_t error)
   {
-  Serial.printf("Error en actualizacion OTA ");    Serial.printf("Error[%u]: ", error);
+  Traza.mensaje("Error en actualizacion OTA ");    Traza.mensaje("Error[%u]: ", error);
   
-  if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-  else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-  else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-  else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-  else if (error == OTA_END_ERROR) Serial.println("End Failed");
+  if (error == OTA_AUTH_ERROR) Traza.mensaje("Auth Failed\n");
+  else if (error == OTA_BEGIN_ERROR) Traza.mensaje("Begin Failed\n");
+  else if (error == OTA_CONNECT_ERROR) Traza.mensaje("Connect Failed\n");
+  else if (error == OTA_RECEIVE_ERROR) Traza.mensaje("Receive Failed\n");
+  else if (error == OTA_END_ERROR) Traza.mensaje("End Failed\n");
   }
 
  boolean inicializaOTA(boolean debug)

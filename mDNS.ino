@@ -1,9 +1,5 @@
 /*
-#ifdef ESP32
-  #include <ESPmDNS.h>
-#else
-  #include <ESP8266mDNS.h>;
-#endif
+#include <ESPmDNS.h>
 
 boolean inicializamDNS(const char *nombre)
   {  
@@ -13,12 +9,12 @@ boolean inicializamDNS(const char *nombre)
   
   if (MDNS.begin(mDNSnombre.c_str()))
     {
-    Serial.printf("mDNS iniciado. Nombre del dispositivo: %s\n",nombre);
+    Traza.mensaje("mDNS iniciado. Nombre del dispositivo: %s\n",nombre);
     MDNS.addService("_http", "_tcp", 80);
 
   	return true;    
     }
-  else Serial.printf("Error al iniciar mDNS\n");
+  else Traza.mensaje("Error al iniciar mDNS\n");
 
 	return false;    
   }

@@ -5,9 +5,7 @@
 /*                                              */
 /************************************************/
 #include <FS.h>     //this needs to be first, or it all crashes and burns...
-#ifdef ESP32
 #include <SPIFFS.h> //para el ESP32
-#endif
 
 #ifndef FILE_APPEND
 #define FILE_APPEND "a"
@@ -22,13 +20,9 @@
 boolean inicializaFicheros(int debug)
 {
   //inicializo el sistema de ficheros
-#ifdef ESP32
   if (!SPIFFS.begin(true)) 
-#else
-  if (!SPIFFS.begin()) 
-#endif
     {
-    Serial.println("No se puede inicializar el sistema de ficheros");
+    Traza.mensaje("No se puede inicializar el sistema de ficheros\n");
     return (false);
     }
   return (true);
@@ -64,16 +58,16 @@ boolean leeFichero(String nombre, String &contenido)
   {
   boolean leido=false;
   
-  Serial.println("Inicio de lectura de fichero " + nombre);
+  Traza.mensaje("Inicio de lectura de fichero %s\n",nombre.c_str());
 
   if (SPIFFS.exists(nombre)) 
     {
     //file exists, reading and loading
-    Serial.printf("Encontrado fichero de configuracion %s.\n",nombre.c_str());
+    Traza.mensaje("Encontrado fichero de configuracion %s.\n",nombre.c_str());
     File configFile = SPIFFS.open(nombre, "r");
     if (configFile) 
       {
-      Serial.printf("Abierto fichero de configuracion %s.\n",configFile.name());
+      Traza.mensaje("Abierto fichero de configuracion %s.\n",configFile.name());
       size_t size = configFile.size();
 
       // Allocate a buffer to store contents of the file.
@@ -84,16 +78,16 @@ boolean leeFichero(String nombre, String &contenido)
       buff[size]=0;//pongo el fin de cadena
         
       contenido=String(buff);
-      Serial.printf("Contenido del fichero: #%s#\n",contenido.c_str());
+      Traza.mensaje("Contenido del fichero: #%s#\n",contenido.c_str());
       free(buff);
       leido=true;
         
       configFile.close();//cierro el fichero
-      Serial.println("Cierro el fichero");
+      Traza.mensaje("Cierro el fichero\n");
       }//la de abrir el fichero de configuracion del WiFi
-      else Serial.println("Fichero no se puede abrir");
+      else Traza.mensaje("Fichero no se puede abrir\n");
     }//la de existe fichero
-    else Serial.println("Fichero no existe");
+    else Traza.mensaje("Fichero no existe\n");
   
   return leido;
   }
@@ -111,30 +105,27 @@ boolean salvaFichero(String nombreFichero, String nombreFicheroBak, String conte
     {
     if(nombreFicheroBak!="")
       {
-      Serial.printf("El fichero %s ya existe, se copiara con el nombre %s.\n",nombreFichero.c_str(),nombreFicheroBak.c_str());
+      Traza.mensaje("El fichero %s ya existe, se copiara con el nombre %s.\n",nombreFichero.c_str(),nombreFicheroBak.c_str());
         
       if(SPIFFS.exists(nombreFicheroBak.c_str())) SPIFFS.remove(nombreFicheroBak.c_str());  
       SPIFFS.rename(nombreFichero.c_str(),nombreFicheroBak.c_str());  
       }
-    else Serial.printf("El fichero %s ya existe, sera sobreescrito.\n",nombreFichero.c_str());
+    else Traza.mensaje("El fichero %s ya existe, sera sobreescrito.\n",nombreFichero.c_str());
     }
 
-  Serial.print("Nombre fichero: ");
-  Serial.println(nombreFichero.c_str());
-  Serial.print("Contenido fichero: ");
-  Serial.println(contenidoFichero.c_str());
+  Traza.mensaje("Nombre fichero: %s\nContenido fichero: %s\n",nombreFichero.c_str(),contenidoFichero.c_str());
    
   File newFile = SPIFFS.open(nombreFichero.c_str(), FILE_WRITE);//abro el fichero, si existe lo borra
   if (newFile) 
     {
-    Serial.printf("Abierto fichero %s.\nGuardo contenido:\n#%s#\n",newFile.name(),contenidoFichero.c_str());
+    Traza.mensaje("Abierto fichero %s.\nGuardo contenido:\n#%s#\n",newFile.name(),contenidoFichero.c_str());
   
     newFile.print(contenidoFichero);
     newFile.close();//cierro el fichero
-    Serial.println("Cierro el fichero");
+    Traza.mensaje("Cierro el fichero\n");
     salvado=true;
     }
-  else Serial.println("El fichero no se pudo abrir para escritura.\n");
+  else Traza.mensaje("El fichero no se pudo abrir para escritura.\n");
       
   return salvado;
   }
@@ -147,25 +138,19 @@ boolean anadeFichero(String nombreFichero, String contenidoFichero,int debug=0)
   {
   boolean salvado=false;
 
-  if(debug==1)
-    {
-    Serial.print("Nombre fichero: ");
-    Serial.println(nombreFichero.c_str());
-    Serial.print("Contenido fichero: ");
-    Serial.println(contenidoFichero.c_str());
-    }
+  if(debug==1) Traza.mensaje("Nombre fichero: %s\nContenido fichero: %s\n",nombreFichero.c_str(),contenidoFichero.c_str());
     
   File newFile = SPIFFS.open(nombreFichero.c_str(), FILE_APPEND);//abro el fichero, si existe añade
   if (newFile) 
     {
-    if(debug==1) Serial.printf("Abierto fichero %s.\nGuardo contenido:\n#%s#\n",newFile.name(),contenidoFichero.c_str());
+    if(debug==1) Traza.mensaje("Abierto fichero %s.\nGuardo contenido:\n#%s#\n",newFile.name(),contenidoFichero.c_str());
   
     newFile.print(contenidoFichero);
     newFile.close();//cierro el fichero
-    if(debug==1) Serial.println("Cierro el fichero");
+    if(debug==1) Traza.mensaje("Cierro el fichero\n");
     salvado=true;
     }
-  else Serial.println("El fichero no se pudo abrir para escritura.\n");
+  else Traza.mensaje("El fichero no se pudo abrir para escritura.\n");
       
   return salvado;
   }
@@ -178,15 +163,15 @@ boolean borraFichero(String nombreFichero)
   boolean borrado=false;
 
   //file exists, reading and loading
-  if(!SPIFFS.exists(nombreFichero)) Serial.println("El fichero " + nombreFichero + " no existe.");
+  if(!SPIFFS.exists(nombreFichero)) Traza.mensaje("El fichero %s no existe.\n", nombreFichero.c_str());
   else
     {
     if (SPIFFS.remove(nombreFichero)) 
       {
       borrado=true;
-      Serial.println("El fichero " + nombreFichero + " ha sido borrado.");
+      Traza.mensaje("El fichero %s ha sido borrado.\n", nombreFichero.c_str());
       }
-    else Serial.println("No se pudo borrar el fichero " + nombreFichero + ".");
+    else Traza.mensaje("No se pudo borrar el fichero %s .\n", nombreFichero.c_str());
     }  
 
   return borrado;
@@ -201,31 +186,16 @@ boolean listaFicheros(String &contenido)
   {   
   contenido="";
 
-#ifdef ESP32
   File root = SPIFFS.open("/");
   File file = root.openNextFile();
  
   while(file)
     {
-    //Serial.printf("FILE: %s\n",String(file.name()).c_str());
-    //Serial.println(file.name());
-
     contenido += String(file.name());
     contenido += SEPARADOR;
       
     file = root.openNextFile();
-#else
-  Dir dir = SPIFFS.openDir("/");
-  while (dir.next()) 
-    {
-    Serial.print("FILE: ");
-    Serial.println(dir.fileName());
-
-    contenido += String(dir.fileName());
-    contenido += SEPARADOR;
-#endif    
-    }
-    
+    }   
   return (true);
   }  
 

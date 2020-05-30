@@ -79,11 +79,11 @@ void inicializaReloj(void)
   
   if (getLocalTime(&timeinfo, 10000))  // wait up to 10sec to sync
     {
-    Serial.println(&timeinfo, "Time set: %B %d %Y %H:%M:%S (%A)");
+    Traza.mensaje("Time set: %i/%i/%i - %i:%i:%i (%A)\n",timeinfo.tm_mday,timeinfo.tm_mon,timeinfo.tm_year+1900,timeinfo.tm_hour,timeinfo.tm_min,timeinfo.tm_sec);
     } 
   else 
     {
-    Serial.println("No se pudo inicializar el reloj por SNTP");
+    Traza.mensaje("No se pudo inicializar el reloj por SNTP\n");
     }    
   }
   
@@ -117,8 +117,8 @@ int8_t diaSemana(void)
 void imprimeDatosReloj(void)
   {
   getLocalTime(&timeinfo);
-  Serial.printf("Fecha: %02i-%02i-%02i Hora: %02i:%02i:%02i\n",timeinfo.tm_mday,timeinfo.tm_mon+1,timeinfo.tm_year+1900,timeinfo.tm_hour,timeinfo.tm_min,timeinfo.tm_sec);    
-  Serial.printf("Día de la semana (Hoy): %s\n", Semana[timeinfo.tm_wday].c_str());
+  Traza.mensaje("Fecha: %02i-%02i-%02i Hora: %02i:%02i:%02i\n",timeinfo.tm_mday,timeinfo.tm_mon+1,timeinfo.tm_year+1900,timeinfo.tm_hour,timeinfo.tm_min,timeinfo.tm_sec);    
+  Traza.mensaje("Día de la semana (Hoy): %s\n", Semana[timeinfo.tm_wday].c_str());
   }
 
 /***************************************************************/

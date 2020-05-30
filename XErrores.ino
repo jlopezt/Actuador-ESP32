@@ -20,31 +20,31 @@ uint8_t compruebaConfiguracion(uint8_t nivelTraza)
   boolean salvar=false;
   String cad="";
 
-  Serial.printf("Init Verificar errores configuracion---------------------------------------------------\n");
-  Serial.printf("     ficheros--------------------------------------------------------------------------\n");
+  Traza.mensaje("Init Verificar errores configuracion---------------------------------------------------\n");
+  Traza.mensaje("     ficheros--------------------------------------------------------------------------\n");
   salvar=compruebaFicheros();
-  Serial.printf("     GHN-------------------------------------------------------------------------------\n");
+  Traza.mensaje("     GHN-------------------------------------------------------------------------------\n");
   cad=compruebaGHN();
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Serial.printf("     Wifi------------------------------------------------------------------------------\n");
+  Traza.mensaje("     Wifi------------------------------------------------------------------------------\n");
   cad=compruebaWifi(); 
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Serial.printf("     WebServer-------------------------------------------------------------------------\n");
+  Traza.mensaje("     WebServer-------------------------------------------------------------------------\n");
   cad=compruebaWebserver();
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Serial.printf("     MQTT------------------------------------------------------------------------------\n");
+  Traza.mensaje("     MQTT------------------------------------------------------------------------------\n");
   cad=comrpuebaMQTT();
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Serial.printf("     E/S-------------------------------------------------------------------------------\n");
+  Traza.mensaje("     E/S-------------------------------------------------------------------------------\n");
   cad=compruebaES();
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Serial.printf("     Secuenciador----------------------------------------------------------------------\n");
+  Traza.mensaje("     Secuenciador----------------------------------------------------------------------\n");
   cad=compruebaSecuenciador();
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Serial.printf("     MaquinaEstados--------------------------------------------------------------------\n");
+  Traza.mensaje("     MaquinaEstados--------------------------------------------------------------------\n");
   cad=compruebaMaquinaEstados();  
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Serial.printf("Fin Verificar errores configuracion----------------------------------------------------\n");
+  Traza.mensaje("Fin Verificar errores configuracion----------------------------------------------------\n");
 
   return 1;
   }

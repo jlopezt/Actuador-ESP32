@@ -8,7 +8,6 @@
 #define NO_CONECTAR "NO_CONECTAR"
 
 #include <esp8266-google-home-notifier.h>
-//#include "D:\arduino\desarrollos\libraries\esp8266-google-home-notifier\src\esp8266mDNS.h"
 
 /*Variable locale sa este modulo*/
 GoogleHomeNotifier ghn;
@@ -27,22 +26,22 @@ String idioma="";//idioma: idioma del texto a reproducir: es español;en ingles
 void inicializaGHN(void) 
   {
   //recupero datos del fichero de configuracion
-  if (!recuperaDatosGHN(false)) Serial.printf("error al recuperar config de GHN.\nConfiguracion por defecto.\n");
+  if (!recuperaDatosGHN(false)) Traza.mensaje("error al recuperar config de GHN.\nConfiguracion por defecto.\n");
     
   if(activaGoogleHomeNotifier==0 || strcmp(nombreEquipo.c_str(),NO_CONECTAR)==0) //Si se configura copmo nombre de equipo el valor de NO_CONECTAR, no se intenta la conexion
     {
-    Serial.println("Google Home desactivado por configuración.\n");
+    Traza.mensaje("Google Home desactivado por configuración.\n");
     return;
     }
 
-  Serial.println("conectando a Google Home...");
+  Traza.mensaje("conectando a Google Home...\n");
   if (ghn.device((const char*)nombreEquipo.c_str(), (const char*)idioma.c_str()) != true) 
     {
-    Serial.println(ghn.getLastError());
+    Traza.mensaje("%s\n",ghn.getLastError());
     return;
     }
     
-  Serial.printf("Google Home(%s:%i) encontrado\n",ghn.getIPAddress().toString().c_str(),ghn.getPort());
+  Traza.mensaje("Google Home(%s:%i) encontrado\n",ghn.getIPAddress().toString().c_str(),ghn.getPort());
   }
 
 /***************************************************/
@@ -53,7 +52,7 @@ void inicializaGHN(void)
 boolean recuperaDatosGHN(boolean debug)
   {
   String cad="";
-  if (debug) Serial.println("Recupero configuracion de archivo...");
+  if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
 
   nombreEquipo="";
   idioma="";
@@ -61,10 +60,10 @@ boolean recuperaDatosGHN(boolean debug)
   if(!leeFicheroConfig(GHN_CONFIG_FILE, cad))
     {
     //Algo salio mal, confgiguracion por defecto
-    Serial.printf("No existe fichero de configuracion GHN o esta corrupto\n");
+    Traza.mensaje("No existe fichero de configuracion GHN o esta corrupto\n");
     cad="{\"activaGoogleHomeNotifier\": 0,\"nombreEquipo\": \"-----\", \"idioma\": \"es\"}";
-    Serial.printf("Generada configuracion por defecto: \n%s\n",cad.c_str());
-    //if (salvaFichero(GHN_CONFIG_FILE, GHN_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion de GHN creado por defecto\n");
+    Traza.mensaje("Generada configuracion por defecto: \n%s\n",cad.c_str());
+    //if (salvaFichero(GHN_CONFIG_FILE, GHN_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion de GHN creado por defecto\n");
     }
   return parseaConfiguracionGHN(cad);    
   }  
@@ -78,16 +77,16 @@ boolean parseaConfiguracionGHN(String contenido)
   {  
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
-  //json.printTo(Serial);
+
   if (json.success()) 
     {
-    Serial.println("parsed json");
+    Traza.mensaje("parsed json\n");
 //******************************Parte especifica del json a leer********************************
     nombreEquipo=json.get<String>("nombreEquipo");
     idioma=json.get<String>("idioma");
     activaGoogleHomeNotifier=json.get<unsigned int>("activaGoogleHomeNotifier");
 
-    Serial.printf("Configuracion leida:\nactivaGoogleHomeNotifier: %i\nnombreEquipo: [%s]\nidioma: [%s]\n",activaGoogleHomeNotifier,nombreEquipo.c_str(),idioma.c_str());
+    Traza.mensaje("Configuracion leida:\nactivaGoogleHomeNotifier: %i\nnombreEquipo: [%s]\nidioma: [%s]\n",activaGoogleHomeNotifier,nombreEquipo.c_str(),idioma.c_str());
 //************************************************************************************************
     return true;
     }
@@ -108,11 +107,11 @@ boolean enviaNotificacion(char *mensaje)
     
   if (ghn.notify(mensaje) != true) 
     {
-    Serial.println(ghn.getLastError());
+    Traza.mensaje("%s\n",ghn.getLastError());
     return false;
     }
     
-  Serial.println("Done.");
+  Traza.mensaje("Done.\n");
   return true;
   }
 /*********************************************fin funcionalidad*****************************************************************************/

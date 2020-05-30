@@ -95,7 +95,7 @@ void inicializaMaquinaEstados(void)
     }
     
   //leo la configuracion del fichero
-  if(!recuperaDatosMaquinaEstados(debugGlobal)) Serial.println("Configuracion de la maquina de estados por defecto");
+  if(!recuperaDatosMaquinaEstados(debugGlobal)) Traza.mensaje("Configuracion de la maquina de estados por defecto.\n");
   else
     { 
       
@@ -110,15 +110,15 @@ boolean recuperaDatosMaquinaEstados(int debug)
   {
   String cad="";
 
-  if (debug) Serial.println("Recupero configuracion de archivo...");
+  if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
 
   if(!leeFicheroConfig(MAQUINAESTADOS_CONFIG_FILE, cad)) 
     {
     //Confgiguracion por defecto
-    Serial.printf("No existe fichero de configuracion de la maquina de estados\n");    
+    Traza.mensaje("No existe fichero de configuracion de la maquina de estados\n");    
     cad="{\"Estados\":[],\"Transiciones\":[] }";
     //salvo la config por defecto
-    //if(salvaFicheroConfig(MAQUINAESTADOS_CONFIG_FILE, MAQUINAESTADOS_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion de la maquina de estados creado por defecto\n");
+    //if(salvaFicheroConfig(MAQUINAESTADOS_CONFIG_FILE, MAQUINAESTADOS_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion de la maquina de estados creado por defecto\n");
     }      
   return parseaConfiguracionMaqEstados(cad);
   }
@@ -133,10 +133,13 @@ boolean parseaConfiguracionMaqEstados(String contenido)
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
 
-  json.printTo(Serial);
+  String salida;
+  json.printTo(salida);//pinto el json que he leido
+  Traza.mensaje("json creado:\n#%s#\n",salida.c_str());
+  
   if (!json.success()) return false;
 
-  Serial.println("\nparsed json");
+  Traza.mensaje("\nparsed json\n");
 //******************************Parte especifica del json a leer********************************
   if(!json.containsKey("Estados"))  return false; 
   if(!json.containsKey("Transiciones"))  return false; 
@@ -148,16 +151,16 @@ boolean parseaConfiguracionMaqEstados(String contenido)
   numeroEntradas=(E.size()<MAX_ENTRADAS?E.size():MAX_ENTRADAS);
   for(uint8_t i=0;i<numeroEntradas;i++) mapeoEntradas[i]=E[i];   
 
-  Serial.printf("Entradas asociadas a la maquina de estados: %i\n",numeroEntradas);
-  for(uint8_t i=0;i<numeroEntradas;i++) Serial.printf("orden %i | id general %i\n", i,mapeoEntradas[i]);
+  Traza.mensaje("Entradas asociadas a la maquina de estados: %i\n",numeroEntradas);
+  for(uint8_t i=0;i<numeroEntradas;i++) Traza.mensaje("orden %i | id general %i\n", i,mapeoEntradas[i]);
   
   /********************Salidas******************************/
   JsonArray& S = json["Salidas"];
   numeroSalidas=(S.size()<MAX_SALIDAS?S.size():MAX_SALIDAS);
   for(uint8_t i=0;i<numeroSalidas;i++) mapeoSalidas[i]=S[i];   
 
-  Serial.printf("Salidas asociadas a la maquina de estados: %i\n",numeroSalidas);
-  for(uint8_t i=0;i<numeroSalidas;i++) Serial.printf("orden %i | id general %i\n", i,mapeoSalidas[i]);
+  Traza.mensaje("Salidas asociadas a la maquina de estados: %i\n",numeroSalidas);
+  for(uint8_t i=0;i<numeroSalidas;i++) Traza.mensaje("orden %i | id general %i\n", i,mapeoSalidas[i]);
   
   /********************Estados******************************/
   JsonArray& Estados = json["Estados"];
@@ -174,25 +177,25 @@ boolean parseaConfiguracionMaqEstados(String contenido)
     num_salidas=(Salidas.size()<MAX_SALIDAS?Salidas.size():MAX_SALIDAS);
     if(num_salidas!=numeroSalidas) 
       {
-      Serial.printf("Numero de salidas incorrecto en estado %i. definidas %i, esperadas %i\n",i,num_salidas,numeroSalidas);
+      Traza.mensaje("Numero de salidas incorrecto en estado %i. definidas %i, esperadas %i\n",i,num_salidas,numeroSalidas);
       return false;
       }
     //////EL ID NO VALE PARA NADA, LA REFERENCIA ES POSICIONAL. QUITAR ID/////////
     for(int8_t s=0;s<num_salidas;s++) estados[i].valorSalidas[s]=Salidas.get<int>(s);//Salidas[s]["valor"];
     }
 
-  Serial.printf("*************************\nEstados:\n"); 
-  Serial.printf("Se han definido %i estados\n",numeroEstados);
+  Traza.mensaje("*************************\nEstados:\n"); 
+  Traza.mensaje("Se han definido %i estados\n",numeroEstados);
   for(int8_t i=0;i<numeroEstados;i++) 
     {
-    Serial.printf("%01i: id= %i| nombre: %s\n",i,estados[i].id,estados[i].nombre.c_str());
-    Serial.printf("salidas:\n");
+    Traza.mensaje("%01i: id= %i| nombre: %s\n",i,estados[i].id,estados[i].nombre.c_str());
+    Traza.mensaje("salidas:\n");
     for(int8_t s=0;s<numeroSalidas;s++) 
       {
-      Serial.printf("salida[%02i]: valor: %i\n",s,estados[i].valorSalidas[s]);
+      Traza.mensaje("salida[%02i]: valor: %i\n",s,estados[i].valorSalidas[s]);
       }
     }
-  Serial.printf("*************************\n");  
+  Traza.mensaje("*************************\n");  
   
   /********************Transiciones******************************/
   JsonArray& Transiciones = json["Transiciones"];
@@ -209,25 +212,25 @@ boolean parseaConfiguracionMaqEstados(String contenido)
     num_entradas=(Entradas.size()<MAX_ENTRADAS?Entradas.size():MAX_ENTRADAS);
     if(num_entradas!=numeroEntradas) 
       {
-      Serial.printf("Numero de entradas incorrecto en estado %i. definidas %i, esperadas %i\n",i,num_entradas,numeroEntradas);
+      Traza.mensaje("Numero de entradas incorrecto en estado %i. definidas %i, esperadas %i\n",i,num_entradas,numeroEntradas);
       return false;
       }
     
     for(int8_t e=0;e<num_entradas;e++) transiciones[i].valorEntradas[e]=Entradas.get<int>(e);//atoi(Entradas[e]["valor"]);//Puede ser -1, significa que no importa el valor
     }
 
-  Serial.printf("*************************\nTransiciones:\n"); 
-  Serial.printf("Se han definido %i transiciones\n",numeroTransiciones);
+  Traza.mensaje("*************************\nTransiciones:\n"); 
+  Traza.mensaje("Se han definido %i transiciones\n",numeroTransiciones);
   for(int8_t i=0;i<numeroTransiciones;i++) 
     {
-    Serial.printf("%01i: estado inicial= %i| estado final: %i\n",i,transiciones[i].estadoInicial,transiciones[i].estadoFinal);
-    Serial.printf("entradas:\n");
+    Traza.mensaje("%01i: estado inicial= %i| estado final: %i\n",i,transiciones[i].estadoInicial,transiciones[i].estadoFinal);
+    Traza.mensaje("entradas:\n");
     for(int8_t e=0;e<numeroEntradas;e++) 
       {
-      Serial.printf("entradas[%02i]: valor: %i\n",e,transiciones[i].valorEntradas[e]);
+      Traza.mensaje("entradas[%02i]: valor: %i\n",e,transiciones[i].valorEntradas[e]);
       }
     }
-  Serial.printf("*************************\n");  
+  Traza.mensaje("*************************\n");  
 //************************************************************************************************
   return true; 
   }
@@ -248,18 +251,18 @@ void actualizaMaquinaEstados(int debug)
 
   if(localDebug) 
     {
-    Serial.printf("Estado inicial: (%i) %s\n",estadoActual,estados[estadoActual].nombre.c_str());
-    Serial.printf("Estado de las entradas:\n");
-    for(uint8_t i=0;i<numeroEntradas;i++) Serial.printf("Entrada %i (dispositivo %i)=> valor %i\n",i, mapeoEntradas[i],entradasActual[i]);
+    Traza.mensaje("Estado inicial: (%i) %s\n",estadoActual,estados[estadoActual].nombre.c_str());
+    Traza.mensaje("Estado de las entradas:\n");
+    for(uint8_t i=0;i<numeroEntradas;i++) Traza.mensaje("Entrada %i (dispositivo %i)=> valor %i\n",i, mapeoEntradas[i],entradasActual[i]);
     }
     
   //busco en las transiciones a que estado debe evolucionar la maquina
   estadoActual=mueveMaquina(estadoActual, entradasActual, localDebug);
 
   //Actualizo las salidas segun el estado actual
-  if(actualizaSalidasMaquinaEstados(estadoActual)!=1) Serial.printf("Error al actualizar las salidas\n");
+  if(actualizaSalidasMaquinaEstados(estadoActual)!=1) Traza.mensaje("Error al actualizar las salidas\n");
 
-  if(localDebug) Serial.printf("Estado actual: (%i) %s\n",estadoActual,estados[estadoActual].nombre.c_str());
+  if(localDebug) Traza.mensaje("Estado actual: (%i) %s\n",estadoActual,estados[estadoActual].nombre.c_str());
   }
 
 /****************************************************/
@@ -273,13 +276,13 @@ uint8_t mueveMaquina(uint8_t estado, int8_t entradasActual[], boolean debug)
     {
     if(transiciones[regla].estadoInicial==estado)//Solo analizo las que tienen como estado inicial el indicado
       {
-      if(debug) Serial.printf("Revisando regla %i\n",regla);
+      if(debug) Traza.mensaje("Revisando regla %i\n",regla);
   
       boolean coinciden=true;  
       for(uint8_t entrada=0;entrada<numeroEntradas;entrada++) 
         {
         if (transiciones[regla].valorEntradas[entrada]!=NO_CONFIGURADO) coinciden=coinciden &&(entradasActual[entrada]==transiciones[regla].valorEntradas[entrada]);
-        if(debug) Serial.printf("Revisando entradas %i de regla %i (valor actual: %i vs valor regla: %i). Resultado %i\n",entrada,regla,entradasActual[entrada],transiciones[regla].valorEntradas[entrada],coinciden);
+        if(debug) Traza.mensaje("Revisando entradas %i de regla %i (valor actual: %i vs valor regla: %i). Resultado %i\n",entrada,regla,entradasActual[entrada],transiciones[regla].valorEntradas[entrada],coinciden);
         }
 
       if(coinciden) return transiciones[regla].estadoFinal;
@@ -294,7 +297,7 @@ uint8_t mueveMaquina(uint8_t estado, int8_t entradasActual[], boolean debug)
 int8_t actualizaSalidasMaquinaEstados(uint8_t estado)
   {
   int8_t retorno=1; //si todo va bien salidaMaquinaEstados devuelve 1, si hay error -1 
-  //Serial.printf("Estado: %s\n",estados[estado].nombre);
+  //Traza.mensaje("Estado: %s\n",estados[estado].nombre);
   for(uint8_t i=0;i<numeroSalidas;i++) 
     {
     if(salidaMaquinaEstados(mapeoSalidas[i], estados[estado].valorSalidas[i])==NO_CONFIGURADO) retorno=0;

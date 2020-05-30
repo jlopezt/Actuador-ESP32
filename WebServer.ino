@@ -20,13 +20,8 @@ Informacion del Hw del sistema http://IP/info
 #define DESACTIVO String("#DDDDDD")
 
 //Includes
-#ifdef ESP32
-  #include <WiFi.h>
-  #include <AsyncTCP.h>
-#elif defined(ESP8266)
-  #include <ESP8266WiFi.h>
-  #include <ESPAsyncTCP.h>
-#endif
+#include <WiFi.h>
+#include <AsyncTCP.h>
 
 #include "ESPAsyncWebServer.h"
 
@@ -98,23 +93,18 @@ void inicializaWebServer(void)
   serverX.on("/borraFichero", HTTP_ANY, handleBorraFichero);  //URI de borrar fichero
   serverX.on("/leeFichero", HTTP_ANY, handleLeeFichero);  //URI de leer fichero
   serverX.on("/manageFichero", HTTP_ANY, handleManageFichero);  //URI de leer fichero  
-#ifdef ESP8266
-  server.on("/infoFS", handleInfoFS);  //URI de info del FS
-#endif
 /*
   serverX.on("/edit.html",  HTTP_POST, [](AsyncWebServerRequest *request) {  // If a POST request is sent to the /edit.html address,
                                            request->send(200, "text/plain", ""); 
                                            }, handleFileUpload);                       // go to 'handleFileUpload'
   */
-#ifdef ESP32  
   serverX.on("/speech", HTTP_ANY, handleSpeechPath);
-#endif  
   
   serverX.onNotFound(handleNotFound);//pagina no encontrada
 
   serverX.begin();
 
-  Serial.printf("Servicio web iniciado en puerto %i\n", PUERTO_WEBSERVER);
+  Traza.mensaje("Servicio web iniciado en puerto %i\n", PUERTO_WEBSERVER);
   }
 /********************************* FIn inicializacion y configuracion ***************************************************************/
 
@@ -192,7 +182,7 @@ void handleRoot(AsyncWebServerRequest *request)
           cad += "<TD colspan=2> | Secuenciador " + String(controladorSalida(i)) + "</TD>\n";
           break;
         case MODO_SEGUIMIENTO:
-          cad += "<TD>Siguiendo a entrada " + String(controladorSalida(i)) + "</TD>\n";
+          cad += "<TD>Siguiendo a la entrada " + nombreEntrada(controladorSalida(i)) + "</TD>\n"; //String(controladorSalida(i)) + "</TD>\n";
           cad += "<td>\n";
           cad += "<form action=\"fuerzaManualSalida\">\n";
           cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
@@ -375,7 +365,10 @@ void handleEstadoSalidas(AsyncWebServerRequest *request)
   cad += "<TD>Configurada</TD>";
   cad += "<TD>Pin</TD>";  
   cad += "<TD>Controlador</TD>";  
+  cad += "<TD>Inicio</TD>";    
   cad += "<TD>Modo</TD>";  
+  cad += "<TD>Tipo</TD>";  
+  cad += "<TD>valor PWM</TD>";      
   cad += "<TD>Ancho del pulso</TD>";  
   cad += "<TD>Inicio del pulso</TD>";  
   cad += "<TD>Fin del pulso</TD>";  
@@ -392,7 +385,10 @@ void handleEstadoSalidas(AsyncWebServerRequest *request)
     cad += "<TD>" + String(releConfigurado(salida)) + "</TD>";
     cad += "<TD>" + String(pinSalida(salida)) + "</TD>";
     cad += "<TD>" + String(controladorSalida(salida)) + "</TD>";
-    cad += "<TD>" + String(modoSalida(salida)) + "</TD>";
+    cad += "<TD>" + String(inicioSalida(salida)) + "</TD>";
+    cad += "<TD>" + String(modoSalidaNombre(salida)) + "</TD>";
+    cad += "<TD>" + String(getTipoNombre(salida)) + "</TD>";
+    cad += "<TD>" + String(getValorPWM(salida)) + "</TD>";
     cad += "<TD>" + String(anchoPulsoSalida(salida)) + "</TD>";
     cad += "<TD>" + String(inicioSalida(salida)) + "</TD>";
     cad += "<TD>" + String(finPulsoSalida(salida)) + "</TD>";
@@ -656,11 +652,7 @@ void handleInfo(AsyncWebServerRequest *request)
 
   cad+= "<BR>-----------------Uptime---------------------<BR>";
   char tempcad[20]="";
-#ifdef ESP32
   sprintf(tempcad,"%lu", (esp_timer_get_time()/(unsigned long)1000000)); //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años  
-#else
-  sprintf(tempcad,"%lu", (millis()/(unsigned long)1000000)); //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años  
-#endif  
   cad += "Uptime: " + String(tempcad) + " segundos"; //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años
   cad += "<BR>-----------------------------------------------<BR>";  
 
@@ -705,11 +697,7 @@ void handleInfo(AsyncWebServerRequest *request)
   cad += "<BR>-----------------Hardware info-----------------<BR>";
   cad += "FreeHeap: " + String(ESP.getFreeHeap());
   cad += "<BR>";
-#ifdef ESP32
   cad += "ChipId: " + String(ESP.getChipRevision());
-#else
-  cad += "ChipId: " + String(ESP.getChipId());
-#endif  
   cad += "<BR>";  
   cad += "SdkVersion: " + String(ESP.getSdkVersion());
   cad += "<BR>";  
@@ -720,60 +708,8 @@ void handleInfo(AsyncWebServerRequest *request)
   cad += "<BR>";  
   cad += "FlashChipSpeed: " + String(ESP.getFlashChipSpeed());
   cad += "<BR>";  
-#ifdef ESP8266  
-  cad += "Vcc: " + String(ESP.getVcc());
-  cad += "<BR>";  
-  cad += "CoreVersion: " + ESP.getCoreVersion();
-  cad += "<BR>";  
-  cad += "FullVersion: " + ESP.getFullVersion();
-  cad += "<BR>";  
-  cad += "BootVersion: " + String(ESP.getBootVersion());
-  cad += "<BR>";  
-  cad += "BootMode: " + String(ESP.getBootMode());
-  cad += "<BR>";  
-  cad += "FlashChipId: " + String(ESP.getFlashChipId());
-  cad += "<BR>";  
-     //gets the actual chip size based on the flash id
-  cad += "FlashChipRealSize: " + String(ESP.getFlashChipRealSize());
-  cad += "<BR>";  
-     //FlashMode_t ESP.getFlashChipMode());
-  cad += "FlashChipSizeByChipId: " + String(ESP.getFlashChipSizeByChipId());  
-  cad += "<BR>";  
-#endif  
   cad += "-----------------------------------------------<BR>";  
-
-#ifdef ESP8266
-  cad += "<BR>-----------------info fileSystem-----------------<BR>";   
-  FSInfo fs_info;
-  if(SPIFFS.info(fs_info)) 
-    {
-    /*        
-     struct FSInfo {
-        size_t totalBytes;
-        size_t usedBytes;
-        size_t blockSize;
-        size_t pageSize;
-        size_t maxOpenFiles;
-        size_t maxPathLength;
-    };
-     */
-    cad += "totalBytes: ";
-    cad += fs_info.totalBytes;
-    cad += "<BR>usedBytes: ";
-    cad += fs_info.usedBytes;
-    cad += "<BR>blockSize: ";
-    cad += fs_info.blockSize;
-    cad += "<BR>pageSize: ";
-    cad += fs_info.pageSize;    
-    cad += "<BR>maxOpenFiles: ";
-    cad += fs_info.maxOpenFiles;
-    cad += "<BR>maxPathLength: ";
-    cad += fs_info.maxPathLength;
-    }
-  else cad += "Error al leer info";
-  cad += "<BR>-----------------------------------------------<BR>"; 
-#endif
-  
+ 
   cad += pieHTML;
   request->send(200, "text/html", cad);     
   }
@@ -879,59 +815,6 @@ void handleLeeFichero(AsyncWebServerRequest *request)
   request->send(200, "text/html", cad); 
   }
 
-#ifdef ESP8266
-/*********************************************/
-/*                                           */
-/*  Lee info del FS                          */
-/*  peticion HTTP                            */ 
-/*                                           */
-/*********************************************/  
-void handleInfoFS(void)
-  {
-  String cad="";
-
-  cad += cabeceraHTML;
-  
-  //inicializo el sistema de ficheros
-  if (SPIFFS.begin()) 
-    {
-    Serial.println("---------------------------------------------------------------\nmounted file system");  
-    FSInfo fs_info;
-    if(SPIFFS.info(fs_info)) 
-      {
-      /*        
-       struct FSInfo {
-          size_t totalBytes;
-          size_t usedBytes;
-          size_t blockSize;
-          size_t pageSize;
-          size_t maxOpenFiles;
-          size_t maxPathLength;
-      };
-       */
-      cad += "totalBytes: ";
-      cad += fs_info.totalBytes;
-      cad += "<BR>usedBytes: ";
-      cad += fs_info.usedBytes;
-      cad += "<BR>blockSize: ";
-      cad += fs_info.blockSize;
-      cad += "<BR>pageSize: ";
-      cad += fs_info.pageSize;    
-      cad += "<BR>maxOpenFiles: ";
-      cad += fs_info.maxOpenFiles;
-      cad += "<BR>maxPathLength: ";
-      cad += fs_info.maxPathLength;
-      }
-    else cad += "Error al leer info";
-
-    Serial.println("unmounted file system\n---------------------------------------------------------------");
-    }//La de abrir el sistema de ficheros
-
-  cad += pieHTML;
-  server.send(200, "text/html", cad); 
-  }
-#endif
-
 /*********************************************/
 /*                                           */
 /*  Pagina no encontrada                     */
@@ -939,10 +822,10 @@ void handleInfoFS(void)
 /*********************************************/
 void handleNotFound(AsyncWebServerRequest *request)
   {
-  //Serial.printf("URL no encontrada: %s\n",request->url().c_str());  
+  //Traza.mensaje("URL no encontrada: %s\n",request->url().c_str());  
   if(!handleFileRead(request))
     {
-  Serial.printf("No se encontro el fichero en SPIFFS\n");  
+  Traza.mensaje("No se encontro el fichero en SPIFFS\n");  
   String message = "";
 
   message = "<h1>" + nombre_dispositivo + "<br></h1>";
@@ -1045,7 +928,7 @@ void handleListaFicheros(AsyncWebServerRequest *request)
   
   if(listaFicheros(contenido)) 
     {
-    Serial.printf("contenido inicial= %s\n",contenido.c_str());      
+    Traza.mensaje("contenido inicial= %s\n",contenido.c_str());      
     //busco el primer separador
     to=contenido.indexOf(SEPARADOR); 
 
@@ -1106,7 +989,7 @@ bool handleFileRead(AsyncWebServerRequest *request)
   {
   String path=request->url();
   // send the right file to the client (if it exists)
-  Serial.println("handleFileRead: " + path);
+  Traza.mensaje("handleFileRead: %s\n", path.c_str());
   
   if (!path.startsWith("/")) path += "/";
   path = "/www" + path; //busco los ficheros en el SPIFFS en la carpeta www
@@ -1120,14 +1003,13 @@ bool handleFileRead(AsyncWebServerRequest *request)
                                              
     request->send(SPIFFS, path, contentType);
     
-    Serial.printf("\tfichero enviado: %s | contentType: %s\n",path.c_str(),contentType.c_str());
+    Traza.mensaje("\tfichero enviado: %s | contentType: %s\n",path.c_str(),contentType.c_str());
     return true;
     }
-  Serial.println(String("\tfichero no encontrado en SPIFFS: ") + path);   // If the file doesn't exist, return false
+  Traza.mensaje("\tfichero no encontrado en SPIFFS: %s\n", path.c_str());   // If the file doesn't exist, return false
   return false;
   }
 /****************************Google Home Notifier ******************************/
-#ifdef ESP32
 void handleSpeechPath(AsyncWebServerRequest *request) 
   {
   String phrase = request->arg("phrase");
@@ -1140,4 +1022,3 @@ void handleSpeechPath(AsyncWebServerRequest *request)
   if(enviaNotificacion((char*)phrase.c_str())) request->send(200, "text / plain", "OK");
   else request->send(404, "text / plain", "KO");  
   }
-#endif

@@ -59,17 +59,16 @@
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/
+#include <Traza.h>
 #include <ArduinoOTA.h>
 #include <ArduinoJson.h>
-#include <rom/rtc.h> //<esp32/rom/rtc.h>
+#include <rom/rtc.h>
 /***************************** Includes *****************************/
 
 /***************************** variables globales *****************************/
 //Indica si el rele se activa con HIGH o LOW
 int nivelActivo;
-
 hw_timer_t *timer = NULL;//Puntero al timer del watchdog
-
 String nombre_dispositivo;//(NOMBRE_FAMILIA);//Nombre del dispositivo, por defecto el de la familia
 uint16_t vuelta = 0; //MAX_VUELTAS-100; //vueltas de loop
 int debugGlobal=0; //por defecto desabilitado
@@ -96,25 +95,25 @@ void setup()
   configuraLed();
   enciendeLed();
   
-  Serial.printf("\n\n\n");
-  Serial.printf("*************** %s ***************\n",NOMBRE_FAMILIA);
-  Serial.printf("*************** %s ***************\n",VERSION);
-  Serial.println("***************************************************************");
-  Serial.println("*                                                             *");
-  Serial.println("*             Inicio del setup del modulo                     *");
-  Serial.println("*                                                             *");    
-  Serial.println("***************************************************************");
+  Traza.mensaje("\n\n\n");
+  Traza.mensaje("*************** %s ***************\n",NOMBRE_FAMILIA);
+  Traza.mensaje("*************** %s ***************\n",VERSION);
+  Traza.mensaje("***************************************************************\n");
+  Traza.mensaje("*                                                             *\n");
+  Traza.mensaje("*             Inicio del setup del modulo                     *\n");
+  Traza.mensaje("*                                                             *\n");    
+  Traza.mensaje("***************************************************************\n");
 
-  for(int8_t core=0;core<2;core++) Serial.printf("Motivo del reinicio (%i): %s\n",core,reset_reason(rtc_get_reset_reason(core)));  
+  for(int8_t core=0;core<2;core++) Traza.mensaje("Motivo del reinicio (%i): %s\n",core,reset_reason(rtc_get_reset_reason(core)));  
   
-  Serial.printf("\n\nInit Ficheros ---------------------------------------------------------------------\n");
+  Traza.mensaje("\n\nInit Ficheros ---------------------------------------------------------------------\n");
   //Ficheros - Lo primero para poder leer los demas ficheros de configuracion
   inicializaFicheros(debugGlobal);
 
   //Compruebo si existe candado, si existe la ultima configuracion fue mal
   if(existeFichero(FICHERO_CANDADO)) 
     {
-    Serial.printf("Candado puesto. Configuracion por defecto");
+    Traza.mensaje("Candado puesto. Configuracion por defecto");
     candado=true; 
     debugGlobal=1;
     }
@@ -122,83 +121,86 @@ void setup()
     {
     candado=false;
     //Genera candado
- /*   if(salvaFichero(FICHERO_CANDADO,"","JSD")) Serial.println("Candado creado");
-    else Serial.println("ERROR - No se pudo crear el candado");*/
+ /*   if(salvaFichero(FICHERO_CANDADO,"","JSD")) Traza.mensaje("Candado creado\n");
+    else Traza.mensaje("ERROR - No se pudo crear el candado\n");*/
     }
  
   //Configuracion general
-  Serial.printf("\n\nInit General ---------------------------------------------------------------------\n");
+  Traza.mensaje("\n\nInit General ---------------------------------------------------------------------\n");
   inicializaConfiguracion(debugGlobal);
   parpadeaLed(1);
   
   //Wifi
-  Serial.println("\n\nInit WiFi -----------------------------------------------------------------------\n");
+  Traza.mensaje("\n\nInit WiFi -----------------------------------------------------------------------\n");
   if (inicializaWifi(1))
     {
     parpadeaLed(5,200); 
+    //Traza  
+    Traza.begin(0,serie);
+    Traza.mensaje("Traza iniciada con nivel %i y salida %i\n",Traza.getNivelDebug(),Traza.getMedio());
     /*----------------Inicializaciones que necesitan red-------------*/
     //OTA
-    Serial.println("\n\nInit OTA ------------------------------------------------------------------------\n");
+    Traza.mensaje("\n\nInit OTA ------------------------------------------------------------------------\n");
     inicializaOTA(debugGlobal);
     parpadeaLed(1);
     //SNTP
-    Serial.printf("\n\nInit SNTP ------------------------------------------------------------------------\n");
+    Traza.mensaje("\n\nInit SNTP ------------------------------------------------------------------------\n");
     inicializaReloj();    
     parpadeaLed(2);
     //MQTT
-    Serial.println("\n\nInit MQTT -----------------------------------------------------------------------\n");
+    Traza.mensaje("\n\nInit MQTT -----------------------------------------------------------------------\n");
     inicializaMQTT();
     parpadeaLed(3);
     //WebServer
-    Serial.println("\n\nInit Web ------------------------------------------------------------------------\n");
+    Traza.mensaje("\n\nInit Web ------------------------------------------------------------------------\n");
     inicializaWebServer();
     parpadeaLed(4);
     //Google Home Notifier
-    Serial.println("\n\nInit Google Home Notifier -------------------------------------------------------\n");
+    Traza.mensaje("\n\nInit Google Home Notifier -------------------------------------------------------\n");
     inicializaGHN();
     //mDNS
-    Serial.println("\n\nInit mDNS -----------------------------------------------------------------------\n");
+    Traza.mensaje("\n\nInit mDNS -----------------------------------------------------------------------\n");
     inicializamDNS(NULL);
     parpadeaLed(3);
     }
-  else Serial.println("No se pudo conectar al WiFi");
+  else Traza.mensaje("No se pudo conectar al WiFi");
   apagaLed();
   
   //Entradas
-  Serial.println("\n\nInit entradas ------------------------------------------------------------------------\n");
+  Traza.mensaje("\n\nInit entradas ------------------------------------------------------------------------\n");
   inicializaEntradas();
 
   //Salidas
-  Serial.println("\n\nInit salidas ------------------------------------------------------------------------\n");
+  Traza.mensaje("\n\nInit salidas ------------------------------------------------------------------------\n");
   inicializaSalidas();
 
   //Secuenciador
-  Serial.println("\n\nInit secuenciador ---------------------------------------------------------------------\n");
+  Traza.mensaje("\n\nInit secuenciador ---------------------------------------------------------------------\n");
   inicializaSecuenciador();
   
   //Maquina de estados
-  Serial.println("\n\nInit maquina de estados----------------------------------------------------------------\n");
+  Traza.mensaje("\n\nInit maquina de estados----------------------------------------------------------------\n");
   inicializaMaquinaEstados();
   
   //Ordenes serie
-  Serial.println("\n\nInit Ordenes ----------------------------------------------------------------------\n");  
+  Traza.mensaje("\n\nInit Ordenes ----------------------------------------------------------------------\n");  
   inicializaOrden();//Inicializa los buffers de recepcion de ordenes desde PC
 
   //Si ha llegado hasta aqui, todo ha ido bien y borro el candado
-  if(borraFichero(FICHERO_CANDADO))Serial.println("Candado borrado");
-  else Serial.println("ERROR - No se pudo borrar el candado");
+  if(borraFichero(FICHERO_CANDADO))Traza.mensaje("Candado borrado\n");
+  else Traza.mensaje("ERROR - No se pudo borrar el candado\n");
 
   compruebaConfiguracion(0);
   parpadeaLed(2);
   apagaLed();//Por si acaso...
   
-  Serial.printf("\n\n");
-  Serial.println("***************************************************************");
-  Serial.println("*                                                             *");
-  Serial.println("*               Fin del setup del modulo                      *");
-  Serial.println("*                                                             *");    
-  Serial.println("***************************************************************");
-  Serial.printf("\n\n");  
+  Traza.mensaje("\n\n");
+  Traza.mensaje("***************************************************************\n");
+  Traza.mensaje("*                                                             *\n");
+  Traza.mensaje("*               Fin del setup del modulo                      *\n");
+  Traza.mensaje("*                                                             *\n");    
+  Traza.mensaje("***************************************************************\n");
+  Traza.mensaje("\n\n");  
 
   //activo el watchdog
   configuraWatchdog();  
@@ -211,7 +213,7 @@ void loop()
   EntradaBucle=millis();//Hora de entrada en la rodaja de tiempo
 
   //reinicio el watchdog del sistema
-  timerWrite(timer, 0);
+  alimentaWatchdog(); // para el esp32 timerWrite(timer, 0);
   
   //------------- EJECUCION DE TAREAS --------------------------------------
   //Acciones a realizar en el bucle   
@@ -249,7 +251,7 @@ void loop()
 boolean inicializaConfiguracion(boolean debug)
   {
   String cad="";
-  if (debug) Serial.println("Recupero configuracion de archivo...");
+  if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
 
   //cargo el valores por defecto
   nombre_dispositivo=String(NOMBRE_FAMILIA); //Nombre del dispositivo, por defecto el de la familia
@@ -257,10 +259,10 @@ boolean inicializaConfiguracion(boolean debug)
   
   if(!leeFicheroConfig(GLOBAL_CONFIG_FILE, cad))
     {
-    Serial.printf("No existe fichero de configuracion global\n");
+    Traza.mensaje("No existe fichero de configuracion global\n");
     cad="{\"nombre_dispositivo\": \"" + String(NOMBRE_FAMILIA) + "\",\"NivelActivo\":0}"; //config por defecto    
     //salvo la config por defecto
-    if(salvaFicheroConfig(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion global creado por defecto\n"); 
+    if(salvaFicheroConfig(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion global creado por defecto\n"); 
     }
 
   return parseaConfiguracionGlobal(cad);
@@ -279,10 +281,9 @@ boolean parseaConfiguracionGlobal(String contenido)
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
   
-  //json.printTo(Serial);
   if (json.success()) 
     {
-    Serial.println("parsed json");
+    Traza.mensaje("parsed json\n");
 //******************************Parte especifica del json a leer********************************
     if (json.containsKey("nombre_dispositivo")) nombre_dispositivo=((const char *)json["nombre_dispositivo"]);    
     if(nombre_dispositivo==NULL) nombre_dispositivo=String(NOMBRE_FAMILIA);
@@ -293,7 +294,7 @@ boolean parseaConfiguracionGlobal(String contenido)
       else nivelActivo=HIGH;
       }
     
-    Serial.printf("Configuracion leida:\nNombre dispositivo: %s\nNivelActivo: %i\n",nombre_dispositivo.c_str(),nivelActivo);
+    Traza.mensaje("Configuracion leida:\nNombre dispositivo: %s\nNivelActivo: %i\n",nombre_dispositivo.c_str(),nivelActivo);
 //************************************************************************************************
     return true;
     }
@@ -310,54 +311,36 @@ String generaJsonConfiguracionNivelActivo(String configActual, int nivelAct)
 
   if(configActual=="") 
     {
-    Serial.println("No existe el fichero. Se genera uno nuevo");
+    Traza.mensaje("No existe el fichero. Se genera uno nuevo\n");
     return "{\"nombre_dispositivo\": \"Nombre dispositivo\", \"NivelActivo\": \"" + String(nivelAct) + "\"}";
     }
     
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(configActual.c_str());
-  json.printTo(Serial);
+  json.printTo(salida);//pinto el json que he creado
+  Traza.mensaje("json leido:\n#%s#\n",salida.c_str());
   if (json.success()) 
     {
-    Serial.println("parsed json");          
+    Traza.mensaje("parsed json\n");          
 
 //******************************Parte especifica del json a modificar*****************************
     json["NivelActivo"]=nivelAct;
 //************************************************************************************************
 
     json.printTo(salida);//pinto el json que he creado
-    Serial.printf("json creado:\n#%s#\n",salida.c_str());
+    Traza.mensaje("json creado:\n#%s#\n",salida.c_str());
     }//la de parsear el json
 
   return salida;  
   }  
   
 /***************************************AUXILIARES**************************************************/
+/****************************ESP32****************************/
 /***************************************************************/
 /*                                                             */
-/*  Funcion de interrupcion del watchdog                       */
+/*  Decodifica el motivo del ultimo reset                      */
 /*                                                             */
 /***************************************************************/
-//funcion de interrupcion que reseteara el ESP si no se atiende el watchdog
-void IRAM_ATTR resetModule(void) {
-  ets_printf("Watchdog!!! reboot\n");
-  esp_restart();
-}
-
-/***************************************************************/
-/*                                                             */
-/*  Configuracion del watchdog del sistema                     */
-/*                                                             */
-/***************************************************************/
-void configuraWatchdog(void)
-{
-  timer = timerBegin(TIMER_WATCHDOG, PREESCALADO_WATCHDOG, true); //timer 0, div 80 para que cuente microsegundos y hacia arriba         //hw_timer_t * timerBegin(uint8_t timer, uint16_t divider, bool countUp);
-  timerAttachInterrupt(timer, &resetModule, true);                //asigno la funcion de interrupcion al contador                        //void timerAttachInterrupt(hw_timer_t *timer, void (*fn)(void), bool edge);
-  timerAlarmWrite(timer, TIEMPO_WATCHDOG, false);                  //configuro el limite del contador para generar interrupcion en us    //void timerAlarmWrite(hw_timer_t *timer, uint64_t interruptAt, bool autoreload);
-  timerWrite(timer, 0);                                           //lo pongo a cero                                                      //void timerWrite(hw_timer_t *timer, uint64_t val);
-  timerAlarmEnable(timer);                                        //habilito el contador                                                 //void timerAlarmEnable(hw_timer_t *timer);
-}
-
 const char* reset_reason(RESET_REASON reason)
 {
   switch ( reason)
@@ -380,3 +363,31 @@ const char* reset_reason(RESET_REASON reason)
     default : return ("NO_MEAN");
   }
 }
+
+/***************************************************************/
+/*                                                             */
+/*  Funcion de interrupcion del watchdog                       */
+/*  reseteara el ESP si no se atiende el watchdog              */
+/*                                                             */
+/***************************************************************/
+void IRAM_ATTR resetModule(void) {
+  Traza.mensaje("Watchdog!!! reboot\n");
+  //ets_printf("Watchdog!!! reboot\n");
+  esp_restart();
+}
+
+/***************************************************************/
+/*                                                             */
+/*  Configuracion del watchdog del sistema                     */
+/*                                                             */
+/***************************************************************/
+void configuraWatchdog(void)
+  {
+  timer = timerBegin(TIMER_WATCHDOG, PREESCALADO_WATCHDOG, true); //timer 0, div 80 para que cuente microsegundos y hacia arriba         //hw_timer_t * timerBegin(uint8_t timer, uint16_t divider, bool countUp);
+  timerAttachInterrupt(timer, &resetModule, true);                //asigno la funcion de interrupcion al contador                        //void timerAttachInterrupt(hw_timer_t *timer, void (*fn)(void), bool edge);
+  timerAlarmWrite(timer, TIEMPO_WATCHDOG, false);                  //configuro el limite del contador para generar interrupcion en us    //void timerAlarmWrite(hw_timer_t *timer, uint64_t interruptAt, bool autoreload);
+  timerWrite(timer, 0);                                           //lo pongo a cero                                                      //void timerWrite(hw_timer_t *timer, uint64_t val);
+  timerAlarmEnable(timer);                                        //habilito el contador                                                 //void timerAlarmEnable(hw_timer_t *timer);
+  }
+
+void alimentaWatchdog(void) {timerWrite(timer, 0);}
