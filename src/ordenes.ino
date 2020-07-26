@@ -58,7 +58,7 @@ int EjecutaOrdenes(int debug){
   String parametros="";
   int iParametro=0;
   char sParametro[LONG_PARAMETRO]="";//LONG_PARAMETRO longitud maxmima del parametro
-  float fParametro;
+  float fParametro=0;
   int inicioParametro=0;
 
   if (debug) Traza.mensaje("Orden recibida: %s\n",ordenRecibida);
@@ -257,6 +257,10 @@ void inicializaOrden(void)
   comandos[i].descripcion="Devuelve el valor de activo para la salida PWM";
   comandos[i++].p_func_comando=func_comando_getPWM;
 
+  comandos[i].comando="setSalida";
+  comandos[i].descripcion="Selecciona la salida a configurar PWM";
+  comandos[i++].p_func_comando=func_comando_setSalida;
+
   //resto
   for(;i<MAX_COMANDOS;)
     {
@@ -265,7 +269,7 @@ void inicializaOrden(void)
     comandos[i++].p_func_comando=func_comando_vacio;  
     }
     
-  func_comando_help(0,"",0.0);
+  func_comando_help(0,NULL,0.0);
   }
 
 /*********************************************************************/
@@ -373,7 +377,7 @@ void func_comando_flist(int iParametro, char* sParametro, float fParametro)//"fe
 
 void func_comando_fexist(int iParametro, char* sParametro, float fParametro)//"fexist")
   {
-  if (sParametro=="") Traza.mensaje("Es necesario indicar un nombre de fichero\n");
+  if (strlen(sParametro)==0) Traza.mensaje("Es necesario indicar un nombre de fichero\n");
   else
     {
     if(SPIFFS.exists(sParametro)) Traza.mensaje("El fichero %s existe.\n",sParametro);
@@ -383,7 +387,7 @@ void func_comando_fexist(int iParametro, char* sParametro, float fParametro)//"f
 
 void func_comando_fopen(int iParametro, char* sParametro, float fParametro)//"fopen")
   {
-  if (sParametro=="") Traza.mensaje("Es necesario indicar un nombre de fichero\n");
+  if (strlen(sParametro)==0) Traza.mensaje("Es necesario indicar un nombre de fichero\n");
   else
     {
     File f = SPIFFS.open(sParametro, "r");
@@ -404,7 +408,7 @@ void func_comando_fopen(int iParametro, char* sParametro, float fParametro)//"fo
 
 void func_comando_fremove(int iParametro, char* sParametro, float fParametro)//"fremove")
   {
-  if (sParametro=="") Traza.mensaje("Es necesario indicar un nombre de fichero\n");
+  if (strlen(sParametro)==0) Traza.mensaje("Es necesario indicar un nombre de fichero\n");
   else
     { 
     if (SPIFFS.remove(sParametro)) Traza.mensaje("Fichero %s borrado\n",sParametro);
@@ -510,14 +514,24 @@ void func_comando_compruebaConfiguracion(int iParametro, char* sParametro, float
   compruebaConfiguracion(0);
   }  
 
-  void func_comando_setPWM(int iParametro, char* sParametro, float fParametro)//"debug")
+void func_comando_setPWM(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  setValorPWM(0,iParametro);
-  Serial.printf("valor: %i\n",getValorPWM(0));
+  int8_t salida=getSalidaActiva();
+  if(salida!=-1)  
+    {
+    setValorPWM(salida,iParametro);
+    Serial.printf("valor: %i\n",getValorPWM(salida));
+    }
+  else Serial.printf("valor de salida no valido (%i)\n",salida);  
   }  
 
 void func_comando_getPWM(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  Serial.printf("valor: %i\n",getValorPWM(0));
+  Serial.printf("valor: %i\n",getValorPWM(getSalidaActiva()));
+  }  
+
+void func_comando_setSalida(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  setSalidaActiva(iParametro);  
   }
 /***************************** FIN funciones para comandos ******************************************/ 

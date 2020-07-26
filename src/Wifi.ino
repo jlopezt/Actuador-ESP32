@@ -233,12 +233,12 @@ boolean conectaAutodetect(boolean debug)
   if (!wifiManager.startConfigPortal(NOMBRE_AP)) Traza.mensaje("Error al conectar. Salida por time-out\n");      
   else 
     {
-    wifiIP.fromString(IPParametro.getValue());
-    wifiGW.fromString(GatewayParametro.getValue());
-    wifiNet.fromString(SubnetParametro.getValue());
-    wifiDNS1.fromString(DNS1Parametro.getValue());
-    wifiDNS2.fromString(DNS2Parametro.getValue());
-    mDNS=mDNSParametro.getValue();
+    wifiIP.fromString(String(IPParametro.getValue()));
+    wifiGW.fromString(String(GatewayParametro.getValue()));
+    wifiNet.fromString(String(SubnetParametro.getValue()));
+    wifiDNS1.fromString(String(DNS1Parametro.getValue()));
+    wifiDNS2.fromString(String(DNS2Parametro.getValue()));
+    mDNS=String(mDNSParametro.getValue()); //Serial.printf("longitud mDNS: %i\n",mDNSParametro.getValueLength());
     Traza.mensaje("Datos leidos del portal: \n IP fija-> %s\n GW-> %s\n subnet-> %s\n DNS1-> %s\n DNS2-> %s\n",wifiIP.toString().c_str(), wifiGW.toString().c_str(), wifiNet.toString().c_str(), wifiDNS1.toString().c_str(), wifiDNS2.toString().c_str());
 
     salvaConfiguracion();

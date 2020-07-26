@@ -1,0 +1,11 @@
+{ 
+"IPBroker": "10.68.0.101", 
+"puerto": 1883, 
+"usuarioMQTT": "usuario", 
+"passwordMQTT": "password", 
+"ID_MQTT": "LuzEscalera", 
+"topicRoot": "casaPre", 
+"keepAlive": 0,
+"publicarEntradas": 1,
+"publicarSalidas": 1
+}

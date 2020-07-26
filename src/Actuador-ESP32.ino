@@ -11,7 +11,7 @@
 /***************************** Defines *****************************/
 //Defines generales
 #define NOMBRE_FAMILIA   "Actuador/Secuenciador (E/S)"
-#define VERSION          "5.0.1 (ESP32 1.0.2|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)" //Correccion en entradas y salidas
+#define VERSION          "5.0.3 (ESP32 1.0.2|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)" //Correccion en entradas y salidas
 #define SEPARADOR        '|'
 #define SUBSEPARADOR     '#'
 #define KO               -1
@@ -37,6 +37,8 @@
 #define GHN_CONFIG_BAK_FILE              "/GHNConfig.json.bak"
 #define MAQUINAESTADOS_CONFIG_FILE       "/MaqEstadosConfig.json"
 #define MAQUINAESTADOS_CONFIG_BAK_FILE   "/MaqEstadosConfig.json.bak"
+#define FTP_CONFIG_FILE                  "/FTPConfig.json"
+#define FTP_CONFIG_BAK_FILE              "/FTPConfig.json.bak"
 
 // Una vuela de loop son ANCHO_INTERVALO segundos 
 #define ANCHO_INTERVALO          100 //Ancho en milisegundos de la rodaja de tiempo
@@ -45,6 +47,8 @@
 #define FRECUENCIA_SALIDAS         5 //cada cuantas vueltas de loop atiende las salidas
 #define FRECUENCIA_SECUENCIADOR   10 //cada cuantas vueltas de loop atiende al secuenciador
 #define FRECUENCIA_MAQUINAESTADOS 10 //cada cuantas vueltas de loop atiende a la maquina de estados
+#define FRECUENCIA_SERVIDOR_FTP           5 //cada cuantas vueltas de loop atiende el servidor ftp
+#define FRECUENCIA_SERVIDOR_WEBSOCKET     1 //cada cuantas vueltas de loop atiende el servidor web
 #define FRECUENCIA_MQTT           10 //cada cuantas vueltas de loop envia y lee del broker MQTT
 #define FRECUENCIA_ENVIO_DATOS   100 //cada cuantas vueltas de loop envia al broker el estado de E/S
 #define FRECUENCIA_ORDENES         2 //cada cuantas vueltas de loop atiende las ordenes via serie 
@@ -63,6 +67,8 @@
 #include <ArduinoOTA.h>
 #include <ArduinoJson.h>
 #include <rom/rtc.h>
+#include <FtpServer.h>
+#include <WebSocketsServer.h>
 /***************************** Includes *****************************/
 
 /***************************** variables globales *****************************/
@@ -74,6 +80,9 @@ uint16_t vuelta = 0; //MAX_VUELTAS-100; //vueltas de loop
 int debugGlobal=0; //por defecto desabilitado
 boolean candado=false; //Candado de configuracion. true implica que la ultima configuracion fue mal
 /***************************** variables globales *****************************/
+
+void inicializaOTA(boolean debug);
+
 /************************* FUNCIONES PARA EL BUITIN LED ***************************/
 void configuraLed(void){pinMode(LED_BUILTIN, OUTPUT);}
 void enciendeLed(void){digitalWrite(LED_BUILTIN, HIGH);}
@@ -158,10 +167,16 @@ void setup()
     //Google Home Notifier
     Traza.mensaje("\n\nInit Google Home Notifier -------------------------------------------------------\n");
     inicializaGHN();
+    //WebSockets
+    Serial.println("\n\nInit WebSockets -----------------------------------------------------------------\n");
+    inicializaWebSockets();
     //mDNS
-    Traza.mensaje("\n\nInit mDNS -----------------------------------------------------------------------\n");
+    Serial.println("\n\nInit mDNS -----------------------------------------------------------------------\n");
     inicializamDNS(NULL);
     parpadeaLed(3);
+    //FTPServer
+    Serial.println("\n\nInit FTP ----------------------------------------------------------------------------\n");
+    inicializaFTP(debugGlobal);
     }
   else Traza.mensaje("No se pudo conectar al WiFi");
   apagaLed();
@@ -225,6 +240,8 @@ void loop()
   if ((vuelta % FRECUENCIA_SECUENCIADOR)==0) actualizaSecuenciador(debugGlobal); //Actualiza la salida del secuenciador
   if ((vuelta % FRECUENCIA_MAQUINAESTADOS)==0) actualizaMaquinaEstados(debugGlobal); //Actualiza la maquina de estados
   //Prioridad 3: Interfaces externos de consulta    
+  if ((vuelta % FRECUENCIA_SERVIDOR_FTP)==0) gestionaFTP(); //atiende el servidor ftp
+  if ((vuelta % FRECUENCIA_SERVIDOR_WEBSOCKET)==0) atiendeWebSocket(debugGlobal); //atiende el servidor web
   if ((vuelta % FRECUENCIA_MQTT)==0) atiendeMQTT();      
   if ((vuelta % FRECUENCIA_ENVIO_DATOS)==0) enviaDatos(debugGlobal); //publica via MQTT los datos de entradas y salidas, segun configuracion
   if ((vuelta % FRECUENCIA_ORDENES)==0) while(HayOrdenes(debugGlobal)) EjecutaOrdenes(debugGlobal); //Lee ordenes via serie
@@ -306,7 +323,6 @@ boolean parseaConfiguracionGlobal(String contenido)
 /**********************************************************************/  
 String generaJsonConfiguracionNivelActivo(String configActual, int nivelAct)
   {
-  boolean nuevo=true;
   String salida="";
 
   if(configActual=="") 

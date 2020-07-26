@@ -190,7 +190,7 @@ void respondeGenericoMQTT(char* topic, byte* payload, unsigned int length)
     else if(root["estado"]=="pulso") estado=2;     
     */
     int id=root.get<int>("id"); 
-    int estado;
+    int estado=0;
     if(root.get<String>("estado")=="off") estado=0;       
     else if(root.get<String>("estado")=="on") estado=1;           
     else if(root.get<String>("estado")=="pulso") estado=2;     
@@ -306,6 +306,8 @@ boolean conectaMQTT(void)
     if(intentos++>=2) return (false);
     delay(timeReconnectMQTT);      
     }
+    
+  return (false);  
   }
 
 /********************************************/
@@ -332,7 +334,8 @@ boolean enviarMQTT(String topic, String payload)
       return(clienteMQTT.endPublish()); //int endPublish();
       }
     }
-  else return (false);
+  
+  return (false);
   }
 
 /********************************************/
@@ -359,7 +362,7 @@ void enviaDatos(boolean debug)
     {
     payload=generaJsonEstadoEntradas();//genero el json de las entradas
     //Lo envio al bus    
-    if(enviarMQTT(ID_MQTT+"/"+"entradas", payload)) if(debug)Traza.mensaje("Enviado json al broker con exito.\n");
+    if(enviarMQTT(ID_MQTT+"/"+"entradas", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
     else if(debug)Traza.mensaje("¡¡Error al enviar json al broker!!\n");
     }
   else if(debug)Traza.mensaje("No publico entradas. Publicar entradas es %i\n",publicarEntradas);
@@ -368,7 +371,7 @@ void enviaDatos(boolean debug)
     {
     payload=generaJsonEstadoSalidas();//genero el json de las salidas
     //Lo envio al bus    
-    if(enviarMQTT(ID_MQTT+"/"+"salidas", payload)) if(debug)Traza.mensaje("Enviado json al broker con exito.\n");
+    if(enviarMQTT(ID_MQTT+"/"+"salidas", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
     else if(debug)Traza.mensaje("¡¡Error al enviar json al broker!!\n");
     }  
   else if(debug)Traza.mensaje("No publico salidas. Publicar salidas es %i\n",publicarSalidas);  

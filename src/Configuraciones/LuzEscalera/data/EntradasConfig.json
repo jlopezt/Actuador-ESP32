@@ -1,0 +1,18 @@
+{
+	"Entradas": [
+		{
+		"GPIO": 16, 
+		"nombre": "PIR", 
+		"tipo": "INPUT_PULLUP",
+		"estadoActivo": 1,
+		"Estados": [
+			{"valor": 0, "texto": "Reposo"},
+			{"valor": 1, "texto": "Activo"}
+			],
+		"Mensajes": [
+			{"valor": 0, "texto": "Esta apagado"},
+			{"valor": 1, "texto": "Esta encendido"}
+			]
+		}
+	]
+}

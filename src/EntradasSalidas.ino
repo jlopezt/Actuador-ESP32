@@ -76,6 +76,7 @@ typedef struct{
   }salida_t; 
 salida_t salidas[MAX_SALIDAS];
 
+int8_t salidaActiva=-1;
 /************************************** Funciones de configuracion ****************************************/
 /*********************************************/
 /* Inicializa los valores de los registros de*/
@@ -188,7 +189,8 @@ void inicializaSalidas(void)
               digitalWrite(salidas[i].pin, nivelActivo);  
               break;
             case TIPO_LED:
-              ledcWrite(salidas[i].canal,salidas[i].valorPWM);
+              if(nivelActivo==1) ledcWrite(salidas[i].canal,salidas[i].valorPWM);
+              else ledcWrite(salidas[i].canal,(1<<RESOLUCION_PWM)-salidas[i].valorPWM);            
               break;
             }
           }
@@ -200,7 +202,8 @@ void inicializaSalidas(void)
               digitalWrite(salidas[i].pin, !nivelActivo); 
               break;
             case TIPO_LED:
-              ledcWrite(salidas[i].canal,0);
+              if(nivelActivo==1) ledcWrite(salidas[i].canal,0);
+              else ledcWrite(salidas[i].canal,(1<<RESOLUCION_PWM));            
               break;
             }          
           }
@@ -504,6 +507,7 @@ int8_t estadoRele(int8_t id)
   
   return salidas[id].estado;
  }
+int8_t estadoSalida(int8_t id){return estadoRele(id);}
 
 /********************************************************/
 /*                                                      */
@@ -617,7 +621,8 @@ int8_t conmutaRele(int8_t id, int8_t estado_final, int debug)
         digitalWrite(salidas[id].pin, HIGH); //controlo el rele
         break;
       case TIPO_LED:
-        ledcWrite(salidas[id].canal,salidas[id].valorPWM);
+        if(nivelActivo==1) ledcWrite(salidas[id].canal,salidas[id].valorPWM);
+        else ledcWrite(salidas[id].canal,(1<<RESOLUCION_PWM)-salidas[id].valorPWM);
         break;
       }    
     }
@@ -630,6 +635,8 @@ int8_t conmutaRele(int8_t id, int8_t estado_final, int debug)
         break;
       case TIPO_LED:
         ledcWrite(salidas[id].canal,0);
+        if(nivelActivo==1) ledcWrite(salidas[id].canal,0);
+        else ledcWrite(salidas[id].canal,(1<<RESOLUCION_PWM));
         break;
       }    
     }
@@ -784,6 +791,19 @@ int8_t recuperarModoSalida(int8_t id)
 
 /********************************************************/
 /*                                                      */
+/*     Devuelve el estado incial de la salida           */
+/*                                                      */
+/********************************************************/ 
+int8_t inicioSalida(int8_t id)
+  {
+  //validaciones previas
+  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
+       
+  return salidas[id].inicio;  
+  }  
+
+/********************************************************/
+/*                                                      */
 /*     Devuelve el nombre de la salida                  */
 /*                                                      */
 /********************************************************/ 
@@ -858,7 +878,9 @@ String nombreEstadoSalida(uint8_t id, uint8_t estado)
   if(id <0 || id>=MAX_SALIDAS) return "ERROR";
   if(estado>2) return "ERROR";
        
-  return salidas[id].nombreEstados[estado];
+  if (estado!=ESTADO_DESACTIVO) return salidas[id].nombreEstados[ESTADO_ACTIVO];
+  
+  return salidas[id].nombreEstados[ESTADO_DESACTIVO];
   }   
 
 /********************************************************/
@@ -871,7 +893,9 @@ String nombreEstadoSalidaActual(uint8_t id)
   //validaciones previas
   if(id <0 || id>=MAX_SALIDAS) return "ERROR";
        
-  return salidas[id].nombreEstados[salidas[id].estado];
+  if (salidas[id].estado!=ESTADO_DESACTIVO) return salidas[id].nombreEstados[ESTADO_ACTIVO];
+  
+  return salidas[id].nombreEstados[ESTADO_DESACTIVO];
   }   
 
 /********************************************************/
@@ -1288,3 +1312,15 @@ String generaJsonEstado(void)
   root.printTo(salida);  
   return salida;  
   }   
+
+int8_t setSalidaActiva(int8_t id)
+  {
+  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
+  if(salidas[id].configurado==NO_CONFIGURADO) return -1; //El rele no esta configurado
+  
+  salidaActiva=id;
+
+  return CONFIGURADO;
+  }  
+  
+int8_t getSalidaActiva(void){return salidaActiva;}

@@ -74,6 +74,12 @@ boolean leeFichero(String nombre, String &contenido)
       char *buff=NULL;
       buff=(char *)malloc(size+1);
 
+      if(buff==NULL) 
+        {
+        Serial.printf("Fallo en allocar memoria\n");
+        return false;
+        }
+
       configFile.readBytes(buff, size);
       buff[size]=0;//pongo el fin de cadena
         
