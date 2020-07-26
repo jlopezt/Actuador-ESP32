@@ -1,0 +1,25 @@
+{
+    "name": "Traza",
+    "description": "Gestion de trazas a traves de diferentes interfaces (serie, TCP, fichero)",
+    "keywords": "wifi, tcp, serial, file",
+    "authors": [
+        {
+            "name": "JoLoTo",
+            "url": "https://github.com/jlopezt/",
+            "maintainer": true
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jlopezt/Traza.git"
+    },
+    "version": "1.0.0",
+    "license": "LGPL-2.1",
+    "export": {
+        "exclude": [
+            "tests"
+        ]
+    },
+    "frameworks": "arduino",
+    "platforms": "atmelavr, espressif8266, espressif32"
+}

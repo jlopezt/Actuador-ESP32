@@ -1,0 +1,25 @@
+{
+    "name": "FTPServer",
+    "description": "Servidor FTP para ESP",
+    "keywords": "FTP, Server, file",
+    "authors": [
+        {
+            "name": "JoLoTo",
+            "url": "https://github.com/jlopezt/",
+            "maintainer": true
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jlopezt/FTPServer.git"
+    },
+    "version": "1.0.0",
+    "license": "LGPL-2.1",
+    "export": {
+        "exclude": [
+            "tests"
+        ]
+    },
+    "frameworks": "arduino",
+    "platforms": "atmelavr, espressif8266, espressif32"
+}
