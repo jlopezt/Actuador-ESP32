@@ -57,7 +57,7 @@ boolean recuperaDatosGHN(boolean debug)
   nombreEquipo="";
   idioma="";
     
-  if(!leeFicheroConfig(GHN_CONFIG_FILE, cad))
+  if(!leeFichero(GHN_CONFIG_FILE, cad))
     {
     //Algo salio mal, confgiguracion por defecto
     Traza.mensaje("No existe fichero de configuracion GHN o esta corrupto\n");

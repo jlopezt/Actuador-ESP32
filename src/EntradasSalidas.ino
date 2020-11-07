@@ -182,7 +182,7 @@ void inicializaSalidas(void)
             break;
           }
 
-        //Lo inicializo segu lo configurado               
+        //Lo inicializo segun lo configurado               
         if(salidas[i].inicio==1) 
           {
           switch (salidas[i].tipo)
@@ -228,13 +228,13 @@ boolean recuperaDatosEntradas(int debug)
 
   if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
 
-  if(!leeFicheroConfig(ENTRADAS_CONFIG_FILE, cad)) 
+  if(!leeFichero(ENTRADAS_CONFIG_FILE, cad)) 
     {
     //Confgiguracion por defecto
     Traza.mensaje("No existe fichero de configuracion de Entradas\n");    
     cad="{\"Entradas\": []}";
     //salvo la config por defecto
-    //if(salvaFicheroConfig(ENTRADAS_CONFIG_FILE, ENTRADAS_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion de Entradas creado por defecto\n");
+    //if(salvaFichero(ENTRADAS_CONFIG_FILE, ENTRADAS_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion de Entradas creado por defecto\n");
     }      
   return parseaConfiguracionEntradas(cad);
   }
@@ -249,13 +249,13 @@ boolean recuperaDatosSalidas(int debug)
 
   if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
   
-  if(!leeFicheroConfig(SALIDAS_CONFIG_FILE, cad)) 
+  if(!leeFichero(SALIDAS_CONFIG_FILE, cad)) 
     {
     //Confgiguracion por defecto
     Traza.mensaje("No existe fichero de configuracion de Salidas\n");    
     cad="{\"Salidas\": []}";
     //salvo la config por defecto
-    //if(salvaFicheroConfig(SALIDAS_CONFIG_FILE, SALIDAS_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion de Salidas creado por defecto\n");
+    //if(salvaFichero(SALIDAS_CONFIG_FILE, SALIDAS_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion de Salidas creado por defecto\n");
     }      
     
   return parseaConfiguracionSalidas(cad);
@@ -459,10 +459,7 @@ void actualizaSalida(int8_t salida)
       break;
     case MODO_SECUENCIADOR://Controlada por un secuenciador
       break;
-    case MODO_SEGUIMIENTO://Sigue a una entradaseguimiento
-      //Traza.mensaje("Salida %i en modo seguimiento\n",salida);
-      //Traza.mensaje("Entrada Asociada: %i\nEstado de la entrada asociada: %i\n",salidas[salida].controlador,estadoEntrada(salidas[salida].controlador));
-      
+    case MODO_SEGUIMIENTO://Sigue a una entradaseguimiento      
       //Si es un seguidor de pulso
       if(salidas[salida].anchoPulso>0)
         {
@@ -472,7 +469,6 @@ void actualizaSalida(int8_t salida)
       
       //Si es un seguidor tal cual
       else if(actuaSalida(salida, estadoEntrada(salidas[salida].controlador))==-1) Traza.mensaje("Error al actualizar la salida seguidor %i\n\n",salida);
-
 
       break;
     case MODO_MAQUINA://Controlada por una maquina de estados  
@@ -682,7 +678,6 @@ int8_t pulsoSalida(int8_t id)
 /********************************************************/ 
 int8_t actuaSalida(int8_t id, int8_t estado)
   {
-  //Traza.mensaje("salida: %i | modo: %i | estado: %i\n",id,salidas[id].modo,estado);
   //Si esta en modo secuenciador o modo maquina no deberia actuar, solo si esta en modo manual o seguimiento
   if(salidas[id].modo!=MODO_MANUAL && salidas[id].modo!=MODO_SEGUIMIENTO) return -1;
    

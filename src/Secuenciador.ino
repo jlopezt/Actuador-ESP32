@@ -69,13 +69,13 @@ boolean recuperaDatosSecuenciador(boolean debug)
 
   if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
   
-  if(!leeFicheroConfig(SECUENCIADOR_CONFIG_FILE, cad)) 
+  if(!leeFichero(SECUENCIADOR_CONFIG_FILE, cad)) 
     {
     //Confgiguracion por defecto
     Traza.mensaje("No existe fichero de configuracion del secuenciador\n");
     //cad="{ \"estadoInicial\": 0, \"Planes\":[ {\"id_plan\": 1, \"salida\": 1, \"intervalos\": [{\"id\":  0, \"valor\": 0},{\"id\":  1, \"valor\": 1}, {\"id\":  2, \"valor\": 0}, {\"id\":  3, \"valor\": 1}, {\"id\":  4, \"valor\": 0}, {\"id\":  5, \"valor\": 1}, {\"id\":  6, \"valor\": 0}, {\"id\":  7, \"valor\": 1}, {\"id\":  8, \"valor\": 0}, {\"id\":  9, \"valor\": 1}, {\"id\": 10, \"valor\": 0}, {\"id\": 11, \"valor\": 1},{\"id\":  12, \"valor\": 0},{\"id\":  13, \"valor\": 1}, {\"id\":  14, \"valor\": 0}, {\"id\":  15, \"valor\": 1}, {\"id\":  16, \"valor\": 0}, {\"id\":  17, \"valor\": 1}, {\"id\":  18, \"valor\": 0}, {\"id\":  19, \"valor\": 1}, {\"id\":  20, \"valor\": 0}, {\"id\":  21, \"valor\": 1}, {\"id\": 22, \"valor\": 0}, {\"id\": 23, \"valor\": 1} ] } ] }";
     cad="{\"estadoInicial\": 0,\"Planes\":[]}";
-    //if(salvaFicheroConfig(SECUENCIADOR_CONFIG_FILE, SECUENCIADOR_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion del secuenciador creado por defecto\n");
+    //if(salvaFichero(SECUENCIADOR_CONFIG_FILE, SECUENCIADOR_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion del secuenciador creado por defecto\n");
     }      
     
   return parseaConfiguracionSecuenciador(cad);
@@ -233,13 +233,12 @@ String pintaPlanHTML(int8_t plan)
   //validaciones previas
   if(plan<0 || plan>MAX_PLANES) return cad;
 
-  //cad += "<TABLE style=\"border: 2px solid black\">\n";
-  cad += "<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
+  cad += "<TABLE width=\"80%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
   cad += "<CAPTION>Plan " + String(plan) + "</CAPTION>\n";  
 
   //Cabecera
   cad += "<tr>";
-  cad += "<th>Hora</th>";
+  cad += "<th width=\"10%\">Hora</th>";
   for(int8_t i=0;i<HORAS_EN_DIA;i++) cad += "<th style=\"width:40px\">" + String(i) + "</th>";
   cad += "</tr>";
 
@@ -250,7 +249,7 @@ String pintaPlanHTML(int8_t plan)
     {
     Traza.mensaje("intervalo: %i | cad: %i\n",intervalo,cad.length());      
     cad += "<TR class=\"modo2\">";
-    cad += "<td>" + String(intervalo) + ": (min " + String(intervalo*5) + " a " + String(intervalo*5+4) + ")</td>";    
+    cad += "<th>" + String(intervalo) + ": (min " + String(intervalo*5) + " a " + String(intervalo*5+4) + ")</th>";    
     for(int8_t i=0;i<HORAS_EN_DIA;i++) cad += "<td style=\"text-align:center;\">" + (planes[plan].horas[i] & mascara?String(1):String(0)) + "</td>";
     cad += "</tr>";
     

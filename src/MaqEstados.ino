@@ -113,13 +113,13 @@ boolean recuperaDatosMaquinaEstados(int debug)
 
   if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
 
-  if(!leeFicheroConfig(MAQUINAESTADOS_CONFIG_FILE, cad)) 
+  if(!leeFichero(MAQUINAESTADOS_CONFIG_FILE, cad)) 
     {
     //Confgiguracion por defecto
     Traza.mensaje("No existe fichero de configuracion de la maquina de estados\n");    
     cad="{\"Estados\":[],\"Transiciones\":[] }";
     //salvo la config por defecto
-    //if(salvaFicheroConfig(MAQUINAESTADOS_CONFIG_FILE, MAQUINAESTADOS_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion de la maquina de estados creado por defecto\n");
+    //if(salvaFichero(MAQUINAESTADOS_CONFIG_FILE, MAQUINAESTADOS_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion de la maquina de estados creado por defecto\n");
     }      
   return parseaConfiguracionMaqEstados(cad);
   }
@@ -181,8 +181,7 @@ boolean parseaConfiguracionMaqEstados(String contenido)
       Traza.mensaje("Numero de salidas incorrecto en estado %i. definidas %i, esperadas %i\n",i,num_salidas,numeroSalidas);
       return false;
       }
-    //////EL ID NO VALE PARA NADA, LA REFERENCIA ES POSICIONAL. QUITAR ID/////////
-    for(int8_t s=0;s<num_salidas;s++) estados[i].valorSalidas[s]=Salidas.get<int>(s);//Salidas[s]["valor"];
+    for(int8_t s=0;s<num_salidas;s++) estados[i].valorSalidas[s]=Salidas.get<int>(s);
     }
 
   Traza.mensaje("*************************\nEstados:\n"); 
@@ -298,7 +297,7 @@ uint8_t mueveMaquina(uint8_t estado, int8_t entradasActual[], boolean debug)
 int8_t actualizaSalidasMaquinaEstados(uint8_t estado)
   {
   int8_t retorno=1; //si todo va bien salidaMaquinaEstados devuelve 1, si hay error -1 
-  //Traza.mensaje("Estado: %s\n",estados[estado].nombre);
+
   for(uint8_t i=0;i<numeroSalidas;i++) 
     {
     if(salidaMaquinaEstados(mapeoSalidas[i], estados[estado].valorSalidas[i])==NO_CONFIGURADO) retorno=0;
