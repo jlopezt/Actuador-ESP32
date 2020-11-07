@@ -40,13 +40,13 @@ boolean recuperaDatosFTP(boolean debug)
 
   if (debug) Serial.println("Recupero configuracion de archivo...");
   
-  if(!leeFicheroConfig(FTP_CONFIG_FILE, cad)) 
+  if(!leeFichero(FTP_CONFIG_FILE, cad)) 
     {
     //Confgiguracion por defecto
     Serial.printf("No existe fichero de configuracion del servidor FTP\n");    
     cad="{\"Usuario\": \"usuario\",\"Password\": \"password\"}";
     //Machaco el fichero de configuracion guardado con la configuracion por defecto
-    //if(SistemaFicheros.salvaFicheroConfig(FTP_CONFIG_FILE, FTP_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion del servidor FTP creado por defecto\n");
+    //if(SistemaFicheros.salvaFichero(FTP_CONFIG_FILE, FTP_CONFIG_BAK_FILE, cad)) Serial.printf("Fichero de configuracion del servidor FTP creado por defecto\n");
     }      
     
   return parseaConfiguracionFTP(cad);

@@ -20,7 +20,7 @@
 #define WILL_MSG    String("¡"+ID_MQTT+" caido!").c_str()
 
 //definicion del clean session
-#define CLEAN_SESSION TRUE
+#define CLEAN_SESSION true
 
 //definicion del topic ping
 #define TOPIC_PING "ping"
@@ -81,12 +81,12 @@ boolean recuperaDatosMQTT(boolean debug)
   publicarEntradas=1; 
   publicarSalidas=1;    
 
-  if(!leeFicheroConfig(MQTT_CONFIG_FILE, cad))
+  if(!leeFichero(MQTT_CONFIG_FILE, cad))
     {
     //Algo salio mal, Confgiguracion por defecto
     Traza.mensaje("No existe fichero de configuracion MQTT o esta corrupto\n");
     cad="{\"IPBroker\": \"0.0.0.0\", \"puerto\": 1883, \"timeReconnectMQTT\": 500, \"usuarioMQTT\": \"usuario\", \"passwordMQTT\": \"password\",  \"ID_MQTT\": \"" + String(NOMBRE_FAMILIA) + "\",  \"topicRoot\":  \"" + NOMBRE_FAMILIA + "\", \"publicarEntradas\": 0, \"publicarSalidas\": 0}";
-    //if (salvaFicheroConfig(MQTT_CONFIG_FILE, MQTT_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion MQTT creado por defecto\n");    
+    //if (salvaFichero(MQTT_CONFIG_FILE, MQTT_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion MQTT creado por defecto\n");    
     }
 
   return parseaConfiguracionMQTT(cad);
@@ -182,13 +182,6 @@ void respondeGenericoMQTT(char* topic, byte* payload, unsigned int length)
   //Leo el rele y el valor a setear
   if(root.containsKey("id") && root.containsKey("estado"))
     {
-    /*
-    int id=atoi(root["id"]); 
-    int estado;
-    if(root["estado"]=="off") estado=0;       
-    else if(root["estado"]=="on") estado=1;           
-    else if(root["estado"]=="pulso") estado=2;     
-    */
     int id=root.get<int>("id"); 
     int estado=0;
     if(root.get<String>("estado")=="off") estado=0;       
@@ -323,12 +316,9 @@ boolean enviarMQTT(String topic, String payload)
   //si y esta conectado envio, sino salgo con error
   if (clienteMQTT.connected()) 
     {
-//    String topicCompleto=topicRoot+"/"+ID_MQTT+"/"+topic;  
     String topicCompleto=topicRoot+"/"+topic;  
     
-    //Traza.mensaje("Enviando:\ntopic:  %s | payload: %s\n",topicCompleto.c_str(),payload.c_str());
-  
-    if(clienteMQTT.beginPublish(topicCompleto.c_str(), payload.length(), false))//boolean beginPublish(const char* topic, unsigned int plength, boolean retained)
+    if(clienteMQTT.beginPublish(topicCompleto.c_str(), payload.length(), false))
       {
       for(uint16_t i=0;i<payload.length();i++) clienteMQTT.write((uint8_t)payload.charAt(i));//virtual size_t write(uint8_t);
       return(clienteMQTT.endPublish()); //int endPublish();
@@ -378,6 +368,12 @@ void enviaDatos(boolean debug)
   }
 
 /******************************* UTILIDADES *************************************/
+IPAddress getIPBroker(void){return IPBroker;}
+uint16_t getPuertoBroker(void){return puertoBroker;}
+String getUsuarioMQTT(void){return usuarioMQTT;}
+String getPasswordMQTT(void){return passwordMQTT;}
+String getTopicRoot(void){return topicRoot;}
+
 /********************************************/
 /* Funcion que devuleve el estado           */
 /* de conexion MQTT al bus                  */

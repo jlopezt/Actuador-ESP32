@@ -29,28 +29,6 @@ boolean inicializaFicheros(int debug)
 }
 
 /************************************************/
-/* Recupera los datos de configuracion          */
-/* de un archivo, si hay bloqyueo de            */
-/* configuracion, devuelve KO                   */
-/************************************************/
-boolean leeFicheroConfig(String nombre, String &contenido)
-  {
-  if(candado) return false; //la utima configuracion fue mal, los ficheros no valen. Tomamos configuracion pro defecto en todos los modulos
-  return (leeFichero(nombre, contenido));  
-  }
-
-/************************************************/
-/* Salva los datos de configuracion             */
-/* de un archivo, si hay bloqyueo de            */
-/* configuracion, devuelve KO                   */
-/************************************************/
-boolean salvaFicheroConfig(String nombreFichero, String nombreFicheroBak, String contenidoFichero)
-  {
-  if(candado) return false; //la utima configuracion fue mal, los ficheros no valen. Tomamos configuracion pro defecto en todos los modulos
-  return (salvaFichero(nombreFichero, nombreFicheroBak, contenidoFichero));  
-  }
-
-/************************************************/
 /* Recupera los datos de                        */
 /* de un archivo cualquiera                     */
 /************************************************/

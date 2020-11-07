@@ -19,7 +19,6 @@
 #define MAX_VUELTAS      UINT16_MAX// 32767 
 
 //Ficheros de configuracion
-#define FICHERO_CANDADO                  "/Candado"
 #define FICHERO_ERRORES                  "/Errores.log"
 #define GLOBAL_CONFIG_FILE               "/Config.json"
 #define GLOBAL_CONFIG_BAK_FILE           "/Config.json.bak"
@@ -78,7 +77,6 @@ hw_timer_t *timer = NULL;//Puntero al timer del watchdog
 String nombre_dispositivo;//(NOMBRE_FAMILIA);//Nombre del dispositivo, por defecto el de la familia
 uint16_t vuelta = 0; //MAX_VUELTAS-100; //vueltas de loop
 int debugGlobal=0; //por defecto desabilitado
-boolean candado=false; //Candado de configuracion. true implica que la ultima configuracion fue mal
 /***************************** variables globales *****************************/
 
 void inicializaOTA(boolean debug);
@@ -119,21 +117,6 @@ void setup()
   //Ficheros - Lo primero para poder leer los demas ficheros de configuracion
   inicializaFicheros(debugGlobal);
 
-  //Compruebo si existe candado, si existe la ultima configuracion fue mal
-  if(existeFichero(FICHERO_CANDADO)) 
-    {
-    Traza.mensaje("Candado puesto. Configuracion por defecto");
-    candado=true; 
-    debugGlobal=1;
-    }
-  else
-    {
-    candado=false;
-    //Genera candado
- /*   if(salvaFichero(FICHERO_CANDADO,"","JSD")) Traza.mensaje("Candado creado\n");
-    else Traza.mensaje("ERROR - No se pudo crear el candado\n");*/
-    }
- 
   //Configuracion general
   Traza.mensaje("\n\nInit General ---------------------------------------------------------------------\n");
   inicializaConfiguracion(debugGlobal);
@@ -200,12 +183,6 @@ void setup()
   //Ordenes serie
   Traza.mensaje("\n\nInit Ordenes ----------------------------------------------------------------------\n");  
   inicializaOrden();//Inicializa los buffers de recepcion de ordenes desde PC
-
-  /*
-  //Si ha llegado hasta aqui, todo ha ido bien y borro el candado
-  if(borraFichero(FICHERO_CANDADO))Traza.mensaje("Candado borrado\n");
-  else Traza.mensaje("ERROR - No se pudo borrar el candado\n");
-  */
 
   compruebaConfiguracion(0);
   parpadeaLed(2);
@@ -276,12 +253,12 @@ boolean inicializaConfiguracion(boolean debug)
   nombre_dispositivo=String(NOMBRE_FAMILIA); //Nombre del dispositivo, por defecto el de la familia
   nivelActivo=LOW;  
   
-  if(!leeFicheroConfig(GLOBAL_CONFIG_FILE, cad))
+  if(!leeFichero(GLOBAL_CONFIG_FILE, cad))
     {
     Traza.mensaje("No existe fichero de configuracion global\n");
     cad="{\"nombre_dispositivo\": \"" + String(NOMBRE_FAMILIA) + "\",\"NivelActivo\":0}"; //config por defecto    
     //salvo la config por defecto
-    if(salvaFicheroConfig(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion global creado por defecto\n"); 
+    if(salvaFichero(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion global creado por defecto\n"); 
     }
 
   return parseaConfiguracionGlobal(cad);

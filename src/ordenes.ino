@@ -77,7 +77,7 @@ int EjecutaOrdenes(int debug){
           if(ordenRecibida[j+inicioParametro]==0) 
             {
             strncpy(sParametro,ordenRecibida+inicioParametro,j+1);//copio el parametro como texto
-            break;//j=LONG_ORDEN;//Cuando encuentro el final de la cadena
+            break;
             }
           else iParametro=(iParametro*10)+(int)ordenRecibida[j+inicioParametro]-48; //hay que convertir de ASCII a decimal
           }
@@ -300,9 +300,9 @@ void func_comando_nivelActivo(int iParametro, char* sParametro, float fParametro
 
     String cad="";
     
-    if(!leeFicheroConfig(GLOBAL_CONFIG_FILE, cad)) Traza.mensaje("No se pudo leer el fichero\n");
+    if(!leeFichero(GLOBAL_CONFIG_FILE, cad)) Traza.mensaje("No se pudo leer el fichero\n");
     cad=generaJsonConfiguracionNivelActivo(cad, nivelActivo);
-    if(!salvaFicheroConfig(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad)) Traza.mensaje("No se pudo salvar el fichero\n");      
+    if(!salvaFichero(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad)) Traza.mensaje("No se pudo salvar el fichero\n");      
     }
   Traza.mensaje("\nNivel activo: %i\n",nivelActivo);  
   }  

@@ -62,7 +62,7 @@ void salvaConfiguracion(void)
   Traza.mensaje("---------------------Salvando configuracion---------------\n");
   Traza.mensaje("Valores que voy a salvar:\nSSID : %s | Password : $s\n",WiFi.SSID().c_str(),WiFi.psk().c_str());
 
-  if(!leeFicheroConfig(WIFI_CONFIG_FILE, cad)) Traza.mensaje("No se pudo leer el fichero\n");
+  if(!leeFichero(WIFI_CONFIG_FILE, cad)) Traza.mensaje("No se pudo leer el fichero\n");
   cad=generaJsonConfiguracionWifi(cad, WiFi.SSID(),WiFi.psk());
   if(!salvaFichero(WIFI_CONFIG_FILE, WIFI_CONFIG_BAK_FILE, cad)) Traza.mensaje("No se pudo salvar el fichero\n");  
   Traza.mensaje("---------------------Fin salvando configuracion---------------\n");
@@ -87,13 +87,13 @@ boolean recuperaDatosWiFi(boolean debug)
   wifiDNS2=IPAddress(0,0,0,0);
   mDNS=NOMBRE_mDNS_CONFIG;
   
-  if(!leeFicheroConfig(WIFI_CONFIG_FILE, cad)) 
+  if(!leeFichero(WIFI_CONFIG_FILE, cad)) 
     {
     //Confgiguracion por defecto
     Traza.mensaje("No existe fichero de configuracion WiFi o no es valido\n");
     //cad="{\"wifi\": [ {\"ssid\": \"BASE0\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE1\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE2\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE-1\",\"password\": \"11223344556677889900abcdef\"}]}";
     //cad="{\"mDNS\":\"actuador\",\"wifiIP\":\"0.0.0.0\",   \"wifiGW\":\"0.0.0.0\",  \"wifiNet\": \"0.0.0.0\",   \"wifiDNS1\":\"0.0.0.0\",\"wifiDNS2\":\"0.0.0.0\",\"wifi\": []}";
-    //if(salvaFicheroConfig(WIFI_CONFIG_FILE, WIFI_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion WiFi creado por defecto\n");
+    //if(salvaFichero(WIFI_CONFIG_FILE, WIFI_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion WiFi creado por defecto\n");
     }
 
   return(parseaConfiguracionWifi(cad));
@@ -192,8 +192,6 @@ boolean conectaAutodetect(boolean debug)
   {
   //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
-  //WiFiManager wifiManager;
-
   AsyncWebServer server(80);
   DNSServer dns;
   AsyncWiFiManager wifiManager(&server,&dns);
@@ -317,30 +315,6 @@ String generaJsonConfiguracionWifi(String configActual, String ssid, String pass
   nuevoJson["wifiNet"] = cadNet; 
   nuevoJson["wifiDNS1"] = cadDNS1; 
   nuevoJson["wifiDNS2"] = cadDNS2; 
-/*
-  Traza.mensaje("Traza: \n mDNS-> %s\n IP fija-> %s\n GW-> %s\n subnet-> %s\n DNS1-> %s\n DNS2-> %s\n", mDNS.c_str(), cadIp, cadGw, cadNet, cadDNS1, cadDNS2);
-
-  Traza.mensaje("destino: %s | origen: %s\n",nuevoJson["mDNS"], mDNS.c_str());
-  Traza.mensaje("destino: %s | origen: %s\n",nuevoJson["wifiIP"], cadIp); 
-  Traza.mensaje("destino: %s | origen: %s\n",nuevoJson["wifiGW"] , cadGw); 
-  Traza.mensaje("destino: %s | origen: %s\n",nuevoJson["wifiNet"] , cadNet); 
-  Traza.mensaje("destino: %s | origen: %s\n",nuevoJson["wifiDNS1"] , cadDNS1); 
-  Traza.mensaje("destino: %s | origen: %s\n",nuevoJson["wifiDNS2"] , cadDNS2); 
-
-  nuevoJson["mDNS"] = "actuador";
-  nuevoJson["wifiIP"] = "10.68.0.52";
-  nuevoJson["wifiGW"] = "10.68.1.1";
-  nuevoJson["wifiNet"] = "255.255.0.0";
-  nuevoJson["wifiDNS1"] = "8.8.8.8";
-  nuevoJson["wifiDNS2"] = "4.4.4.4";
-
-  Traza.mensaje("destino: %s | origen: %s\n",nuevoJson.get<const char*>("mDNS"), mDNS.c_str());
-  Traza.mensaje("destino: %s | origen: %s\n",nuevoJson.get<const char*>("wifiIP"), cadIp); 
-  Traza.mensaje("destino: %s | origen: %s\n",nuevoJson.get<const char*>("wifiGW") , cadGw); 
-  Traza.mensaje("destino: %s | origen: %s\n",nuevoJson.get<const char*>("wifiNet") , cadNet); 
-  Traza.mensaje("destino: %s | origen: %s\n",nuevoJson.get<const char*>("wifiDNS1") , cadDNS1); 
-  Traza.mensaje("destino: %s | origen: %s\n",nuevoJson.get<const char*>("wifiDNS2") , cadDNS2); 
-*/
 
   JsonArray& nuevoWifi=nuevoJson.createNestedArray("wifi");
   
