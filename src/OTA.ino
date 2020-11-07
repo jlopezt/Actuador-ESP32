@@ -154,16 +154,17 @@ String pintaParticionHTML(void)
   
   esp_partition_iterator_t iterador=esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, NULL); //omito el nombre para sacar todas
 
-  cad +="<TABLE>\n<CAPTION>Particiones de memoria</CAPTION>\n";
+  cad += "<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
+  cad += "<CAPTION>Particiones de memoria</CAPTION>\n";
   cad += "<TR>";
-  cad += "<TD>Nombre</TD><TD>Tipo</TD><TD>Subtipo</TD><TD>Direccion</TD><TD>Tamaño</TD><TD>Encriptado</TD>";
+  cad += "<TH>Nombre</TH><TH>Tipo</TH><TH>Subtipo</TH><TH>Direccion</TH><TH>Tamaño</TH><TH>Encriptado</TH>";
   cad += "</TR>";
 
   while(iterador!=NULL)
     {
     particion=esp_partition_get(iterador);
 
-    cad += "<TR>";
+    cad += "<TR class=\"modo2\">";
     
     cad +="<TD><a href=\"setNextBoot?p=" + String(particion->label) + "\" target=\"_self\">" + String(particion->label) + "</a></TD>"; 
 
@@ -193,13 +194,14 @@ String pintaParticionHTML(void)
   cad +="</TABLE>";
 
   cad +="<BR>";
+  cad += "<p style=\"color: black;\">";
   cad += getParticionEjecucion();
-  cad +="<BR>";
-  cad += getParticionProximoArranque();
-  cad +="<BR>";
-  cad += getParticionProximoUpdate();
-  cad +="<BR>";
-   
+  cad += "<BR>" + getParticionProximoArranque();
+  cad += "<BR>" + getParticionProximoUpdate();
+  cad +="</p><BR>";
+
+  //cad += "<p><a href=\"/restart\" style=\"text-decoration:none; color: black;\">reinciar</a></p>";
+  cad += "<form action=\"/restart\"><input type=\"submit\" value=\"Reiniciar\"></form>";  
   esp_partition_iterator_release(iterador);  
 
   return(cad);

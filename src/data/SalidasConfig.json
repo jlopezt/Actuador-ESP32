@@ -1,41 +1,19 @@
 {
   "Salidas": [
     {
-    "GPIO": 23, 
-    "nombre": "Luz",
+    "GPIO": 36, 
+    "nombre": "Pulsador",
     "inicio": "off",
-    "anchoPulso": 3000,
-    "modo": 2,
-    "tipo": 1,
-    "valorPWM": 500,
-    "canal": 0,
-    "frecuencia": 200,
-    "resolucion": 10,
+    "anchoPulso": 1000,
+    "modo": 0,
     "controlador": 0,
     "Estados": [
-      {"valor": 0, "texto": "Reposo"},
-      {"valor": 1, "texto": "Activo"}
+      {"valor": 0, "texto": "Encendido"},
+      {"valor": 1, "texto": "Apagado"}
       ],
     "Mensajes": [
-      {"valor": 0, "texto": "Apagado"},
-      {"valor": 1, "texto": "Encendido"}
-      ]
-    },
-    {
-    "GPIO": 22, 
-    "nombre": "Led",
-    "inicio": "off",
-    "anchoPulso": 3000,
-    "modo": 2,
-    "tipo": 0,
-    "controlador": 0,
-    "Estados": [
-      {"valor": 0, "texto": "Reposo"},
-      {"valor": 1, "texto": "Activo"}
-      ],
-    "Mensajes": [
-      {"valor": 0, "texto": "Apagado"},
-      {"valor": 1, "texto": "Encendido"}
+      {"valor": 0, "texto": "Encendido"},
+      {"valor": 1, "texto": "Apagado"}
       ]
     }
   ]

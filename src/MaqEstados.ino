@@ -1,11 +1,11 @@
 /*******************************************/
 /*                                         */
 /*  Definicion de la maquina de estados    */
-/*  configurable.                          */ 
-/*
+/*  configurable.                          */
+/*                                         */
 /*  Hay un mapeo de E/S del dispositivo y  */
 /*  de la maquina de estados. La entrada 1 */
-/*  de la maquina puede ser la 4 del dis-  */ 
+/*  de la maquina puede ser la 4 del dis-  */
 /*  positivo. Igual con las salidas.       */
 /*                                         */
 /*  el estado 0 es el de error             */
@@ -16,9 +16,12 @@
 
 /********************definiciones**************************/
 #define MAX_ESTADOS 10
-#define MAX_TRANSICIONES 3*MAX_ESTADOS
+#define MAX_TRANSICIONES 50//3*MAX_ESTADOS
 #define ESTADO_ERROR   0 //Estado de error de la logica de la maquina. Imposible evolucionar del ese estado con las estradas actuales
 #define ESTADO_INICIAL 1 //Estado inicio
+
+/********************includes**************************/
+#include <Arduino.h>
 
 //Estados de la maquina. Tienen un nombre, un id y una lista de salidas asociadas, son el valor de las salidas en ese estado
 typedef struct {
@@ -31,10 +34,8 @@ typedef struct {
 typedef struct {
   int8_t estadoInicial;
   int8_t estadoFinal;
-  int8_t valorEntradas[MAX_ENTRADAS];
+  int8_t valorEntradas[MAX_ENTRADAS];//Puede ser -1, significa que no importa el valor
   }transicionEstados_t;
-  
-/********************includes**************************/
 
 /********************variables locales**************************/
 uint8_t numeroEstados;
@@ -135,7 +136,7 @@ boolean parseaConfiguracionMaqEstados(String contenido)
 
   String salida;
   json.printTo(salida);//pinto el json que he leido
-  Traza.mensaje("json creado:\n#%s#\n",salida.c_str());
+  Traza.mensaje("json cargado:\n#%s#\n",salida.c_str());
   
   if (!json.success()) return false;
 
@@ -216,7 +217,7 @@ boolean parseaConfiguracionMaqEstados(String contenido)
       return false;
       }
     
-    for(int8_t e=0;e<num_entradas;e++) transiciones[i].valorEntradas[e]=Entradas.get<int>(e);//atoi(Entradas[e]["valor"]);//Puede ser -1, significa que no importa el valor
+    for(int8_t e=0;e<num_entradas;e++) transiciones[i].valorEntradas[e]=Entradas.get<int>(e);//Puede ser -1, significa que no importa el valor
     }
 
   Traza.mensaje("*************************\nTransiciones:\n"); 

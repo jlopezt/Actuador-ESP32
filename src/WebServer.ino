@@ -26,10 +26,22 @@ Informacion del Hw del sistema http://IP/info
 AsyncWebServer serverX(PUERTO_WEBSERVER);
 
 //Cadenas HTML precargadas
+//String CSS=".tabla th {padding: 5px;font-size: 16px;background-color: #83aec0;background-repeat: repeat-x;color: #FFFFFF;border-right-width: 1px;border-bottom-width: 1px;border-right-style: solid;border-bottom-style: solid;border-right-color: #558FA6;border-bottom-color: #558FA6;font-family: Trebuchet MS, Arial;text-transform: uppercase;}.tabla .modo2 {font-size: 12px;font-weight:bold;background-color: #fdfdf1;background-repeat: repeat-x;color: #990000;font-family: Trebuchet MS, Arial;text-align:left;}.tabla .modo2 td {padding: 5px;border-right-width: 1px;border-bottom-width: 1px;border-right-style: solid;border-bottom-style: solid;border-right-color: #EBE9BC;border-bottom-color: #EBE9BC;}.tabla .modo2 th {background-position: left top;font-size: 12px;font-weight:bold;background-color: #fdfdf1;background-repeat: repeat-x;color: #990000;font-family: Trebuchet MS, Arial;text-align:left;border-right-width: 1px;border-bottom-width: 1px;border-right-style: solid;border-bottom-style: solid;border-right-color: #EBE9BC;border-bottom-color: #EBE9BC;}";
 String cabeceraHTML="";
-String cabeceraHTMLlight = "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n<meta charset=\"UTF-8\" />\n<HTML><HEAD><TITLE>Termostato domestico</TITLE></HEAD><BODY>\n";
-String enlaces="<TABLE>\n<CAPTION>Enlaces</CAPTION>\n<TR><TD><a href=\"info\" target=\"_self\">Info</a></TD></TR>\n<TR><TD><a href=\"test\" target=\"_self\">Test</a></TD></TR>\n<TR><TD><a href=\"restart\" target=\"_self\">Restart</a></TD></TR>\n<TR><TD><a href=\"particiones\" target=\"_self\">Particiones</a></TD></TR>\n<TR><TD><a href=\"listaFicheros\" target=\"_self\">Lista ficheros</a></TD></TR>\n<TR><TD><a href=\"estado\" target=\"_self\">Estado</a></TD></TR>\n<TR><TD><a href=\"configSalidas\" target=\"_self\">Configuracion salidas</a></TD></TR>\n<TR><TD><a href=\"configEntradas\" target=\"_self\">Configuracion entradas</a></TD></TR>\n<TR><TD><a href=\"planes\" target=\"_self\">Planes del secuenciador</a></TD></TR>\n<TR><TD><a href=\"maquinaEstados\" target=\"_self\">Maquina de estados</a></TD></TR></TABLE>\n"; 
+String cabeceraHTMLlight = "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n<meta charset=\"UTF-8\" />\n<HTML><HEAD><TITLE>Domoticae</TITLE><link rel=\"stylesheet\" type=\"text/css\" href=\"CSS.css\"></HEAD><BODY>\n";
+String enlaces ="<H2>Enlaces</H2><LU>	<LI><a href=\"info\" target=\"_self\">Info</a></LI>	<LI><a href=\"test\" target=\"_self\">Test</a></LI>	<LI><a href=\"restart\" target=\"_self\">Restart</a></LI>	<LI><a href=\"particiones\" target=\"_self\">Particiones</a></LI>	<LI><a href=\"listaFicheros\" target=\"_self\">Lista ficheros</a></LI>	<LI><a href=\"estado\" target=\"_self\">Estado</a></LI>	<LI><a href=\"configSalidas\" target=\"_self\">Configuracion salidas</a></LI>	<LI><a href=\"configEnLUadas\" target=\"_self\">Configuracion enLUadas</a></LI>	<LI><a href=\"planes\" target=\"_self\">Planes del secuenciador</a></LI>	<LI><a href=\"maquinaEstados\" target=\"_self\">Maquina de estados</a></LI></LU>";
 String pieHTML="</BODY></HTML>";
+//String tabla = "<TABLE style=\"border: 2px solid black\">\n";
+String tabla = "<TABLE border=\"0\" width=\"80%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
+
+//String pagina_a = "<!DOCTYPE html>\n<html lang=\"es\">\n <head>\n <meta charset=\"UTF-8\">\n <TITLE>Domoticae</TITLE>\n <link rel=\"stylesheet\" type=\"text/css\" href=\"CSS.css\">\n </HEAD>\n <BODY>\n <table style=\"width:100%;color:white\" cellpadding=\"10\" cellspacing=\"0\">\n  <tr style=\"height:20%; background-color:black\">\n  	<!--\n  <th align=\"left\">\n  	<p style=\"font-size:30px;color:white;\"><a href=\"../\" style=\"text-decoration:none;color:white;\" target=\"_self\">Puerta del garaje</a></p>\n  </th>-->\n  <th align=\"left\">\n   <span style=\"font-family:verdana;font-size:30px;color:white\">DOMOTI</span>\n   <span style=\"font-family:verdana;font-size:30px;color:red\">C</span>\n   <span style=\"font-family:verdana;font-size:30px;color:white\">AE - Puerta del garaje</span>   \n  </th>\n  </tr>\n  <tr style=\"height:10%;\">\n  	<td>";
+String pagina_a = "<!DOCTYPE html>\n<html lang=\"es\">\n <head>\n <meta charset=\"UTF-8\">\n <TITLE>Domoticae</TITLE>\n <link rel=\"stylesheet\" type=\"text/css\" href=\"CSS.css\">\n </HEAD>\n <BODY>\n <table style=\"width:100%;\" cellpadding=\"10\" cellspacing=\"0\">\n  <tr style=\"height:20%; background-color:black\">\n  <th align=\"left\">\n   <span style=\"font-family:verdana;font-size:30px;color:white\">DOMOTI</span>\n   <span style=\"font-family:verdana;font-size:30px;color:red\">C</span>\n   <span style=\"font-family:verdana;font-size:30px;color:white\">AE - ";
+//en medio va el nombre_dispositivo
+String pagina_b = "</span>   \n  </th>\n  </tr>\n  <tr style=\"height:10%;\">\n  	<td>";
+String enlaces_2 = "<table class=\"tabla\"><tr class=\"modo1\"><td><a href=\"..\" target=\"_self\" style=\"text-decoration:none; color: black;\">Home</a></td><td><a href=\"configEntradas\" target=\"_self\" style=\"text-decoration:none; color: black;\">Entradas</a></td><td><a href=\"configSalidas\" target=\"_self\" style=\"text-decoration:none; color: black;\">Salidas</a></td><td><a href=\"planes\" target=\"_self\" style=\"text-decoration:none; color: black;\">Secuenciador</a></td><td><a href=\"maquinaEstados\" target=\"_self\" style=\"text-decoration:none; color: black;\">Maquina de estados</a></td><td><a href=\"listaFicheros\" target=\"_self\" style=\"text-decoration:none; color: black;\">Ficheros</a></td><td><a href=\"info\" target=\"_self\" style=\"text-decoration:none; color: black;\">Info</a></td><td><a href=\"particiones\" target=\"_self\" style=\"text-decoration:none; color: black;\">Particiones</a></td><td><a href=\"restart\" target=\"_self\" style=\"text-decoration:none; color: black;\">Restart</a></td></tr></table>";
+String pagina_c = "</td></tr><TR style=\"height:60%\"><TD>";
+//En medio va el cuerpo de la pagina
+String pagina_d = "</TD>\n</TR>\n<TR>\n<TD style=\"color:white; background-color:black\"><a href=\"https://domoticae.lopeztola.com\" target=\"_self\" style=\"text-decoration:none; color:white;\">domoticae</a></TD>\n</TR>\n</table>\n</BODY>\n</HTML>";
 
 void handleNotFound(AsyncWebServerRequest *request);
 bool handleFileRead(AsyncWebServerRequest *request);
@@ -65,9 +77,13 @@ void handleSetNextBoot(AsyncWebServerRequest *request);
 /*********************************** Inicializacion y configuracion *****************************************************************/
 void inicializaWebServer(void)
   {
-  //lo inicializo aqui, despues de leer el nombre del dispositivo en la configuracion del cacharro
-  //cabeceraHTML="<HTML><HEAD><TITLE>" + nombre_dispositivo + " </TITLE>\n<link rel=\"stylesheet\" type=\"text/css\" href=\"estilos.css\" media=\"screen\" /></HEAD><BODY><h1><a href=\"../\" target=\"_self\">" + nombre_dispositivo + "</a><br></h1>";
+  //lo inicializo aqui, despues de leer el nombre del dispositivo en la configuracion del cacharro  
   cabeceraHTML = cabeceraHTMLlight + "<h1><a href=\"../\" target=\"_self\">" + nombre_dispositivo + "</a><br></h1>\n";
+
+  cabeceraHTML = pagina_a + nombre_dispositivo + pagina_b + enlaces_2 + pagina_c;
+  pieHTML = pagina_d;
+  enlaces = "";
+
     
   /*******Configuracion del Servicio Web***********/  
   //Inicializo los serivcios  
@@ -81,7 +97,7 @@ void inicializaWebServer(void)
   serverX.on("/fuerzaManualSalida", HTTP_ANY, handleFuerzaManual);  //Servicio para formar ua salida a modo manual
   serverX.on("/recuperaManualSalida", HTTP_ANY, handleRecuperaManual);  //Servicio para formar ua salida a modo manual  
 
-  serverX.on("/pulsoRele", HTTP_ANY, handlePulsoRele);  //Servicio de pulso de rele
+  serverX.on("/pulsoSalida", HTTP_ANY, handlePulsoRele);  //Servicio de pulso de rele
   serverX.on("/planes", HTTP_ANY, handlePlanes);  //Servicio de representacion del plan del secuenciador
   serverX.on("/activaSecuenciador", HTTP_ANY, handleActivaSecuenciador);  //Servicio para activar el secuenciador
   serverX.on("/desactivaSecuenciador", HTTP_ANY, handleDesactivaSecuenciador);  //Servicio para desactivar el secuenciador
@@ -133,50 +149,52 @@ void handleRoot(AsyncWebServerRequest *request)
   //genero la respuesta por defecto
   cad += cabeceraHTML;
 
-  //Entradas  
-  cad += "<TABLE style=\"border: 2px solid black\">\n";
-  cad += "<CAPTION>Entradas</CAPTION>\n";  
+  //Entradas    
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
+  cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
+  cad += "<CAPTION>Entradas</CAPTION>\n";    
   for(int8_t i=0;i<MAX_ENTRADAS;i++)
     {    
     if(entradaConfigurada(i)==CONFIGURADO) 
       {
       //cad += "<TR><TD>" + nombreEntrada(i) + "-></TD><TD>" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD></TR>\n";    
-      cad += "<TR>";
-      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + FONDO + "\">" + nombreEntrada(i) + "</TD>";
-      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoEntrada(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 100px\">" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD>";
+      cad += "<TR class=\"modo2\">";
+      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + FONDO + "; width: 100px\">" + nombreEntrada(i) + "</TD>";
+      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoEntrada(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 200px\">" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD>";
       cad += "</TR>";
       }
     }
   cad += "</TABLE>\n";
-  cad += "<BR>";
+  cad += "<BR>\n";
   
   //Salidas
-  cad += "\n<TABLE style=\"border: 2px solid blue\">\n";
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
+  cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Salidas</CAPTION>\n";  
   for(int8_t i=0;i<MAX_SALIDAS;i++)
     {
     if(releConfigurado(i)==CONFIGURADO)
       {
       String orden="";
-      if (estadoRele(i)!=ESTADO_DESACTIVO) orden="desactiva"; 
+      if (estadoSalida(i)!=ESTADO_DESACTIVO) orden="desactiva"; 
       else orden="activa";
 
-      cad += "<TR>\n";
-      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + FONDO + "; width: 100px\">" + nombreRele(i) + "</TD>\n";
-      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoRele(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 100px\">" + String(nombreEstadoSalida(i,estadoSalida(i))) + "</TD>";
+      cad += "<TR class=\"modo2\">\n";
+      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + FONDO + "; width: 100px\">" + nombreSalida(i) + "</TD>\n";
+      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoSalida(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 100px\">" + String(nombreEstadoSalida(i,estadoSalida(i))) + "</TD>";
 
       //acciones en funcion del modo
       switch (modoSalida(i))          
         {
         case MODO_MANUAL:
           //Enlace para activar o desactivar y para generar un pulso
-          cad += "<TD>Manual</TD>\n";
+          cad += "<TD width=\"100\">Manual</TD>\n";
           cad += "<td>\n";
           cad += "<form action=\"" + orden + "Rele\">\n";
           cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
-          cad += "<input STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoRele(i)==ESTADO_DESACTIVO?ACTIVO:DESACTIVO)) + "; width: 80px\" type=\"submit\" value=\"" + orden + "r\">\n";
+          cad += "<input STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoSalida(i)==ESTADO_DESACTIVO?ACTIVO:DESACTIVO)) + "; width: 80px\" type=\"submit\" value=\"" + orden + "r\">\n";
           cad += "</form>\n";
-          cad += "<form action=\"pulsoRele\">\n";
+          cad += "<form action=\"pulsoSalida\">\n";
           cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
           cad += "<input STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + ACTIVO + "; width: 80px\" type=\"submit\" value=\"pulso\">\n";
           cad += "</form>\n";
@@ -211,28 +229,48 @@ void handleRoot(AsyncWebServerRequest *request)
       }
     }
   cad += "</TABLE>\n";
+  cad += "<BR><BR>\n";
 
   //Secuenciadores
-  cad += "<BR><BR>\n";
-  cad += "\n<TABLE style=\"border: 2px solid blue\">\n";
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";  
+  cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Secuenciadores</CAPTION>\n";  
   for(int8_t i=0;i<MAX_PLANES;i++)
     {
+    cad += "<TR>";  
+    cad += "<TH>plan</TH>";  
+    cad += "<TH>acción</TH>";  
+    cad += "</TR>";  
+
     if(planConfigurado(i)==CONFIGURADO)
       {      
-      cad += "<TR>\n";
-      if (estadoSecuenciador()) cad += "<TD><a href=\"desactivaSecuenciador\" \" target=\"_self\">Desactiva secuenciador</TD>";            
-      else cad += "<TD><a href=\"activaSecuenciador\" \" target=\"_self\">Activa secuenciador</TD>";            
+      cad += "<TR class=\"modo2\">\n";
+      cad += "<TD>Plan " + String(i) + "</TD>";
+      cad += "<TD>";
+      if (estadoSecuenciador()) cad += "<a href=\"desactivaSecuenciador\" \" target=\"_self\">Desactiva secuenciador";
+      else cad += "<a href=\"activaSecuenciador\" \" target=\"_self\">Activa secuenciador";
+      cad += "</TD>";
       cad += "</TR>\n";  
       }
     }
   cad += "</TABLE>\n";
-  
-  //Enlaces
   cad += "<BR><BR>\n";
+  
+  //Maquina de estados
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";  
+  cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
+  cad += "<CAPTION>Máquina de estados</CAPTION>\n"; 
+  cad += "<TR>\n";
+  cad += "<TH width=\"100\">Estado: </TH>";
+  cad += "<TD width=\"200\" class=\"modo2\">" + getNombreEstadoActual() + "</TD>";
+  cad += "</TR>\n";
+  cad += "</TABLE>\n";
+
+  //Enlaces
+  cad += "<BR>\n";
   cad += enlaces;
 
-  cad += "<BR><BR>" + nombre_dispositivo + " . Version " + String(VERSION) + ".";
+  cad += "<BR><p style=\"fonst-size: 12px;color:black;\">" + nombre_dispositivo + " - Version " + String(VERSION) + "</p>";
 
   cad += pieHTML;
   request->send(200, "text/html", cad);
@@ -292,87 +330,101 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += cabeceraHTML;
 
   //Estado actual
-  cad += "Estado actual: " + getNombreEstadoActual();
-  cad += "<BR><BR>";
-  
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";  
+  cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
+  cad += "<CAPTION>Estado actual</CAPTION>\n"; 
+  cad += "<TR>\n";
+  cad += "<TH width=\"100\">Estado: </TH>";
+  cad += "<TD width=\"200\" class=\"modo2\">" + getNombreEstadoActual() + "</TD>";
+  cad += "</TR>\n";
+  cad += "</TABLE>\n";
+  cad += "<BR>";
+
   //Entradas
-  cad += "<TABLE style=\"border: 2px solid black\">\n";
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
+  cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Entradas actual</CAPTION>\n";  
   cad += "<TR>"; 
-  cad += "<TD>id</TD>";  
-  cad += "<TD>Nombre</TD>";
-  cad += "<TD>Ultimo estado leido</TD>";
+  cad += "<TH>id</TH>";
+  cad += "<TH>Nombre</TH>";
+  cad += "<TH>Ultimo estado leido</TH>";
   cad += "</TR>";    
   for(uint8_t i=0;i<getNumEntradasME();i++)
     {
-    cad += "<TR>";  
+    cad += "<TR class=\"modo2\">";  
     cad += "<TD>" + String(i) + ":" + String(mapeoEntradas[i]) + "</TD>";  
     cad += "<TD>" + nombreEntrada(mapeoEntradas[i])+ "</TD>";
     cad += "<TD>" + String(entradasActual[i]) + ":" + String(estadoEntrada(mapeoEntradas[i])) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
-  cad += "<BR><BR>";
+  cad += "<BR>";
   
   //Salidas
-  cad += "<TABLE style=\"border: 2px solid black\">\n";
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
+  cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Salidas actual</CAPTION>\n";  
   cad += "<TR>"; 
-  cad += "<TD>id</TD>";  
-  cad += "<TD>Nombre</TD>";
-  cad += "<TD>Estado actual</TD>";
+  cad += "<TH>id</TH>";  
+  cad += "<TH>Nombre</TH>";
+  cad += "<TH>Estado actual</TH>";
   cad += "</TR>";    
   for(uint8_t i=0;i<getNumSalidasME();i++)
     {
-    cad += "<TR>";  
+    cad += "<TR class\"modo2\">";  
     cad += "<TD>" + String(i) + ":" + String(mapeoSalidas[i]) + "</TD>";  
     cad += "<TD>" + String(nombreSalida(mapeoSalidas[i])) + "</TD>";
-    cad += "<TD>" + String(estadoRele(mapeoSalidas[i])) + "</TD>";
+    cad += "<TD>" + String(estadoSalida(mapeoSalidas[i])) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
-  cad += "<BR><BR>";
+  cad += "<BR>";
   
   //Estados  
-  cad += "<TABLE style=\"border: 2px solid black\">\n";
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
+  cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>ESTADOS</CAPTION>\n";  
   cad += "<TR>"; 
-  cad += "<TD>id</TD>";  
-  cad += "<TD>Nombre</TD>";
+  cad += "<TH>id</TH>";  
+  cad += "<TH>Nombre</TH>";
   for(uint8_t i=0;i<getNumSalidasME();i++) cad += "<TD>Salida[" + String(i) + "] salida asociada(" + mapeoSalidas[i] + ")</TD>";
   cad += "</TR>"; 
     
   for(uint8_t i=0;i<getNumEstados();i++)
     {
-    cad += "<TR>";  
+    cad += "<TR class=\"modo2\">";  
     cad += "<TD>" + String(i) + "</TD>";  
     cad += "<TD>" + estados[i].nombre + "</TD>";
     for(uint8_t j=0;j<getNumSalidasME();j++) cad += "<TD>" + String(estados[i].valorSalidas[j]) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
-  cad += "<BR><BR>";
+  cad += "<BR>";
   
   //Transiciones
-  cad += "<TABLE style=\"border: 2px solid black\">\n";
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
+  cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>TRANSICIONES</CAPTION>\n";  
 
   cad += "<TR>";
-  cad += "<TD>Inicial</TD>";
-  for(uint8_t i=0;i<getNumEntradasME();i++) cad += "<TD>Entrada " + String(i) + "</TD>";
-  cad += "<TD>Final</TD>";  
+  cad += "<TH ROWSPAN=2>Estado inicial</TH>";
+  cad += "<TH COLSPAN=" + String(getNumEntradasME()) + ">Entradas</TH>";
+  cad += "<TH ROWSPAN=2>Estado final</TH>";
   cad += "</TR>";
-  
+  cad += "<TR>";
+  for(uint8_t i=0;i<getNumEntradasME();i++) cad += "<TH>" + String(nombreEntrada(i)) + "</TH>";
+  cad += "</TR>";
+
   for(uint8_t i=0;i<getNumTransiciones();i++)
     {
-    cad += "<TR>";
-    cad += "<TD>" + String(transiciones[i].estadoInicial) + "</TD>";
+    cad += "<TR class=\"modo2\">";
+    cad += "<TD>" + String(getNombreEstado(transiciones[i].estadoInicial)) + "</TD>";
     for(uint8_t j=0;j<getNumEntradasME();j++) cad += "<TD>" + String(transiciones[i].valorEntradas[j]) + "</TD>";
-    cad += "<TD>" + String(transiciones[i].estadoFinal) + "</TD>";    
+    cad += "<TD>" + String(getNombreEstado(transiciones[i].estadoFinal)) + "</TD>";    
     cad += "</TR>";
     }
   cad += "</TABLE>";
-  cad += "<BR><BR>";
+  cad += "<BR>";
   
   cad += pieHTML;
   request->send(200, "text/html", cad);
@@ -406,30 +458,31 @@ void handleConfigSalidas(AsyncWebServerRequest *request)
   cad += cabeceraHTML;
 
   //Estados
-  cad += "<TABLE style=\"border: 2px solid black\">\n";
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
+  cad += "<TABLE border=\"0\" width=\"80%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Salidas</CAPTION>\n";  
 
   cad += "<TR>"; 
-  cad += "<TD>id</TD>";  
-  cad += "<TD>Nombre</TD>";
-  cad += "<TD>Configurada</TD>";
-  cad += "<TD>Pin</TD>";  
-  cad += "<TD>Controlador</TD>";  
-  cad += "<TD>Inicio</TD>";    
-  cad += "<TD>Modo</TD>";  
-  cad += "<TD>Tipo</TD>";  
-  cad += "<TD>valor PWM</TD>";      
-  cad += "<TD>Ancho del pulso</TD>";  
-  cad += "<TD>Inicio del pulso</TD>";  
-  cad += "<TD>Fin del pulso</TD>";  
-  cad += "<TD>Estado</TD>";
-  cad += "<TD>Nombre del estado</TD>";
-  cad += "<TD>mensaje</TD>";
+  cad += "<TH>id</TH>";  
+  cad += "<TH>Nombre</TH>";
+  cad += "<TH>Configurada</TH>";
+  cad += "<TH>Pin</TH>";  
+  cad += "<TH>Controlador</TH>";  
+  cad += "<TH>Inicio</TH>";    
+  cad += "<TH>Modo</TH>";  
+  cad += "<TH>Tipo</TH>";  
+  cad += "<TH>valor PWM</TH>";      
+  cad += "<TH>Ancho del pulso</TH>";  
+  cad += "<TH>Inicio del pulso</TH>";  
+  cad += "<TH>Fin del pulso</TH>";  
+  cad += "<TH>Estado</TH>";
+  cad += "<TH>Nombre del estado</TH>";
+  cad += "<TH>mensaje</TH>";
   cad += "</TR>"; 
 
   for(uint8_t salida=0;salida<MAX_SALIDAS;salida++)
     {
-    cad += "<TR>"; 
+    cad += "<TR class=\"modo2\">"; 
     cad += "<TD>" + String(salida) + "</TD>";
     cad += "<TD>" + String(nombreSalida(salida)) + "</TD>";  
     cad += "<TD>" + String(releConfigurado(salida)) + "</TD>";
@@ -442,9 +495,9 @@ void handleConfigSalidas(AsyncWebServerRequest *request)
     cad += "<TD>" + String(anchoPulsoSalida(salida)) + "</TD>";
     cad += "<TD>" + String(inicioSalida(salida)) + "</TD>";
     cad += "<TD>" + String(finPulsoSalida(salida)) + "</TD>";
-    cad += "<TD>" + String(estadoRele(salida)) + "</TD>";
-    cad += "<TD>" + String(nombreEstadoSalida(salida,estadoRele(salida))) + "</TD>";
-    cad += "<TD>" + String(mensajeEstadoSalida(salida,estadoRele(salida))) + "</TD>";
+    cad += "<TD>" + String(estadoSalida(salida)) + "</TD>";
+    cad += "<TD>" + String(nombreEstadoSalida(salida,estadoSalida(salida))) + "</TD>";
+    cad += "<TD>" + String(mensajeEstadoSalida(salida,estadoSalida(salida))) + "</TD>";
     cad += "</TR>";     
     }
   cad += "</TABLE>";
@@ -467,25 +520,26 @@ void handleConfigEntradas(AsyncWebServerRequest *request)
   cad += cabeceraHTML;
 
   //Estados
-  cad += "<TABLE style=\"border: 2px solid black\">\n";
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
+  cad += "<TABLE border=\"0\" width=\"80%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Entradas</CAPTION>\n";  
 
   cad += "<TR>"; 
-  cad += "<TD>id</TD>";  
-  cad += "<TD>Nombre</TD>";
-  cad += "<TD>Configurada</TD>";
-  cad += "<TD>Tipo</TD>";
-  cad += "<TD>Pin</TD>";
-  cad += "<TD>Estado activo</TD>";
-  cad += "<TD>Estado fisico</TD>";
-  cad += "<TD>Estado</TD>";
-  cad += "<TD>Nombre del estado</TD>";
-  cad += "<TD>mensaje</TD>";
+  cad += "<TH>id</TH>";  
+  cad += "<TH>Nombre</TH>";
+  cad += "<TH>Configurada</TH>";
+  cad += "<TH>Tipo</TH>";
+  cad += "<TH>Pin</TH>";
+  cad += "<TH>Estado activo</TH>";
+  cad += "<TH>Estado fisico</TH>";
+  cad += "<TH>Estado</TH>";
+  cad += "<TH>Nombre del estado</TH>";
+  cad += "<TH>mensaje</TH>";
   cad += "</TR>"; 
 
   for(uint8_t entrada=0;entrada<MAX_ENTRADAS;entrada++)
     {
-    cad += "<TR>"; 
+    cad += "<TR class=\"modo2\">"; 
     cad += "<TD>" + String(entrada) + "</TD>";
     cad += "<TD>" + String(nombreEntrada(entrada)) + "</TD>";  
     cad += "<TD>" + String(entradaConfigurada(entrada)) + "</TD>";
@@ -516,7 +570,7 @@ void handleActivaRele(AsyncWebServerRequest *request)
     int8_t id=request->arg("id").toInt();
 
     //activaRele(id);
-    conmutaRele(id, ESTADO_ACTIVO, debugGlobal);
+    conmutaSalida(id, ESTADO_ACTIVO, debugGlobal);
 
     handleRoot(request);
     }
@@ -535,7 +589,7 @@ void handleDesactivaRele(AsyncWebServerRequest *request)
     int8_t id=request->arg("id").toInt();
 
     //desactivaRele(id);
-    conmutaRele(id, ESTADO_DESACTIVO, debugGlobal);
+    conmutaSalida(id, ESTADO_DESACTIVO, debugGlobal);
     
     handleRoot(request);
     }
@@ -554,7 +608,7 @@ void handlePulsoRele(AsyncWebServerRequest *request)
     int8_t id=request->arg("id").toInt();
 
     //desactivaRele(id);
-    pulsoRele(id);
+    pulsoSalida(id);
     
     handleRoot(request);
     }
@@ -611,12 +665,12 @@ void handlePlanes(AsyncWebServerRequest *request)
   int8_t numPlanes=getNumPlanes();  
   String cad=cabeceraHTML;
   
-  cad += "<h1>hay " + String(numPlanes) + " plan(es) activo(s).</h1><BR>";
+  cad += "<h3>hay " + String(numPlanes) + " plan(es) activo(s).</h3>";
   
   for(int8_t i=0;i<numPlanes;i++)
     {
     cad += pintaPlanHTML(i);
-    cad += "<BR><BR>";
+    cad += "<BR>";
     }
   
   cad += pieHTML;
@@ -688,9 +742,9 @@ void handleRestart(AsyncWebServerRequest *request)
 void handleInfo(AsyncWebServerRequest *request)
   {
   String cad=cabeceraHTML;
-  cad += "<h1>" + nombre_dispositivo + "</h1>";
 
-  cad+= "<BR>-----------------Uptime---------------------<BR>";
+  cad+= "<p style=\"color:black;\">";
+  cad+= "-----------------Uptime---------------------<BR>";
   char tempcad[20]="";
   sprintf(tempcad,"%lu", (unsigned long)(esp_timer_get_time()/(unsigned long)1000000)); //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años  
   cad += "Uptime: " + String(tempcad) + " segundos"; //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años
@@ -707,7 +761,7 @@ void handleInfo(AsyncWebServerRequest *request)
   cad += "<BR>";  
   for(int8_t i=0;i<MAX_SALIDAS;i++)
     {
-    cad += "Rele " + String(i) + " nombre: " + nombreRele(i) + "| estado: " + estadoRele(i);    
+    cad += "Rele " + String(i) + " nombre: " + nombreSalida(i) + "| estado: " + estadoSalida(i);    
     cad += "<BR>";   
     }
   cad += "-----------------------------------------------<BR>"; 
@@ -749,6 +803,7 @@ void handleInfo(AsyncWebServerRequest *request)
   cad += "FlashChipSpeed: " + String(ESP.getFlashChipSpeed());
   cad += "<BR>";  
   cad += "-----------------------------------------------<BR>";  
+  cad += "</p>";
  
   cad += pieHTML;
   request->send(200, "text/html", cad);     
@@ -900,8 +955,7 @@ void handleManageFichero(AsyncWebServerRequest *request)
   String cad="";
 
   cad += cabeceraHTML;
-  cad += "<h1>" + nombre_dispositivo + "</h1>";
-  
+    
   if(request->hasArg("nombre") ) //si existen esos argumentos
     {
     nombreFichero=request->arg("nombre");
@@ -971,7 +1025,7 @@ void handleListaFicheros(AsyncWebServerRequest *request)
     to=contenido.indexOf(SEPARADOR); 
 
     cad +="<style> table{border-collapse: collapse;} th, td{border: 1px solid black; padding: 10px; text-align: left;}</style>";
-    cad += "<TABLE>";
+    cad += "<TABLE>";//"<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
     while(to!=-1)
       {
       fichero=contenido.substring(0, to);//cojo el principio como el fichero
@@ -1061,10 +1115,6 @@ void handleSpeechPath(AsyncWebServerRequest *request)
   else request->send(404, "text / plain", "KO");  
   }
 
-
-
-
-
 /**********************************************************************************************/
 /*********************************************/
 /*                                           */
@@ -1081,7 +1131,8 @@ void handleDatos(AsyncWebServerRequest *request)
   cad += cabeceraHTMLlight;
 
   //Entradas  
-  cad += "<TABLE style=\"border: 2px solid black\">\n";
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
+  cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Entradas</CAPTION>\n";  
   for(int8_t i=0;i<MAX_ENTRADAS;i++)
     {
@@ -1098,19 +1149,20 @@ void handleDatos(AsyncWebServerRequest *request)
   cad += "<BR>";
   
   //Salidas
-  cad += "\n<TABLE style=\"border: 2px solid blue\">\n";
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
+  cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Salidas</CAPTION>\n";  
   for(int8_t i=0;i<MAX_SALIDAS;i++)
     {
     if(releConfigurado(i)==CONFIGURADO)
       {      
       String orden="";
-      if (estadoRele(i)!=ESTADO_DESACTIVO) orden="desactiva"; 
+      if (estadoSalida(i)!=ESTADO_DESACTIVO) orden="desactiva"; 
       else orden="activa";
 
       cad += "<TR>\n";
-      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + FONDO + "; width: 100px\">" + nombreRele(i) + "</TD>\n";
-      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoRele(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 100px\">" + String(nombreEstadoSalida(i,estadoSalida(i))) + "</TD>";
+      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + FONDO + "; width: 100px\">" + nombreSalida(i) + "</TD>\n";
+      cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoSalida(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 100px\">" + String(nombreEstadoSalida(i,estadoSalida(i))) + "</TD>";
 
         //acciones en funcion del modo
       switch (modoSalida(i))          
@@ -1121,9 +1173,9 @@ void handleDatos(AsyncWebServerRequest *request)
           cad += "<td>\n";
           cad += "<form action=\"" + orden + "Rele\">\n";
           cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
-          cad += "<input STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoRele(i)==ESTADO_DESACTIVO?ACTIVO:DESACTIVO)) + "; width: 80px\" type=\"submit\" value=\"" + orden + "r\">\n";
+          cad += "<input STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoSalida(i)==ESTADO_DESACTIVO?ACTIVO:DESACTIVO)) + "; width: 80px\" type=\"submit\" value=\"" + orden + "r\">\n";
           cad += "</form>\n";
-          cad += "<form action=\"pulsoRele\">\n";
+          cad += "<form action=\"pulsoSalida\">\n";
           cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
           cad += "<input STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + ACTIVO + "; width: 80px\" type=\"submit\" value=\"pulso\">\n";
           cad += "</form>\n";
@@ -1161,7 +1213,8 @@ void handleDatos(AsyncWebServerRequest *request)
   
   //Secuenciadores
   cad += "<BR><BR>\n";
-  cad += "\n<TABLE style=\"border: 2px solid blue\">\n";
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";  
+  cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Secuenciadores</CAPTION>\n";  
   for(int8_t i=0;i<MAX_PLANES;i++)
     {

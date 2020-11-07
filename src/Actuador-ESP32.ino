@@ -11,7 +11,7 @@
 /***************************** Defines *****************************/
 //Defines generales
 #define NOMBRE_FAMILIA   "Actuador/Secuenciador (E/S)"
-#define VERSION          "5.0.3 (ESP32 1.0.2|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)" //Correccion en entradas y salidas
+#define VERSION          "5.0.4 (ESP32 1.0.4|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)" //Correccion en entradas y salidas
 #define SEPARADOR        '|'
 #define SUBSEPARADOR     '#'
 #define KO               -1
@@ -201,9 +201,11 @@ void setup()
   Traza.mensaje("\n\nInit Ordenes ----------------------------------------------------------------------\n");  
   inicializaOrden();//Inicializa los buffers de recepcion de ordenes desde PC
 
+  /*
   //Si ha llegado hasta aqui, todo ha ido bien y borro el candado
   if(borraFichero(FICHERO_CANDADO))Traza.mensaje("Candado borrado\n");
   else Traza.mensaje("ERROR - No se pudo borrar el candado\n");
+  */
 
   compruebaConfiguracion(0);
   parpadeaLed(2);

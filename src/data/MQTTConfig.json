@@ -3,9 +3,8 @@
 "puerto": 1883, 
 "usuarioMQTT": "usuario", 
 "passwordMQTT": "password", 
-"ID_MQTT": "LuzEscalera", 
+"ID_MQTT": "PuertaGaraje", 
 "topicRoot": "casaPre", 
-"keepAlive": 0,
 "publicarEntradas": 1,
 "publicarSalidas": 1
 }

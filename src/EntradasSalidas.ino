@@ -39,6 +39,8 @@
 
 #define TOPIC_MENSAJES    "mensajes"
 
+#include <arduino.h>
+
 //definicion de los tipos de dataos para las entradas y salidas
 //Entradas
 typedef struct{
@@ -285,9 +287,9 @@ boolean parseaConfiguracionEntradas(String contenido)
     JsonObject& entrada = json["Entradas"][i];
       
     entradas[i].configurada=CONFIGURADO; //Cambio el valor para configurarla  
-    if(entrada.containsKey("nombre")) entradas[i].nombre=entrada.get<String>("nombre");
-    if(entrada.containsKey("tipo")) entradas[i].tipo=entrada.get<String>("tipo");
-    if(entrada.containsKey("GPIO")) entradas[i].pin=entrada.get<int>("GPIO");    
+    if(entrada.containsKey("nombre")) entradas[i].nombre=entrada.get<String>("nombre"); 
+    if(entrada.containsKey("tipo")) entradas[i].tipo=entrada.get<String>("tipo"); 
+    if(entrada.containsKey("GPIO")) entradas[i].pin=entrada.get<int>("GPIO"); else return false;
     if(entrada.containsKey("estadoActivo")) entradas[i].estadoActivo=entrada.get<int>("estadoActivo");
     
     if(entrada.containsKey("Estados"))
@@ -351,8 +353,8 @@ boolean parseaConfiguracionSalidas(String contenido)
     JsonObject& salida = json["Salidas"][i];
 
     salidas[i].configurado=CONFIGURADO;//lo marco como configurado  
-    if(salida.containsKey("GPIO")) salidas[i].pin=salida.get<int>("GPIO");
-    if(salida.containsKey("nombre")) salidas[i].nombre=salida.get<String>("nombre");//String((const char *)salida["nombre"]);//Pongo el nombre que indoca el fichero
+    if(salida.containsKey("GPIO")) salidas[i].pin=salida.get<int>("GPIO"); else return false;
+    if(salida.containsKey("nombre")) salidas[i].nombre=salida.get<String>("nombre");
     if(salida.containsKey("inicio")) 
       {
       if(salida.get<String>("inicio")=="on") salidas[i].inicio=1; //Si de inicio debe estar activado o desactivado
@@ -422,7 +424,7 @@ int8_t actualizaPulso(int8_t salida)
     {
     if(millis()>=salidas[salida].finPulso) //El pulso ya ha acabado
       {
-      conmutaRele(salida,ESTADO_DESACTIVO,debugGlobal);  
+      conmutaSalida(salida,ESTADO_DESACTIVO,debugGlobal);  
       Traza.mensaje("Fin del pulso. millis()= %i\n",millis());
       }//del if del fin de pulso
     }//del if de desboda
@@ -432,7 +434,7 @@ int8_t actualizaPulso(int8_t salida)
       {
       if(millis()>=salidas[salida].finPulso) //El pulso ha acabado
         {
-        conmutaRele(salida,ESTADO_DESACTIVO,debugGlobal);
+        conmutaSalida(salida,ESTADO_DESACTIVO,debugGlobal);
         Traza.mensaje("Fin del pulso. millis()= %i\n",millis());
         }//del if del fin de pulso
       }//del if ha desbordado ya
@@ -464,12 +466,12 @@ void actualizaSalida(int8_t salida)
       //Si es un seguidor de pulso
       if(salidas[salida].anchoPulso>0)
         {
-        if(estadoEntrada(salidas[salida].controlador)==ESTADO_ACTIVO) pulsoRele(salida); //Si la entrada esta activa, actualizo
+        if(estadoEntrada(salidas[salida].controlador)==ESTADO_ACTIVO) pulsoSalida(salida); //Si la entrada esta activa, actualizo
         else if(salidas[salida].estado==ESTADO_PULSO) actualizaPulso(salida);//si no esta activa, reviso el pulso
         }
       
       //Si es un seguidor tal cual
-      else if(actuaRele(salida, estadoEntrada(salidas[salida].controlador))==-1) Traza.mensaje("Error al actualizar la salida seguidor %i\n\n",salida);
+      else if(actuaSalida(salida, estadoEntrada(salidas[salida].controlador))==-1) Traza.mensaje("Error al actualizar la salida seguidor %i\n\n",salida);
 
 
       break;
@@ -500,14 +502,13 @@ void actualizaSalidas(bool debug)
 /*  puede ser 0 apagado, 1 encendido, 2 pulsando */
 /*                                               */
 /*************************************************/
-int8_t estadoRele(int8_t id)
+int8_t estadoSalida(int8_t id)
   {
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO; //Rele fuera de rango
   if(salidas[id].configurado!=CONFIGURADO) return -1; //No configurado
   
   return salidas[id].estado;
  }
-int8_t estadoSalida(int8_t id){return estadoRele(id);}
 
 /********************************************************/
 /*                                                      */
@@ -591,7 +592,7 @@ int8_t setValorPWM(int8_t id, int16_t valor)
 /*  Devuelve el nombre del rele con el id especificado  */
 /*                                                      */
 /********************************************************/
-String nombreRele(int8_t id)
+String nombreSalida(int8_t id)
   { 
   if(id <0 || id>=MAX_SALIDAS) return "ERROR"; //Rele fuera de rango    
   return salidas[id].nombre;
@@ -603,7 +604,7 @@ String nombreRele(int8_t id)
 /* LA ENTRADA ES EL ESTADO LOGICO. ADAPTO EL     */
 /*  ESTADO FISICO SEGUN nivelActivo              */
 /*************************************************/
-int8_t conmutaRele(int8_t id, int8_t estado_final, int debug)
+int8_t conmutaSalida(int8_t id, int8_t estado_final, int debug)
   {
   //validaciones previas
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO; //Rele fuera de rango
@@ -654,7 +655,7 @@ int8_t conmutaRele(int8_t id, int8_t estado_final, int debug)
 /*   Genera un pulso en rele indicado en id         */
 /*   devuelve 1 si ok, -1 si ko                     */
 /****************************************************/
-int8_t pulsoRele(int8_t id)
+int8_t pulsoSalida(int8_t id)
   {
   //validaciones previas
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
@@ -662,7 +663,7 @@ int8_t pulsoRele(int8_t id)
   if(salidas[id].modo!=MODO_MANUAL && salidas[id].modo!=MODO_SEGUIMIENTO) return NO_CONFIGURADO;
       
   //Pongo el rele en nivel Activo  
-  if(!conmutaRele(id, ESTADO_ACTIVO, debugGlobal)) return 0; //Si no puede retorna -1
+  if(!conmutaSalida(id, ESTADO_ACTIVO, debugGlobal)) return 0; //Si no puede retorna -1
 
   //cargo el campo con el valor definido para el ancho del pulso
   salidas[id].estado=ESTADO_PULSO;//estado EN_PULSO
@@ -679,7 +680,7 @@ int8_t pulsoRele(int8_t id)
 /*     actuar sobre un rele                             */
 /*                                                      */
 /********************************************************/ 
-int8_t actuaRele(int8_t id, int8_t estado)
+int8_t actuaSalida(int8_t id, int8_t estado)
   {
   //Traza.mensaje("salida: %i | modo: %i | estado: %i\n",id,salidas[id].modo,estado);
   //Si esta en modo secuenciador o modo maquina no deberia actuar, solo si esta en modo manual o seguimiento
@@ -688,13 +689,13 @@ int8_t actuaRele(int8_t id, int8_t estado)
   switch(estado)
     {
     case ESTADO_DESACTIVO:
-      return conmutaRele(id, ESTADO_DESACTIVO, debugGlobal);
+      return conmutaSalida(id, ESTADO_DESACTIVO, debugGlobal);
       break;
     case ESTADO_ACTIVO:
-      return conmutaRele(id, ESTADO_ACTIVO, debugGlobal);
+      return conmutaSalida(id, ESTADO_ACTIVO, debugGlobal);
       break;
     case ESTADO_PULSO:
-      return pulsoRele(id);
+      return pulsoSalida(id);
       break;      
     default://no deberia pasar nunca!!
       return -1;
@@ -711,7 +712,7 @@ int8_t salidaMaquinaEstados(int8_t id, int8_t estado)
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
   if(salidas[id].modo!=MODO_MAQUINA) return NO_CONFIGURADO;
 
-  return conmutaRele(id, estado, false);
+  return conmutaSalida(id, estado, false);
   }
 
 /********************************************************/
@@ -785,7 +786,7 @@ int8_t recuperarModoSalida(int8_t id)
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
 
   salidas[id].modo=salidas[id].modo_inicial;
-  conmutaRele(id, ESTADO_DESACTIVO, debugGlobal);
+  conmutaSalida(id, ESTADO_DESACTIVO, debugGlobal);
   return CONFIGURADO;
   }  
 

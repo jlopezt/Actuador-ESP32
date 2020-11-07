@@ -1,0 +1,122 @@
+body {
+    font-family: Trebuchet MS, Arial;
+    background-color:#F0F0CE;
+    }
+
+.tabla th,caption {
+    padding: 5px;
+    font-size: 16px;
+    background-color: #83aec0;
+    background-repeat: repeat-x;
+    color: #FFFFFF;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-right-color: #558FA6;
+    border-bottom-color: #558FA6;
+    font-family: Trebuchet MS, Arial;
+    text-transform: uppercase;
+    }
+.tabla .modo1 {
+    font-size: 15px;
+    font-weight:bold;
+    background-color: #fdfdf1;
+    background-repeat: repeat-x;
+    color: #990000;
+    font-family: Trebuchet MS, Arial;
+    text-align:center;
+    }
+.tabla .modo1 td {
+    padding: 5px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-right-color: #EBE9BC;
+    border-bottom-color: #EBE9BC;
+    }
+.tabla .modo1 th {
+    background-position: left top;
+    font-size: 12px;
+    font-weight:bold;
+    background-color: #fdfdf1;
+    background-repeat: repeat-x;
+    color: #990000;
+    font-family: Trebuchet MS, Arial;
+    text-align:left;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-right-color: #EBE9BC;
+    border-bottom-color: #EBE9BC;
+    }
+.tabla .modo2 {
+    font-size: 12px;
+    font-weight:bold;
+    background-color: #fdfdf1;
+    background-repeat: repeat-x;
+    color: #990000;
+    font-family: Trebuchet MS, Arial;
+    text-align:center;
+    }
+.tabla .modo2 td {
+    padding: 5px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-right-color: #EBE9BC;
+    border-bottom-color: #EBE9BC;
+    }
+.tabla .modo2 th {
+    background-position: left top;
+    font-size: 12px;
+    font-weight:bold;
+    background-color: #fdfdf1;
+    background-repeat: repeat-x;
+    color: #990000;
+    font-family: Trebuchet MS, Arial;
+    text-align:left;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-right-color: #EBE9BC;
+    border-bottom-color: #EBE9BC;
+    }
+    
+
+p {
+    line-height: 1.4;
+  }
+  
+  a {
+    outline: none;
+    text-decoration: none;
+    padding: 2px 1px 0;
+  }
+  
+  a:link {
+    color: #20167a;
+  }
+  
+  a:visited {
+    color: #20167a;
+  }
+  
+  a:focus {
+    border-bottom: 0px solid;
+    background: #F0F0CE;
+  }
+  
+  a:hover {
+    border-bottom: 0px solid;     
+    background: #F0F0CE;
+  }
+  
+  a:active {
+    background: #000000;
+    color: #F0F0CE;
+  }    

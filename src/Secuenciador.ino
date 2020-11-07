@@ -145,8 +145,8 @@ void actualizaSecuenciador(bool debug)
 
       if(debug) Traza.mensaje("Hora: %02i:%02i\nMascara: %i | intervalo: %i\n",hora(),minuto(),mascara,planes[i].horas[hora()]);
 
-      if(planes[i].horas[hora()] & mascara) conmutaRele(planes[i].rele, ESTADO_ACTIVO, debugGlobal);
-      else conmutaRele(planes[i].rele, ESTADO_DESACTIVO, debugGlobal);
+      if(planes[i].horas[hora()] & mascara) conmutaSalida(planes[i].rele, ESTADO_ACTIVO, debugGlobal);
+      else conmutaSalida(planes[i].rele, ESTADO_DESACTIVO, debugGlobal);
       }  
     }
   }
@@ -233,7 +233,8 @@ String pintaPlanHTML(int8_t plan)
   //validaciones previas
   if(plan<0 || plan>MAX_PLANES) return cad;
 
-  cad += "<TABLE style=\"border: 2px solid black\">\n";
+  //cad += "<TABLE style=\"border: 2px solid black\">\n";
+  cad += "<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
   cad += "<CAPTION>Plan " + String(plan) + "</CAPTION>\n";  
 
   //Cabecera
@@ -248,13 +249,15 @@ String pintaPlanHTML(int8_t plan)
   for(int8_t intervalo=0;intervalo<12;intervalo++)
     {
     Traza.mensaje("intervalo: %i | cad: %i\n",intervalo,cad.length());      
-    cad += "<tr>";
-    cad += "<td>" + String(intervalo) + ": (" + String(intervalo*5) + "-" + String(intervalo*5+4) + ")</td>";    
+    cad += "<TR class=\"modo2\">";
+    cad += "<td>" + String(intervalo) + ": (min " + String(intervalo*5) + " a " + String(intervalo*5+4) + ")</td>";    
     for(int8_t i=0;i<HORAS_EN_DIA;i++) cad += "<td style=\"text-align:center;\">" + (planes[plan].horas[i] & mascara?String(1):String(0)) + "</td>";
     cad += "</tr>";
     
     mascara<<=1;
     }  
+    
+  cad+="</table>";
     
   return cad;  
   }

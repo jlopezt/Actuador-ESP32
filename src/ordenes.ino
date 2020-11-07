@@ -157,9 +157,9 @@ void inicializaOrden(void)
   comandos[i].descripcion="Desactiva el rele indicado";
   comandos[i++].p_func_comando=func_comando_desactiva;
 
-  comandos[i].comando="estadoRele";
-  comandos[i].descripcion="Devuelve el estado del rele indicado";
-  comandos[i++].p_func_comando=func_comando_estadoRele;
+  comandos[i].comando="estadoSalida";
+  comandos[i].descripcion="Devuelve el estado de la salida indicada";
+  comandos[i++].p_func_comando=func_comando_estadoSalida;
 
   comandos[i].comando="info";
   comandos[i].descripcion="Devuelve informacion del hardware";
@@ -309,24 +309,24 @@ void func_comando_nivelActivo(int iParametro, char* sParametro, float fParametro
 
 void func_comando_activa(int iParametro, char* sParametro, float fParametro)//"activa")
   {
-  conmutaRele(iParametro, ESTADO_ACTIVO, debugGlobal);  
+  conmutaSalida(iParametro, ESTADO_ACTIVO, debugGlobal);  
   Traza.mensaje("\nRele %i activado\n",iParametro);
   }  
 
 void func_comando_desactiva(int iParametro, char* sParametro, float fParametro)//"desactiva")
   {
-  conmutaRele(iParametro, ESTADO_DESACTIVO, debugGlobal);
+  conmutaSalida(iParametro, ESTADO_DESACTIVO, debugGlobal);
   Traza.mensaje("\nRele %i desactivado\n",iParametro);  
   }  
 
-void func_comando_estadoRele(int iParametro, char* sParametro, float fParametro)//"estadoRele")
+void func_comando_estadoSalida(int iParametro, char* sParametro, float fParametro)
   { 
-  Traza.mensaje("\nEl estado logico del rele %i es ",iParametro);  
-  if (estadoRele(iParametro)==ESTADO_ACTIVO)Traza.mensaje("activado");
-  else if (estadoRele(iParametro)==ESTADO_PULSO)Traza.mensaje("pulso");
-  else Traza.mensaje("desactivado");
+  Traza.mensaje("\nEl estado logico de la salida %i es ",iParametro);  
+  if (estadoSalida(iParametro)==ESTADO_ACTIVO)Traza.mensaje("activada");
+  else if (estadoSalida(iParametro)==ESTADO_PULSO)Traza.mensaje("pulso");
+  else Traza.mensaje("desactivada");
 
-  Traza.mensaje("\nEl estado fisico del rele %i es %i\nPines:\npin rele: %i\n",iParametro, digitalRead(salidas[iParametro].pin),salidas[iParametro].pin);
+  Traza.mensaje("\nEl estado fisico de la salida %i es %i\nPines:\npin rele: %i\n",iParametro, digitalRead(salidas[iParametro].pin),salidas[iParametro].pin);
   }  
     
 void func_comando_restart(int iParametro, char* sParametro, float fParametro)//"restart")
@@ -343,7 +343,7 @@ void func_comando_info(int iParametro, char* sParametro, float fParametro)//"inf
   Traza.mensaje("\n-----------------info logica-----------------\n");
   Traza.mensaje("IP: %s\n", String(getIP(debugGlobal)).c_str());
   Traza.mensaje("nivelActivo: %s\n", String(nivelActivo).c_str());  
-  for(int8_t i=0;i<MAX_SALIDAS;i++) Traza.mensaje("Rele %i | nombre: %s | estado: %i\n", i,nombreRele(i).c_str(), estadoRele(i));
+  for(int8_t i=0;i<MAX_SALIDAS;i++) Traza.mensaje("Rele %i | nombre: %s | estado: %i\n", i,nombreSalida(i).c_str(), estadoSalida(i));
   Traza.mensaje("-----------------------------------------------\n");  
   
   Traza.mensaje("-------------------WiFi info-------------------\n");
@@ -461,7 +461,7 @@ void func_comando_ES(int iParametro, char* sParametro, float fParametro)//"debug
   Traza.mensaje("Entradas\n");
   for(int8_t i=0;i<MAX_ENTRADAS;i++) Traza.mensaje("%i: nombre: %s | configurada: %i | estado: %i | tipo: %s | pin: %i\n",i,nombreEntrada(i).c_str(),entradaConfigurada(i),estadoEntrada(i),tipoEntrada(i).c_str(),pinEntrada(i));
   Traza.mensaje("Salidas\n");
-  for(int8_t i=0;i<MAX_SALIDAS;i++) Traza.mensaje("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i | modo: %i | controlador: %i | ancho pulso: %i | fin pulso: %i\n",i,nombreSalida(i).c_str(),releConfigurado(i),estadoRele(i),inicioSalida(i),pinSalida(i),modoSalida(i),controladorSalida(i),anchoPulsoSalida(i),finPulsoSalida(i));  
+  for(int8_t i=0;i<MAX_SALIDAS;i++) Traza.mensaje("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i | modo: %i | controlador: %i | ancho pulso: %i | fin pulso: %i\n",i,nombreSalida(i).c_str(),releConfigurado(i),estadoSalida(i),inicioSalida(i),pinSalida(i),modoSalida(i),controladorSalida(i),anchoPulsoSalida(i),finPulsoSalida(i));  
   } 
 
 void func_comando_actSec(int iParametro, char* sParametro, float fParametro)//"debug")
