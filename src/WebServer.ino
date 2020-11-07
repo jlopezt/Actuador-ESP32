@@ -22,22 +22,26 @@ Informacion del Hw del sistema http://IP/info
 #include "ESPAsyncWebServer.h"
 
 //Variables globales
+//WebServer server(PUERTO_WEBSERVER);
 AsyncWebServer serverX(PUERTO_WEBSERVER);
 
 //Cadenas HTML precargadas
+//String CSS=".tabla th {padding: 5px;font-size: 16px;background-color: #83aec0;background-repeat: repeat-x;color: #FFFFFF;border-right-width: 1px;border-bottom-width: 1px;border-right-style: solid;border-bottom-style: solid;border-right-color: #558FA6;border-bottom-color: #558FA6;font-family: Trebuchet MS, Arial;text-transform: uppercase;}.tabla .modo2 {font-size: 12px;font-weight:bold;background-color: #fdfdf1;background-repeat: repeat-x;color: #990000;font-family: Trebuchet MS, Arial;text-align:left;}.tabla .modo2 td {padding: 5px;border-right-width: 1px;border-bottom-width: 1px;border-right-style: solid;border-bottom-style: solid;border-right-color: #EBE9BC;border-bottom-color: #EBE9BC;}.tabla .modo2 th {background-position: left top;font-size: 12px;font-weight:bold;background-color: #fdfdf1;background-repeat: repeat-x;color: #990000;font-family: Trebuchet MS, Arial;text-align:left;border-right-width: 1px;border-bottom-width: 1px;border-right-style: solid;border-bottom-style: solid;border-right-color: #EBE9BC;border-bottom-color: #EBE9BC;}";
 String cabeceraHTML="";
+String cabeceraHTMLlight = "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n<meta charset=\"UTF-8\" />\n<HTML><HEAD><TITLE>Domoticae</TITLE><link rel=\"stylesheet\" type=\"text/css\" href=\"CSS.css\"></HEAD><BODY>\n";
+String enlaces ="<H2>Enlaces</H2><LU>	<LI><a href=\"info\" target=\"_self\">Info</a></LI>	<LI><a href=\"test\" target=\"_self\">Test</a></LI>	<LI><a href=\"restart\" target=\"_self\">Restart</a></LI>	<LI><a href=\"particiones\" target=\"_self\">Particiones</a></LI>	<LI><a href=\"listaFicheros\" target=\"_self\">Lista ficheros</a></LI>	<LI><a href=\"estado\" target=\"_self\">Estado</a></LI>	<LI><a href=\"configSalidas\" target=\"_self\">Configuracion salidas</a></LI>	<LI><a href=\"configEnLUadas\" target=\"_self\">Configuracion enLUadas</a></LI>	<LI><a href=\"planes\" target=\"_self\">Planes del secuenciador</a></LI>	<LI><a href=\"maquinaEstados\" target=\"_self\">Maquina de estados</a></LI></LU>";
+String pieHTML="</BODY></HTML>";
+//String tabla = "<TABLE style=\"border: 2px solid black\">\n";
+String tabla = "<TABLE border=\"0\" width=\"80%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
 
-//version de la web propia del cacharro
-String pagina_a = "<!DOCTYPE html>\n<html lang=\"es\">\n <head>\n <meta charset=\"UTF-8\">\n <TITLE>Domoticae</TITLE>\n <link rel=\"stylesheet\" type=\"text/css\" href=\"css.css\">\n </HEAD>\n <BODY>\n <table style=\"width:100%;\" cellpadding=\"10\" cellspacing=\"0\">\n  <tr style=\"height:20%; background-color:black\">\n  <th align=\"left\">\n   <span style=\"font-family:verdana;font-size:30px;color:white\">DOMOTI</span><span style=\"font-family:verdana;font-size:30px;color:red\">C</span><span style=\"font-family:verdana;font-size:30px;color:white\">AE - ";
+//String pagina_a = "<!DOCTYPE html>\n<html lang=\"es\">\n <head>\n <meta charset=\"UTF-8\">\n <TITLE>Domoticae</TITLE>\n <link rel=\"stylesheet\" type=\"text/css\" href=\"CSS.css\">\n </HEAD>\n <BODY>\n <table style=\"width:100%;color:white\" cellpadding=\"10\" cellspacing=\"0\">\n  <tr style=\"height:20%; background-color:black\">\n  	<!--\n  <th align=\"left\">\n  	<p style=\"font-size:30px;color:white;\"><a href=\"../\" style=\"text-decoration:none;color:white;\" target=\"_self\">Puerta del garaje</a></p>\n  </th>-->\n  <th align=\"left\">\n   <span style=\"font-family:verdana;font-size:30px;color:white\">DOMOTI</span>\n   <span style=\"font-family:verdana;font-size:30px;color:red\">C</span>\n   <span style=\"font-family:verdana;font-size:30px;color:white\">AE - Puerta del garaje</span>   \n  </th>\n  </tr>\n  <tr style=\"height:10%;\">\n  	<td>";
+String pagina_a = "<!DOCTYPE html>\n<html lang=\"es\">\n <head>\n <meta charset=\"UTF-8\">\n <TITLE>Domoticae</TITLE>\n <link rel=\"stylesheet\" type=\"text/css\" href=\"CSS.css\">\n </HEAD>\n <BODY>\n <table style=\"width:100%;\" cellpadding=\"10\" cellspacing=\"0\">\n  <tr style=\"height:20%; background-color:black\">\n  <th align=\"left\">\n   <span style=\"font-family:verdana;font-size:30px;color:white\">DOMOTI</span>\n   <span style=\"font-family:verdana;font-size:30px;color:red\">C</span>\n   <span style=\"font-family:verdana;font-size:30px;color:white\">AE - ";
 //en medio va el nombre_dispositivo
 String pagina_b = "</span>   \n  </th>\n  </tr>\n  <tr style=\"height:10%;\">\n  	<td>";
-String enlaces = "<table class=\"tabla\"><tr class=\"modo1\"><td><a href=\"..\" target=\"_self\" style=\"text-decoration:none; color: black;\">Home</a></td><td><a href=\"configEntradas\" target=\"_self\" style=\"text-decoration:none; color: black;\">Entradas</a></td><td><a href=\"configSalidas\" target=\"_self\" style=\"text-decoration:none; color: black;\">Salidas</a></td><td><a href=\"planes\" target=\"_self\" style=\"text-decoration:none; color: black;\">Secuenciador</a></td><td><a href=\"maquinaEstados\" target=\"_self\" style=\"text-decoration:none; color: black;\">Maquina de estados</a></td><td><a href=\"listaFicheros\" target=\"_self\" style=\"text-decoration:none; color: black;\">Ficheros</a></td><td><a href=\"info\" target=\"_self\" style=\"text-decoration:none; color: black;\">Info</a></td><td><a href=\"particiones\" target=\"_self\" style=\"text-decoration:none; color: black;\">Particiones</a></td><td><a href=\"restart\" target=\"_self\" style=\"text-decoration:none; color: black;\">Restart</a></td></tr></table>";
+String enlaces_2 = "<table class=\"tabla\"><tr class=\"modo1\"><td><a href=\"..\" target=\"_self\" style=\"text-decoration:none; color: black;\">Home</a></td><td><a href=\"configEntradas\" target=\"_self\" style=\"text-decoration:none; color: black;\">Entradas</a></td><td><a href=\"configSalidas\" target=\"_self\" style=\"text-decoration:none; color: black;\">Salidas</a></td><td><a href=\"planes\" target=\"_self\" style=\"text-decoration:none; color: black;\">Secuenciador</a></td><td><a href=\"maquinaEstados\" target=\"_self\" style=\"text-decoration:none; color: black;\">Maquina de estados</a></td><td><a href=\"listaFicheros\" target=\"_self\" style=\"text-decoration:none; color: black;\">Ficheros</a></td><td><a href=\"info\" target=\"_self\" style=\"text-decoration:none; color: black;\">Info</a></td><td><a href=\"particiones\" target=\"_self\" style=\"text-decoration:none; color: black;\">Particiones</a></td><td><a href=\"restart\" target=\"_self\" style=\"text-decoration:none; color: black;\">Restart</a></td></tr></table>";
 String pagina_c = "</td></tr><TR style=\"height:60%\"><TD>";
 //En medio va el cuerpo de la pagina
-String pieHTML = "</TD>\n</TR>\n<TR>\n<TD style=\"color:white; background-color:black\"><a href=\"https://domoticae.lopeztola.com\" target=\"_self\" style=\"text-decoration:none; color:white;\">domoticae-2020</a></TD>\n</TR>\n</table>\n</BODY>\n</HTML>";
-
-//version para integrar en otras paginas
-String cabeceraHTMLlight = "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n<meta charset=\"UTF-8\" />\n<HTML><HEAD><TITLE>Domoticae</TITLE><link rel=\"stylesheet\" type=\"text/css\" href=\"css.css\"></HEAD><BODY>\n"; 
+String pagina_d = "</TD>\n</TR>\n<TR>\n<TD style=\"color:white; background-color:black\"><a href=\"https://domoticae.lopeztola.com\" target=\"_self\" style=\"text-decoration:none; color:white;\">domoticae</a></TD>\n</TR>\n</table>\n</BODY>\n</HTML>";
 
 void handleNotFound(AsyncWebServerRequest *request);
 bool handleFileRead(AsyncWebServerRequest *request);
@@ -74,10 +78,16 @@ void handleSetNextBoot(AsyncWebServerRequest *request);
 void inicializaWebServer(void)
   {
   //lo inicializo aqui, despues de leer el nombre del dispositivo en la configuracion del cacharro  
-  cabeceraHTML = pagina_a + nombre_dispositivo + pagina_b + enlaces + pagina_c;
+  cabeceraHTML = cabeceraHTMLlight + "<h1><a href=\"../\" target=\"_self\">" + nombre_dispositivo + "</a><br></h1>\n";
+
+  cabeceraHTML = pagina_a + nombre_dispositivo + pagina_b + enlaces_2 + pagina_c;
+  pieHTML = pagina_d;
+  enlaces = "";
+
     
   /*******Configuracion del Servicio Web***********/  
-  //Inicializo los serivcios, decalra las URIs a las que va a responder
+  //Inicializo los serivcios  
+  //decalra las URIs a las que va a responder
   serverX.on("/", HTTP_ANY, handleRoot); //Responde con la iodentificacion del modulo
   serverX.on("/estado", HTTP_ANY, handleEstado); //Servicio de estdo de reles
   serverX.on("/configSalidas", HTTP_ANY, handleConfigSalidas); //Servicio de estdo de reles
@@ -110,6 +120,11 @@ void inicializaWebServer(void)
   serverX.on("/version", HTTP_ANY, handleVersion);
   serverX.on("/listaFicheros2", HTTP_ANY, handleListaFicheros2);
 
+/*
+  serverX.on("/edit.html",  HTTP_POST, [](AsyncWebServerRequest *request) {  // If a POST request is sent to the /edit.html address,
+                                           request->send(200, "text/plain", ""); 
+                                           }, handleFileUpload);                       // go to 'handleFileUpload'
+  */
   serverX.on("/speech", HTTP_ANY, handleSpeechPath);
   
   serverX.onNotFound(handleNotFound);//pagina no encontrada
@@ -135,12 +150,14 @@ void handleRoot(AsyncWebServerRequest *request)
   cad += cabeceraHTML;
 
   //Entradas    
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
   cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Entradas</CAPTION>\n";    
   for(int8_t i=0;i<MAX_ENTRADAS;i++)
     {    
     if(entradaConfigurada(i)==CONFIGURADO) 
       {
+      //cad += "<TR><TD>" + nombreEntrada(i) + "-></TD><TD>" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD></TR>\n";    
       cad += "<TR class=\"modo2\">";
       cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + FONDO + "; width: 100px\">" + nombreEntrada(i) + "</TD>";
       cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoEntrada(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 200px\">" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD>";
@@ -151,6 +168,7 @@ void handleRoot(AsyncWebServerRequest *request)
   cad += "<BR>\n";
   
   //Salidas
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
   cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Salidas</CAPTION>\n";  
   for(int8_t i=0;i<MAX_SALIDAS;i++)
@@ -190,10 +208,10 @@ void handleRoot(AsyncWebServerRequest *request)
           cad += "</td>\n";    
           break;
         case MODO_SECUENCIADOR:
-          cad += "<TD colspan=2>Secuenciador " + String(controladorSalida(i)) + "</TD>\n";
+          cad += "<TD colspan=2> | Secuenciador " + String(controladorSalida(i)) + "</TD>\n";
           break;
         case MODO_SEGUIMIENTO:
-          cad += "<TD>Siguiendo a la entrada " + nombreEntrada(controladorSalida(i)) + "</TD>\n";
+          cad += "<TD>Siguiendo a la entrada " + nombreEntrada(controladorSalida(i)) + "</TD>\n"; //String(controladorSalida(i)) + "</TD>\n";
           cad += "<td>\n";
           cad += "<form action=\"fuerzaManualSalida\">\n";
           cad += "<input  type=\"hidden\" id=\"id\" name=\"id\" value=\"" + String(i) + "\" >\n";
@@ -214,16 +232,16 @@ void handleRoot(AsyncWebServerRequest *request)
   cad += "<BR><BR>\n";
 
   //Secuenciadores
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";  
   cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Secuenciadores</CAPTION>\n";  
-
+  for(int8_t i=0;i<MAX_PLANES;i++)
+    {
   cad += "<TR>";  
   cad += "<TH>plan</TH>";  
   cad += "<TH>acción</TH>";  
   cad += "</TR>";  
 
-  for(int8_t i=0;i<MAX_PLANES;i++)
-    {
     if(planConfigurado(i)==CONFIGURADO)
       {      
       cad += "<TR class=\"modo2\">\n";
@@ -239,6 +257,7 @@ void handleRoot(AsyncWebServerRequest *request)
   cad += "<BR><BR>\n";
   
   //Maquina de estados
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";  
   cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Máquina de estados</CAPTION>\n"; 
   cad += "<TR>\n";
@@ -247,10 +266,11 @@ void handleRoot(AsyncWebServerRequest *request)
   cad += "</TR>\n";
   cad += "</TABLE>\n";
 
-  cad += "<BR>";
+  //Enlaces
+  cad += "<BR>\n";
+  cad += enlaces;
   
-  //Informacion del dispositivo
-  cad += "<p style=\"font-size: 12px;color:black;\">" + nombre_dispositivo + " - Version " + String(VERSION) + "</p>";
+  cad += "<BR><p style=\"fonst-size: 12px;color:black;\">" + nombre_dispositivo + " - Version " + String(VERSION) + "</p>";
 
   cad += pieHTML;
   request->send(200, "text/html", cad);
@@ -265,11 +285,13 @@ void handleRoot(AsyncWebServerRequest *request)
 void handleParticiones(AsyncWebServerRequest *request)
   {
   String cad=cabeceraHTML;
+  //cad += "<h1>" + cacharro.getNombreDispositivo() + "</h1>";
 
   cad +=pintaParticionHTML();
 
   cad += pieHTML;
   request->send(200, "text/html", cad);
+  //server.send(200, "text/html", cad);     
   }
 
 /*********************************************/
@@ -280,6 +302,7 @@ void handleParticiones(AsyncWebServerRequest *request)
 void handleSetNextBoot(AsyncWebServerRequest *request)
   {
   String cad=cabeceraHTML;
+  //cad += "<h1>" + cacharro.getNombreDispositivo() + "</h1>";
 
   if(request->hasArg("p")) //si existen esos argumentos
     {
@@ -289,6 +312,7 @@ void handleSetNextBoot(AsyncWebServerRequest *request)
 
   cad += pieHTML;
   request->send(200, "text/html", cad);
+  //server.send(200, "text/html", cad);     
   }
 
 /*************************************************/
@@ -306,6 +330,7 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += cabeceraHTML;
 
   //Estado actual
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";  
   cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Estado actual</CAPTION>\n"; 
   cad += "<TR>\n";
@@ -316,6 +341,7 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += "<BR>";
 
   //Entradas
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
   cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Entradas actual</CAPTION>\n";  
   cad += "<TR>"; 
@@ -335,6 +361,7 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += "<BR>";
   
   //Salidas
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
   cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Salidas actual</CAPTION>\n";  
   cad += "<TR>"; 
@@ -354,6 +381,7 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += "<BR>";
   
   //Estados  
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
   cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>ESTADOS</CAPTION>\n";  
   cad += "<TR>"; 
@@ -374,6 +402,7 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += "<BR>";
   
   //Transiciones
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
   cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>TRANSICIONES</CAPTION>\n";  
 
@@ -429,6 +458,7 @@ void handleConfigSalidas(AsyncWebServerRequest *request)
   cad += cabeceraHTML;
 
   //Estados
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
   cad += "<TABLE border=\"0\" width=\"80%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Salidas</CAPTION>\n";  
 
@@ -490,6 +520,7 @@ void handleConfigEntradas(AsyncWebServerRequest *request)
   cad += cabeceraHTML;
 
   //Estados
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
   cad += "<TABLE border=\"0\" width=\"80%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Entradas</CAPTION>\n";  
 
@@ -557,6 +588,7 @@ void handleDesactivaRele(AsyncWebServerRequest *request)
     {
     int8_t id=request->arg("id").toInt();
 
+    //desactivaRele(id);
     conmutaSalida(id, ESTADO_DESACTIVO, debugGlobal);
     
     handleRoot(request);
@@ -575,6 +607,7 @@ void handlePulsoRele(AsyncWebServerRequest *request)
     {
     int8_t id=request->arg("id").toInt();
 
+    //desactivaRele(id);
     pulsoSalida(id);
     
     handleRoot(request);
@@ -741,20 +774,20 @@ void handleInfo(AsyncWebServerRequest *request)
   cad += "Potencia: " + String(WiFi.RSSI());
   cad += "<BR>";    
   cad += "-----------------------------------------------<BR>";  
-
+/*
   cad += "<BR>-----------------MQTT info-----------------<BR>";
-  cad += "IP broker: " + getIPBroker().toString();
+  cad += "IP broker: " + IPBroker.toString();
   cad += "<BR>";
-  cad += "Puerto broker: " +   getPuertoBroker();
+  cad += "Puerto broker: " +   puertoBroker=0;
   cad += "<BR>";  
-  cad += "Usuario: " + getUsuarioMQTT();
+  cad += "Usuario: " + usuarioMQTT="";
   cad += "<BR>";  
-  cad += "Password: " + getPasswordMQTT();
+  cad += "Password: " + passwordMQTT="";
   cad += "<BR>";  
-  cad += "Topic root: " + getTopicRoot();
+  cad += "Topic root: " + topicRoot="";
   cad += "<BR>";  
   cad += "-----------------------------------------------<BR>";  
-
+*/    
   cad += "<BR>-----------------Hardware info-----------------<BR>";
   cad += "FreeHeap: " + String(ESP.getFreeHeap());
   cad += "<BR>";
@@ -797,6 +830,7 @@ void handleCreaFichero(AsyncWebServerRequest *request)
 
     if(salvaFichero( nombreFichero, nombreFichero+".bak", contenidoFichero)) 
 	  {
+	  //cad += "Fichero salvado con exito<br>";
 	  handleListaFicheros(request);
 	  return;
 	  }  
@@ -828,6 +862,7 @@ void handleBorraFichero(AsyncWebServerRequest *request)
 
     if(borraFichero(nombreFichero)) 
       {
+      //cad += "El fichero " + nombreFichero + " ha sido borrado.\n";
       handleListaFicheros(request);
       return;
       }
@@ -881,6 +916,7 @@ void handleLeeFichero(AsyncWebServerRequest *request)
 /*********************************************/
 void handleNotFound(AsyncWebServerRequest *request)
   {
+  //Traza.mensaje("URL no encontrada: %s\n",request->url().c_str());  
   if(!handleFileRead(request))
     {
   Traza.mensaje("No se encontro el fichero en SPIFFS\n");  
@@ -891,7 +927,7 @@ void handleNotFound(AsyncWebServerRequest *request)
   message += "URI: ";
   message += request->url();
   message += "\nMethod: ";
-  message += request->methodToString();
+  message += request->methodToString();// == HTTP_GET)?"GET":"POST";
   message += "\nArguments: ";
   message += request->args();
   message += "\n";
@@ -989,7 +1025,7 @@ void handleListaFicheros(AsyncWebServerRequest *request)
     to=contenido.indexOf(SEPARADOR); 
 
     cad +="<style> table{border-collapse: collapse;} th, td{border: 1px solid black; padding: 10px; text-align: left;}</style>";
-    cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
+    cad += "<TABLE>";//"<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
     while(to!=-1)
       {
       fichero=contenido.substring(0, to);//cojo el principio como el fichero
@@ -1049,6 +1085,7 @@ bool handleFileRead(AsyncWebServerRequest *request)
   
   if (!path.startsWith("/")) path += "/";
   path = "/www" + path; //busco los ficheros en el SPIFFS en la carpeta www
+  //if (!path.endsWith("/")) path += "/";
   
   String contentType = getContentType(path);             // Get the MIME type
   String pathWithGz = path + ".gz";
@@ -1094,12 +1131,14 @@ void handleDatos(AsyncWebServerRequest *request)
   cad += cabeceraHTMLlight;
 
   //Entradas  
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
   cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Entradas</CAPTION>\n";  
   for(int8_t i=0;i<MAX_ENTRADAS;i++)
     {
     if(entradaConfigurada(i)==CONFIGURADO) 
       {
+      //cad += "<TR><TD>" + nombreEntrada(i) + "-></TD><TD>" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD></TR>\n";    
       cad += "<TR>";
       cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + FONDO + "\">" + nombreEntrada(i) + "</TD>";
       cad += "<TD STYLE=\"color: " + TEXTO + "; text-align: center; background-color: " + String((estadoEntrada(i)==ESTADO_DESACTIVO?DESACTIVO:ACTIVO)) + "; width: 100px\">" + String(nombreEstadoEntrada(i,estadoEntrada(i))) + "</TD>";
@@ -1110,6 +1149,7 @@ void handleDatos(AsyncWebServerRequest *request)
   cad += "<BR>";
   
   //Salidas
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
   cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Salidas</CAPTION>\n";  
   for(int8_t i=0;i<MAX_SALIDAS;i++)
@@ -1173,6 +1213,7 @@ void handleDatos(AsyncWebServerRequest *request)
   
   //Secuenciadores
   cad += "<BR><BR>\n";
+  //cad += tabla;//"<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";  
   cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
   cad += "<CAPTION>Secuenciadores</CAPTION>\n";  
   for(int8_t i=0;i<MAX_PLANES;i++)
