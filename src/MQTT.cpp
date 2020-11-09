@@ -9,6 +9,8 @@
 /*                                            */
 /* https://pubsubclient.knolleary.net/api.html*/
 /**********************************************/
+
+/***************************** Defines *****************************/
 //definicion de los comodines del MQTT
 #define WILDCARD_ALL      "#"
 #define WILDCARD_ONELEVEL "+"
@@ -25,9 +27,16 @@
 //definicion del topic ping
 #define TOPIC_PING "ping"
 #define TOPIC_PING_RESPUESTA "ping/respuesta"
+/***************************** Defines *****************************/
 
-//Includes MQTT
+/***************************** Includes *****************************/
+#include <MQTT.h>
+#include <EntradasSalidas.h>
+#include <RedWifi.h>
+#include <Ficheros.h>
+
 #include <PubSubClient.h>
+/***************************** Includes *****************************/
 
 //Definicion de variables globales
 IPAddress IPBroker; //IP del bus MQTT
@@ -373,6 +382,12 @@ uint16_t getPuertoBroker(void){return puertoBroker;}
 String getUsuarioMQTT(void){return usuarioMQTT;}
 String getPasswordMQTT(void){return passwordMQTT;}
 String getTopicRoot(void){return topicRoot;}
+String getIDMQTT(void){return ID_MQTT;}
+int8_t getPublicarEntradas(void){return publicarEntradas;}
+int8_t getPublicarSalidas(void){return publicarSalidas;}
+String getWillTopic(void){return WILL_TOPIC;}
+String getWillMsg(void){return WILL_MSG;}
+boolean getCleanSession(void){return CLEAN_SESSION;}
 
 /********************************************/
 /* Funcion que devuleve el estado           */

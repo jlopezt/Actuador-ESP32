@@ -1,6 +1,14 @@
+/***************************** Defines *****************************/
+/***************************** Defines *****************************/
+
+/***************************** Includes *****************************/
+#include <Global.h>
 /*
 #include <ESPmDNS.h>
-
+#include <RedmDNS.h>
+*/
+/***************************** Includes *****************************/
+/*
 boolean inicializamDNS(const char *nombre)
   {  
   String mDNSnombre;
@@ -16,6 +24,6 @@ boolean inicializamDNS(const char *nombre)
     }
   else Traza.mensaje("Error al iniciar mDNS\n");
 
-	return false;    
+  return false;    
   }
 */

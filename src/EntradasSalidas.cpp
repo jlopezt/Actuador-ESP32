@@ -4,42 +4,14 @@
 /*                                       */
 /*****************************************/
 
-//Definicion de pines
-#define MAX_PINES         20 //numero de pines disponibles para entradas y salidas
-#define MAX_ENTRADAS      10 //numero maximo de reles soportado
-#define MAX_SALIDAS       MAX_PINES-MAX_ENTRADAS //numero maximo de salidas
+/***************************** Defines *****************************/
+/***************************** Defines *****************************/
 
-#ifndef NO_CONFIGURADO 
-#define NO_CONFIGURADO    -1
-#endif
-
-#ifndef CONFIGURADO 
-#define CONFIGURADO       1
-#endif
-
-//modos de las salidas
-#define MODO_MANUAL       0
-#define MODO_SECUENCIADOR 1
-#define MODO_SEGUIMIENTO  2
-#define MODO_MAQUINA      3
-
-//estados de las salidas
-#define ESTADO_DESACTIVO  0
-#define ESTADO_ACTIVO     1
-#define ESTADO_PULSO      2
-
-//tipo de salidas
-#define TIPO_DIGITAL      0
-#define TIPO_PWM          1
-#define TIPO_LED          1
-
-//Valores por defecto para PWM
-#define RESOLUCION_PWM    10    //en bits
-#define FRECUENCIA_PWM    1000  //en herzios
-
-#define TOPIC_MENSAJES    "mensajes"
-
-#include <arduino.h>
+/***************************** Includes *****************************/
+#include <EntradasSalidas.h>
+#include <MQTT.h>
+#include <Ficheros.h>
+/***************************** Includes *****************************/
 
 //definicion de los tipos de dataos para las entradas y salidas
 //Entradas

@@ -4,16 +4,17 @@
 /*                                       */
 /*****************************************/
 
-#define MAX_PLANES 2
+/***************************** Defines *****************************/
 #define HORAS_EN_DIA 24
+/***************************** Defines *****************************/
 
-#ifndef NO_CONFIGURADO 
-#define NO_CONFIGURADO -1
-#endif
-
-#ifndef CONFIGURADO 
-#define CONFIGURADO     1
-#endif
+/***************************** Includes *****************************/
+#include <Global.h>
+#include <Secuenciador.h>
+#include <EntradasSalidas.h>
+#include <SNTP.h>
+#include <Ficheros.h>
+/***************************** Includes *****************************/
 
 //define un array de HORAS_EN_DIA enteros de 16 bits. Para los 12 primeros, es el valor on/off de los 5 minutos de esa hora
 typedef struct{
@@ -25,6 +26,8 @@ plan planes[MAX_PLANES];
 
 boolean secuenciadorActivo=false; //plag para activar o desactivar el secuenciador
 
+boolean recuperaDatosSecuenciador(boolean debug);
+boolean parseaConfiguracionSecuenciador(String contenido);
 /************************************** Funciones de configuracion ****************************************/
 void inicializaSecuenciador()
   {

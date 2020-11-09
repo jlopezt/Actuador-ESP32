@@ -5,15 +5,26 @@
 /*                                                       */
 /*                                                       */
 /*********************************************************/
+
+/***************************** Defines *****************************/
 #define NO_CONECTAR "NO_CONECTAR"
+/***************************** Defines *****************************/
+
+/***************************** Includes *****************************/
+#include <GoogleHomeNotifier.h>
+#include <Ficheros.h>
 
 #include <esp8266-google-home-notifier.h>
+/***************************** Includes *****************************/
 
 /*Variable locale sa este modulo*/
 GoogleHomeNotifier ghn;
-int activaGoogleHomeNotifier=0;//no activo por defecto
+uint8_t activaGoogleHomeNotifier=0;//no activo por defecto
 String nombreEquipo="";//nombreEquipo: nombre del altavoz google home
 String idioma="";//idioma: idioma del texto a reproducir: es español;en ingles
+
+boolean recuperaDatosGHN(boolean debug);
+boolean parseaConfiguracionGHN(String contenido);
 
 /*********************************************inicio configuracion**************************************************************************/
 /***************************************************/
@@ -115,3 +126,9 @@ boolean enviaNotificacion(char *mensaje)
   return true;
   }
 /*********************************************fin funcionalidad*****************************************************************************/
+
+/*********************************************acecso a datos*****************************************************************************/
+uint8_t getActivaGoogleHomeNotifier(void){return activaGoogleHomeNotifier;}
+String getNombreEquipo(void) {return nombreEquipo;}
+String getIdioma(void) {return idioma;}
+/*********************************************fin acceso a datos*****************************************************************************/

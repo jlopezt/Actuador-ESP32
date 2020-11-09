@@ -14,14 +14,19 @@
 /*                                         */
 /*******************************************/
 
-/********************definiciones**************************/
+/***************************** Defines *****************************/
 #define MAX_ESTADOS 10
 #define MAX_TRANSICIONES 50//3*MAX_ESTADOS
 #define ESTADO_ERROR   0 //Estado de error de la logica de la maquina. Imposible evolucionar del ese estado con las estradas actuales
 #define ESTADO_INICIAL 1 //Estado inicio
+/***************************** Defines *****************************/
 
-/********************includes**************************/
-#include <Arduino.h>
+/***************************** Includes *****************************/
+#include <Global.h>
+#include <MaqEstados.h>
+#include <EntradasSalidas.h>
+#include <Ficheros.h>
+/***************************** Includes *****************************/
 
 //Estados de la maquina. Tienen un nombre, un id y una lista de salidas asociadas, son el valor de las salidas en ese estado
 typedef struct {
@@ -32,8 +37,8 @@ typedef struct {
 
 //Los lazos del grafo. Estado inicial, estado final y los valores de las entradas que gobiernan la transicion
 typedef struct {
-  int8_t estadoInicial;
-  int8_t estadoFinal;
+  uint8_t estadoInicial;
+  uint8_t estadoFinal;
   int8_t valorEntradas[MAX_ENTRADAS];//Puede ser -1, significa que no importa el valor
   }transicionEstados_t;
 
@@ -52,6 +57,7 @@ uint8_t estadoActual;
 int8_t entradasActual[MAX_ENTRADAS]; //VAlor leido de las entradas
 int8_t salidasActual[MAX_SALIDAS];
 boolean debugMaquinaEstados;
+
 /************************************** Funciones de configuracion ****************************************/
 /*********************************************/
 /* Inicializa los valores de la maquina      */
@@ -127,7 +133,6 @@ boolean recuperaDatosMaquinaEstados(int debug)
 /*********************************************/
 /* Parsea el json leido del fichero de       */
 /* configuracio de la maquina de estados     */
-/*
 /*********************************************/
 boolean parseaConfiguracionMaqEstados(String contenido)
   {
@@ -241,7 +246,6 @@ boolean parseaConfiguracionMaqEstados(String contenido)
 /* Analiza el estado de la maquina y evoluciona     */
 /* los estados y las salidas asociadas              */
 /****************************************************/
-void actualizaMaquinaEstados(int debug=false);
 void actualizaMaquinaEstados(int debug)
   {
   boolean localDebug=debug || debugMaquinaEstados;
@@ -269,7 +273,6 @@ void actualizaMaquinaEstados(int debug)
 /* busco en las transiciones a que estado debe      */
 /* evolucionar la maquina                           */
 /****************************************************/
-uint8_t mueveMaquina(uint8_t estado, int8_t entradasActual[], boolean debug=false);
 uint8_t mueveMaquina(uint8_t estado, int8_t entradasActual[], boolean debug)
   {
   for(uint8_t regla=0;regla<numeroTransiciones;regla++) //las reglas se evaluan por orden
@@ -308,8 +311,11 @@ int8_t actualizaSalidasMaquinaEstados(uint8_t estado)
 
 
 /****************************************************/
-/* Funciones de consulta de dataos (encapsulan)     */
+/* Funciones de consulta de datos (encapsulan)     */
 /****************************************************/
+boolean setDebugMaquinaEstados(boolean debug){debugMaquinaEstados=debug;}
+boolean getDebugMAquinaEstados(void){return debugMaquinaEstados;}
+
 uint8_t getNumEstados(void){return numeroEstados;}
 uint8_t getNumTransiciones(void){return numeroTransiciones;}
 uint8_t getNumEntradasME(void){return numeroEntradas;}
@@ -327,9 +333,48 @@ uint8_t getNumSalidaME(uint8_t salida)
   return mapeoSalidas[salida];
   }
 
-int8_t getEstadoInicialTransicion(int8_t transicion) {return transiciones[transicion].estadoInicial;}
-int8_t getEstadoFinalTransicion(int8_t transicion) {return transiciones[transicion].estadoFinal;}
+uint8_t getEstadoInicialTransicion(int8_t transicion) {return transiciones[transicion].estadoInicial;}
+uint8_t getEstadoFinalTransicion(int8_t transicion) {return transiciones[transicion].estadoFinal;}
 int8_t getValorEntradaTransicion(int8_t transicion, int8_t entrada) {return transiciones[transicion].valorEntradas[entrada];}
 
 String getNombreEstado(uint8_t estado){return estados[estado].nombre;}
 String getNombreEstadoActual(void){return getNombreEstado(estadoActual);}
+
+
+uint8_t getMapeoEntradas(uint8_t id) 
+  {
+  if (id<0 || id>MAX_ENTRADAS) return NO_CONFIGURADO;
+  return mapeoEntradas[id];
+  }
+
+uint8_t getMapeoSalidas(uint8_t id) 
+  {
+  if (id<0 || id>MAX_SALIDAS) return NO_CONFIGURADO;
+  return mapeoSalidas[id];
+  }
+
+uint8_t getEntradasActual(uint8_t id) 
+  {
+  if (id<0 || id>MAX_ENTRADAS) return NO_CONFIGURADO;
+  return entradasActual[id];
+  }
+
+uint8_t getIdEstados(uint8_t estado)
+  {
+  if (estado<0 || estado>MAX_ESTADOS) return NO_CONFIGURADO;
+  return estados[estado].id;
+  }
+
+String getNombreEstados(uint8_t estado)
+  {
+  if (estado<0 || estado>MAX_ESTADOS) return "NO_CONFIGURADO";
+  return estados[estado].nombre;
+  }
+
+uint8_t getValorSalidaEstados(uint8_t estado, uint8_t salida)
+  {
+  if (estado<0 || estado>MAX_ESTADOS) return NO_CONFIGURADO;
+  if (salida<0 || salida>MAX_ESTADOS) return NO_CONFIGURADO;
+
+  return estados[estado].valorSalidas[salida];
+  }

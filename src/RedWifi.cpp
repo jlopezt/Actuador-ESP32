@@ -5,8 +5,21 @@
 /*  Control de la IP, DefaulGw, DNS...        */
 /*                                            */
 /**********************************************/
+
+/***************************** Defines *****************************/
 #define NOMBRE_AP          "AP_actuador"
 #define NOMBRE_mDNS_CONFIG "configurame"
+
+#define MAX_LONG_NOMBRE_DISPOSITIVO 32
+#define WIFI_PORTAL_TIMEOUT 5*60 //5 minutos en segundos
+#define TIME_OUT 10000
+#define DELAY_MULTIBASE 1000
+/***************************** Defines *****************************/
+
+/***************************** Includes *****************************/
+#include <Global.h>
+#include <RedWifi.h>
+#include <Ficheros.h>
 
 //needed for library
 #include <WiFi.h> 
@@ -14,13 +27,7 @@
 #include <ESPmDNS.h>
 #include <DNSServer.h>
 #include <ESPAsyncWiFiManager.h>          //https://github.com/alanswx/ESPAsyncWiFiManager
-
-#define TRUE 1
-#define FALSE 0
-#define MAX_LONG_NOMBRE_DISPOSITIVO 32
-#define WIFI_PORTAL_TIMEOUT 5*60 //5 minutos en segundos
-#define TIME_OUT 10000
-#define DELAY_MULTIBASE 1000
+/***************************** Includes *****************************/
 
 IPAddress wifiIP(0, 0, 0, 0);//0.0.0.0 significa que no hay IP fija
 IPAddress wifiNet(0, 0, 0, 0);
@@ -36,6 +43,13 @@ WiFiMulti MiWiFiMulti;
 
 boolean conectado=false; //Si el portal de configuracion devolvio OK a la conexion
 
+String generaJsonConfiguracionWifi(String configActual, String ssid, String password);
+boolean conectaMultibase(boolean debug);
+boolean conectaAutodetect(boolean debug);
+boolean parseaConfiguracionWifi(String contenido);
+boolean recuperaDatosWiFi(boolean debug);
+
+/************************************************************************************/
 boolean inicializamDNS(const char *nombre)
   {  
   String mDNSnombre;

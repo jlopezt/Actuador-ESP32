@@ -8,18 +8,33 @@ Reinicia el actuador           http://IP/restart
 Informacion del Hw del sistema http://IP/info
 ************************************************************************************************/
 
+/***************************** Defines *****************************/
 //Configuracion de los servicios web
 #define PUERTO_WEBSERVER 80
 #define FONDO     String("#DDDDDD")
 #define TEXTO     String("#000000")
 #define ACTIVO    String("#FFFF00")
 #define DESACTIVO String("#DDDDDD")
+/***************************** Defines *****************************/
 
-//Includes
+/***************************** Includes *****************************/
+#include <Global.h>
+#include <WebServer.h>
+#include <EntradasSalidas.h>
+#include <Secuenciador.h>
+#include <MaqEstados.h>
+#include <OTA.h>
+#include <SNTP.h>
+#include <RedWifi.h>
+#include <MQTT.h>
+#include <Ficheros.h>
+#include <GoogleHomeNotifier.h>
+
 #include <WiFi.h>
 #include <AsyncTCP.h>
-
 #include "ESPAsyncWebServer.h"
+#include <SPIFFS.h>
+/***************************** Includes *****************************/
 
 //Variables globales
 AsyncWebServer serverX(PUERTO_WEBSERVER);
@@ -326,9 +341,9 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   for(uint8_t i=0;i<getNumEntradasME();i++)
     {
     cad += "<TR class=\"modo2\">";  
-    cad += "<TD>" + String(i) + ":" + String(mapeoEntradas[i]) + "</TD>";  
-    cad += "<TD>" + nombreEntrada(mapeoEntradas[i])+ "</TD>";
-    cad += "<TD>" + String(entradasActual[i]) + ":" + String(estadoEntrada(mapeoEntradas[i])) + "</TD>";
+    cad += "<TD>" + String(i) + ":" + String(getMapeoEntradas(i)) + "</TD>";  
+    cad += "<TD>" + nombreEntrada(getMapeoEntradas(i))+ "</TD>";
+    cad += "<TD>" + String(getEntradasActual(i)) + ":" + String(estadoEntrada(getMapeoEntradas(i))) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
@@ -345,9 +360,9 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   for(uint8_t i=0;i<getNumSalidasME();i++)
     {
     cad += "<TR class\"modo2\">";  
-    cad += "<TD>" + String(i) + ":" + String(mapeoSalidas[i]) + "</TD>";  
-    cad += "<TD>" + String(nombreSalida(mapeoSalidas[i])) + "</TD>";
-    cad += "<TD>" + String(estadoSalida(mapeoSalidas[i])) + "</TD>";
+    cad += "<TD>" + String(i) + ":" + String(getMapeoSalidas(i)) + "</TD>";  
+    cad += "<TD>" + String(nombreSalida(getMapeoSalidas(i))) + "</TD>";
+    cad += "<TD>" + String(estadoSalida(getMapeoSalidas(i))) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
@@ -359,15 +374,15 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += "<TR>"; 
   cad += "<TH>id</TH>";  
   cad += "<TH>Nombre</TH>";
-  for(uint8_t i=0;i<getNumSalidasME();i++) cad += "<TD>Salida[" + String(i) + "] salida asociada(" + mapeoSalidas[i] + ")</TD>";
+  for(uint8_t i=0;i<getNumSalidasME();i++) cad += "<TD>Salida[" + String(i) + "] salida asociada(" + getMapeoSalidas(i) + ")</TD>";
   cad += "</TR>"; 
     
   for(uint8_t i=0;i<getNumEstados();i++)
     {
     cad += "<TR class=\"modo2\">";  
     cad += "<TD>" + String(i) + "</TD>";  
-    cad += "<TD>" + estados[i].nombre + "</TD>";
-    for(uint8_t j=0;j<getNumSalidasME();j++) cad += "<TD>" + String(estados[i].valorSalidas[j]) + "</TD>";
+    cad += "<TD>" + getNombreEstados(i) + "</TD>";
+    for(uint8_t j=0;j<getNumSalidasME();j++) cad += "<TD>" + String(getValorSalidaEstados(i,j)) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
@@ -389,9 +404,9 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   for(uint8_t i=0;i<getNumTransiciones();i++)
     {
     cad += "<TR class=\"modo2\">";
-    cad += "<TD>" + String(getNombreEstado(transiciones[i].estadoInicial)) + "</TD>";
-    for(uint8_t j=0;j<getNumEntradasME();j++) cad += "<TD>" + String(transiciones[i].valorEntradas[j]) + "</TD>";
-    cad += "<TD>" + String(getNombreEstado(transiciones[i].estadoFinal)) + "</TD>";    
+    cad += "<TD>" + String(getNombreEstado(getEstadoInicialTransicion(i))) + "</TD>";
+    for(uint8_t j=0;j<getNumEntradasME();j++) cad += "<TD>" + String(getValorEntradaTransicion(i,j)) + "</TD>";
+    cad += "<TD>" + String(getNombreEstado(getEstadoFinalTransicion(i))) + "</TD>";    
     cad += "</TR>";
     }
   cad += "</TABLE>";
@@ -1052,9 +1067,11 @@ bool handleFileRead(AsyncWebServerRequest *request)
   
   String contentType = getContentType(path);             // Get the MIME type
   String pathWithGz = path + ".gz";
-  if (SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)) 
+  //if (SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)) 
+  if (existeFichero(pathWithGz) || existeFichero(path)) 
     { // If the file exists, either as a compressed archive, or normal
-    if (SPIFFS.exists(pathWithGz)) path += ".gz"; // Si hay una version comprimida del fichero disponible, usa la version comprimida
+    //if (SPIFFS.exists(pathWithGz)) path += ".gz"; // Si hay una version comprimida del fichero disponible, usa la version comprimida
+    if (existeFichero(pathWithGz)) path += ".gz"; // Si hay una version comprimida del fichero disponible, usa la version comprimida
                                              
     request->send(SPIFFS, path, contentType);
     

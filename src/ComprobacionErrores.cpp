@@ -13,49 +13,19 @@ From https://github.com/espressif/esp-idf/blob/357a277603/components/driver/incl
 #define GPIO_IS_VALID_OUTPUT_GPIO(gpio_num) (((1ULL << (gpio_num)) & SOC_GPIO_VALID_OUTPUT_GPIO_MASK) != 0)
 */
 
-#ifndef KO 
-#define KO               -1
-#endif
-
-#ifndef OK
-#define OK               0
-#endif
-
+/***************************** Defines *****************************/
 #define MAX_PINES_ESP32  39
+/***************************** Defines *****************************/
 
-uint8_t compruebaConfiguracion(uint8_t nivelTraza)
-  {
-  boolean salvar=false;
-  String cad="";
-
-  Traza.mensaje("Init Verificar errores configuracion---------------------------------------------------\n");
-  Traza.mensaje("     ficheros--------------------------------------------------------------------------\n");
-  salvar=compruebaFicheros();
-  Traza.mensaje("     GHN-------------------------------------------------------------------------------\n");
-  cad=compruebaGHN();
-  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Traza.mensaje("     Wifi------------------------------------------------------------------------------\n");
-  cad=compruebaWifi(); 
-  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Traza.mensaje("     WebServer-------------------------------------------------------------------------\n");
-  cad=compruebaWebserver();
-  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Traza.mensaje("     MQTT------------------------------------------------------------------------------\n");
-  cad=comrpuebaMQTT();
-  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Traza.mensaje("     E/S-------------------------------------------------------------------------------\n");
-  cad=compruebaES();
-  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Traza.mensaje("     Secuenciador----------------------------------------------------------------------\n");
-  cad=compruebaSecuenciador();
-  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Traza.mensaje("     MaquinaEstados--------------------------------------------------------------------\n");
-  cad=compruebaMaquinaEstados();  
-  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Traza.mensaje("Fin Verificar errores configuracion----------------------------------------------------\n");
-
-  return 1;
-  }
+/***************************** Includes *****************************/
+#include <Global.h>
+#include <ComprobacionErrores.h>
+#include <EntradasSalidas.h>
+#include <Secuenciador.h>
+#include <MaqEstados.h>
+#include <SNTP.h>
+#include <Ficheros.h>
+/***************************** Includes *****************************/
 
 boolean compruebaFicheros(void) 
   {
@@ -193,7 +163,7 @@ String compruebaMaquinaEstados(void)
       {
       for(int8_t j=0;j<nSalidas;j++) 
         {
-        if(estados[estado].valorSalidas[i]!=ESTADO_DESACTIVO && estados[estado].valorSalidas[i]!=ESTADO_ACTIVO) cad += "Estado " + String(estado) + " Salida " + String(j) + " | el valor configurado no es valido\n";  
+        if(getValorSalidaEstados(estado,i)!=ESTADO_DESACTIVO && getValorSalidaEstados(estado,i)!=ESTADO_ACTIVO) cad += "Estado " + String(estado) + " Salida " + String(j) + " | el valor configurado no es valido\n";  
         }
       }
     }
@@ -209,8 +179,8 @@ String compruebaMaquinaEstados(void)
     boolean correctoFinal=false;
     for(int8_t estado=0;estado<nEstados;estado++) 
       {
-      if(getEstadoInicialTransicion(transi)==estados[estado].id) correctoInicial=true;
-      if(getEstadoFinalTransicion(transi)==estados[estado].id) correctoFinal=true;
+      if(getEstadoInicialTransicion(transi)==getIdEstados(estado)) correctoInicial=true;
+      if(getEstadoFinalTransicion(transi)==getIdEstados(estado)) correctoFinal=true;
       }
     if(!correctoInicial) cad += "Transicion " + String(transi) + " | el estado inicial no es valido\n";  
     if(!correctoFinal) cad += "Transicion " + String(transi) + " | el estado final no es valido\n";  
@@ -223,3 +193,36 @@ String compruebaMaquinaEstados(void)
   return cad;
   }
   
+uint8_t compruebaConfiguracion(uint8_t nivelTraza)
+  {
+  boolean salvar=false;
+  String cad="";
+
+  Traza.mensaje("Init Verificar errores configuracion---------------------------------------------------\n");
+  Traza.mensaje("     ficheros--------------------------------------------------------------------------\n");
+  salvar=compruebaFicheros();
+  Traza.mensaje("     GHN-------------------------------------------------------------------------------\n");
+  cad=compruebaGHN();
+  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
+  Traza.mensaje("     Wifi------------------------------------------------------------------------------\n");
+  cad=compruebaWifi(); 
+  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
+  Traza.mensaje("     WebServer-------------------------------------------------------------------------\n");
+  cad=compruebaWebserver();
+  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
+  Traza.mensaje("     MQTT------------------------------------------------------------------------------\n");
+  cad=comrpuebaMQTT();
+  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
+  Traza.mensaje("     E/S-------------------------------------------------------------------------------\n");
+  cad=compruebaES();
+  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
+  Traza.mensaje("     Secuenciador----------------------------------------------------------------------\n");
+  cad=compruebaSecuenciador();
+  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
+  Traza.mensaje("     MaquinaEstados--------------------------------------------------------------------\n");
+  cad=compruebaMaquinaEstados();  
+  if(salvar) anadeFichero(FICHERO_ERRORES, cad);
+  Traza.mensaje("Fin Verificar errores configuracion----------------------------------------------------\n");
+
+  return 1;
+  }

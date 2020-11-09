@@ -1,25 +1,33 @@
-/*
- * ordenes.ino
- *
- * Comandos para la actualizacion de la hora del reloj
- *
- * Permite la puesta en hora del reloj a traves de comandos enviados por el puesto
- * serie desde el PC.
- *
- * Para actualizar la hora <comado> <valor>; Ejemplo: "hora 3;"
- * Se pueden anidar: "hora 2;minuto 33;"
- *
- */
+/**********************************************************************************/
+/* ordenes.ino                                                                    */
+/*                                                                                */
+/* Comandos para el  control a traves del puerto serie                            */
+/*                                                                                */
+/**********************************************************************************/
 
+/***************************** Defines *****************************/
 #define LONG_COMANDO 40
 #define LONG_PARAMETRO 30
 #define LONG_ORDEN 22 //Comando (espacio) Parametros (fin de cadena)
 #define MAX_COMANDOS   35
+/***************************** Defines *****************************/
 
+/***************************** Includes *****************************/
+#include <Global.h>
+#include <Ordenes.h>
+#include <EntradasSalidas.h>
+#include <RedWifi.h>
+#include <SNTP.h>
+#include <Secuenciador.h>
+#include <ComprobacionErrores.h>
+#include <MaqEstados.h>
+#include <GoogleHomeNotifier.h>
+#include <MQTT.h>
+#include <Ficheros.h>
+
+#include <SPIFFS.h>
 #include <Time.h>
-
-char ordenRecibida[LONG_ORDEN]="";
-int lonOrden=0;
+/***************************** Includes *****************************/
 
 typedef struct 
   {
@@ -29,6 +37,9 @@ typedef struct
   }tipo_comando;
 tipo_comando comandos[MAX_COMANDOS];
 
+char ordenRecibida[LONG_ORDEN]="";
+int lonOrden=0;
+/*********************************************************************/
 int HayOrdenes(int debug)
   {
   char inChar=0;
@@ -126,151 +137,6 @@ void limpiaOrden(void)
   lonOrden=0;
   ordenRecibida[0]=0;
   }
-  
-void inicializaOrden(void)
-  { 
-  int i =0;  
-
-  limpiaOrden();
-  
-  comandos[i].comando="help";
-  comandos[i].descripcion="Listado de comandos";
-  comandos[i++].p_func_comando=func_comando_help;
-  
-  comandos[i].comando="IP";
-  comandos[i].descripcion="Direccion IP";
-  comandos[i++].p_func_comando=func_comando_IP;
-
-  comandos[i].comando="nivelActivo";
-  comandos[i].descripcion="Configura el nivel activo de los reles";
-  comandos[i++].p_func_comando=func_comando_nivelActivo;
-  
-  comandos[i].comando="restart";
-  comandos[i].descripcion="Reinicia el modulo";
-  comandos[i++].p_func_comando=func_comando_restart;
-  
-  comandos[i].comando="activa";
-  comandos[i].descripcion="Activa el rele indicado";
-  comandos[i++].p_func_comando=func_comando_activa;
-    
-  comandos[i].comando="desactiva";
-  comandos[i].descripcion="Desactiva el rele indicado";
-  comandos[i++].p_func_comando=func_comando_desactiva;
-
-  comandos[i].comando="estadoSalida";
-  comandos[i].descripcion="Devuelve el estado de la salida indicada";
-  comandos[i++].p_func_comando=func_comando_estadoSalida;
-
-  comandos[i].comando="info";
-  comandos[i].descripcion="Devuelve informacion del hardware";
-  comandos[i++].p_func_comando=func_comando_info;
-  
-  comandos[i].comando="flist";
-  comandos[i].descripcion="Lista los ficheros en el sistema de ficheros";
-  comandos[i++].p_func_comando=func_comando_flist;
-
-  comandos[i].comando="fexist";
-  comandos[i].descripcion="Indica si existe un fichero en el sistema de ficheros";
-  comandos[i++].p_func_comando=func_comando_fexist;
-
-  comandos[i].comando="fopen";
-  comandos[i].descripcion="Devuelve el contenido del fichero especificado";
-  comandos[i++].p_func_comando=func_comando_fopen;
-  
-  comandos[i].comando="fremove";
-  comandos[i].descripcion="Borra el fichero especificado";
-  comandos[i++].p_func_comando=func_comando_fremove;
-  
-  comandos[i].comando="format";
-  comandos[i].descripcion="Formatea el sistema de ficheros";
-  comandos[i++].p_func_comando=func_comando_format;
-  
-  comandos[i].comando="hora";
-  comandos[i].descripcion="Consulta la hora del sistema";
-  comandos[i++].p_func_comando=func_comando_hora;
-      
-  comandos[i].comando="minuto";
-  comandos[i].descripcion="Consulta los minutos del sistema";
-  comandos[i++].p_func_comando=func_comando_minuto;
-       
-  comandos[i].comando="segundo";
-  comandos[i].descripcion="Consulta los segundos del sistema";
-  comandos[i++].p_func_comando=func_comando_segundo;
-       
-  comandos[i].comando="reloj";
-  comandos[i].descripcion="Consulta el reloj del sistema";
-  comandos[i++].p_func_comando=func_comando_reloj;
-
-  comandos[i].comando="echo";
-  comandos[i].descripcion="Devuelve el eco del sistema";
-  comandos[i++].p_func_comando=func_comando_echo;
-   
-  comandos[i].comando="debug";
-  comandos[i].descripcion="Activa/desactiva el modo debug";
-  comandos[i++].p_func_comando=func_comando_debug;
-
-  comandos[i].comando="ES";
-  comandos[i].descripcion="Entradas y Salidas";
-  comandos[i++].p_func_comando=func_comando_ES;
-  
-  comandos[i].comando="actSec";
-  comandos[i].descripcion="Activa secuenciador";
-  comandos[i++].p_func_comando=func_comando_actSec;
-  
-  comandos[i].comando="desSec";
-  comandos[i].descripcion="Desactiva secuenciador";
-  comandos[i++].p_func_comando=func_comando_desSec;
-  
-  comandos[i].comando="estSec";
-  comandos[i].descripcion="Estado del secuenciador";
-  comandos[i++].p_func_comando=func_comando_estSec;    
-
-  comandos[i].comando="MQTTConfig";
-  comandos[i].descripcion="Configuración de MQTT";
-  comandos[i++].p_func_comando=func_comando_MQTTConfig;
-
-  comandos[i].comando="entradas";
-  comandos[i].descripcion="JSON entradas";
-  comandos[i++].p_func_comando=func_comando_Entradas;
-
-  comandos[i].comando="salidas";
-  comandos[i].descripcion="JSON salidas";
-  comandos[i++].p_func_comando=func_comando_Salidas;
-
-  comandos[i].comando="GHN";
-  comandos[i].descripcion="Datos de GHN";
-  comandos[i++].p_func_comando=func_comando_GHN;
-
-  comandos[i].comando="debugME";
-  comandos[i].descripcion="Debug de la maquina de estados";
-  comandos[i++].p_func_comando=func_comando_debugMaquinaEstados;
-
-  comandos[i].comando="CheckConfig";
-  comandos[i].descripcion="Comprueba la configuracion del sistema";
-  comandos[i++].p_func_comando=func_comando_compruebaConfiguracion;
-
-  comandos[i].comando="setPWM";
-  comandos[i].descripcion="Actualiza el valor de activo para la salida PWM";
-  comandos[i++].p_func_comando=func_comando_setPWM;
-
-  comandos[i].comando="getPWM";
-  comandos[i].descripcion="Devuelve el valor de activo para la salida PWM";
-  comandos[i++].p_func_comando=func_comando_getPWM;
-
-  comandos[i].comando="setSalida";
-  comandos[i].descripcion="Selecciona la salida a configurar PWM";
-  comandos[i++].p_func_comando=func_comando_setSalida;
-
-  //resto
-  for(;i<MAX_COMANDOS;)
-    {
-    comandos[i].comando="vacio";
-    comandos[i].descripcion="Comando vacio";
-    comandos[i++].p_func_comando=func_comando_vacio;  
-    }
-    
-  func_comando_help(0,NULL,0.0);
-  }
 
 /*********************************************************************/
 /*  Funciones para los comandos                                      */
@@ -326,7 +192,7 @@ void func_comando_estadoSalida(int iParametro, char* sParametro, float fParametr
   else if (estadoSalida(iParametro)==ESTADO_PULSO)Traza.mensaje("pulso");
   else Traza.mensaje("desactivada");
 
-  Traza.mensaje("\nEl estado fisico de la salida %i es %i\nPines:\npin rele: %i\n",iParametro, digitalRead(salidas[iParametro].pin),salidas[iParametro].pin);
+  Traza.mensaje("\nEl estado fisico de la salida %i es %i\nPines:\npin rele: %i\n",iParametro, digitalRead(pinSalida(iParametro)),pinSalida(iParametro));
   }  
     
 void func_comando_restart(int iParametro, char* sParametro, float fParametro)//"restart")
@@ -484,7 +350,7 @@ void func_comando_estSec(int iParametro, char* sParametro, float fParametro)//"d
 
 void func_comando_MQTTConfig(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nIP Puerto del broker: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\nWill topic: %s\nWill msg: %s\nCelan session: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),puertoBroker,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),publicarEntradas,publicarSalidas,(topicRoot+"/"+String(WILL_TOPIC)).c_str(),String(WILL_MSG).c_str(), CLEAN_SESSION);
+  Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nIP Puerto del broker: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\nWill topic: %s\nWill msg: %s\nCelan session: %i\n",getIDMQTT().c_str(),getIPBroker().toString().c_str(),getPuertoBroker(),getUsuarioMQTT().c_str(),getPasswordMQTT().c_str(),getTopicRoot().c_str(),getPublicarEntradas(),getPublicarSalidas(),getTopicRoot()+"/"+getWillTopic().c_str(),getWillMsg().c_str(), getCleanSession());
   }  
 
 void func_comando_Salidas(int iParametro, char* sParametro, float fParametro)//"debug")
@@ -499,13 +365,14 @@ void func_comando_Entradas(int iParametro, char* sParametro, float fParametro)//
 
 void func_comando_GHN(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  Traza.mensaje("Google Home Notifier:\n Nombre del equipo: %s | Idioma: %s | Activo: %i\n",nombreEquipo.c_str(),idioma.c_str(), activaGoogleHomeNotifier);
+  Traza.mensaje("Google Home Notifier:\n Nombre del equipo: %s | Idioma: %s | Activo: %i\n",getNombreEquipo().c_str(),getIdioma().c_str(), getActivaGoogleHomeNotifier());
   }    
 
 void func_comando_debugMaquinaEstados(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  debugMaquinaEstados=!debugMaquinaEstados;
-  if (debugMaquinaEstados) Traza.mensaje("El debug de la maquina de estados esta on\n");
+  //debugMaquinaEstados=!debugMaquinaEstados;
+  setDebugMaquinaEstados(!getDebugMAquinaEstados());
+  if (getDebugMAquinaEstados()) Traza.mensaje("El debug de la maquina de estados esta on\n");
   else Traza.mensaje("El debug de la maquina de estados esta off\n");
   }  
 
@@ -535,3 +402,148 @@ void func_comando_setSalida(int iParametro, char* sParametro, float fParametro)/
   setSalidaActiva(iParametro);  
   }
 /***************************** FIN funciones para comandos ******************************************/ 
+
+void inicializaOrden(void)
+  { 
+  int i =0;  
+
+  limpiaOrden();
+  
+  comandos[i].comando="help";
+  comandos[i].descripcion="Listado de comandos";
+  comandos[i++].p_func_comando=func_comando_help;
+  
+  comandos[i].comando="IP";
+  comandos[i].descripcion="Direccion IP";
+  comandos[i++].p_func_comando=func_comando_IP;
+
+  comandos[i].comando="nivelActivo";
+  comandos[i].descripcion="Configura el nivel activo de los reles";
+  comandos[i++].p_func_comando=func_comando_nivelActivo;
+  
+  comandos[i].comando="restart";
+  comandos[i].descripcion="Reinicia el modulo";
+  comandos[i++].p_func_comando=func_comando_restart;
+  
+  comandos[i].comando="activa";
+  comandos[i].descripcion="Activa el rele indicado";
+  comandos[i++].p_func_comando=func_comando_activa;
+    
+  comandos[i].comando="desactiva";
+  comandos[i].descripcion="Desactiva el rele indicado";
+  comandos[i++].p_func_comando=func_comando_desactiva;
+
+  comandos[i].comando="estadoSalida";
+  comandos[i].descripcion="Devuelve el estado de la salida indicada";
+  comandos[i++].p_func_comando=func_comando_estadoSalida;
+
+  comandos[i].comando="info";
+  comandos[i].descripcion="Devuelve informacion del hardware";
+  comandos[i++].p_func_comando=func_comando_info;
+  
+  comandos[i].comando="flist";
+  comandos[i].descripcion="Lista los ficheros en el sistema de ficheros";
+  comandos[i++].p_func_comando=func_comando_flist;
+
+  comandos[i].comando="fexist";
+  comandos[i].descripcion="Indica si existe un fichero en el sistema de ficheros";
+  comandos[i++].p_func_comando=func_comando_fexist;
+
+  comandos[i].comando="fopen";
+  comandos[i].descripcion="Devuelve el contenido del fichero especificado";
+  comandos[i++].p_func_comando=func_comando_fopen;
+  
+  comandos[i].comando="fremove";
+  comandos[i].descripcion="Borra el fichero especificado";
+  comandos[i++].p_func_comando=func_comando_fremove;
+  
+  comandos[i].comando="format";
+  comandos[i].descripcion="Formatea el sistema de ficheros";
+  comandos[i++].p_func_comando=func_comando_format;
+  
+  comandos[i].comando="hora";
+  comandos[i].descripcion="Consulta la hora del sistema";
+  comandos[i++].p_func_comando=func_comando_hora;
+      
+  comandos[i].comando="minuto";
+  comandos[i].descripcion="Consulta los minutos del sistema";
+  comandos[i++].p_func_comando=func_comando_minuto;
+       
+  comandos[i].comando="segundo";
+  comandos[i].descripcion="Consulta los segundos del sistema";
+  comandos[i++].p_func_comando=func_comando_segundo;
+       
+  comandos[i].comando="reloj";
+  comandos[i].descripcion="Consulta el reloj del sistema";
+  comandos[i++].p_func_comando=func_comando_reloj;
+
+  comandos[i].comando="echo";
+  comandos[i].descripcion="Devuelve el eco del sistema";
+  comandos[i++].p_func_comando=func_comando_echo;
+   
+  comandos[i].comando="debug";
+  comandos[i].descripcion="Activa/desactiva el modo debug";
+  comandos[i++].p_func_comando=func_comando_debug;
+
+  comandos[i].comando="ES";
+  comandos[i].descripcion="Entradas y Salidas";
+  comandos[i++].p_func_comando=func_comando_ES;
+  
+  comandos[i].comando="actSec";
+  comandos[i].descripcion="Activa secuenciador";
+  comandos[i++].p_func_comando=func_comando_actSec;
+  
+  comandos[i].comando="desSec";
+  comandos[i].descripcion="Desactiva secuenciador";
+  comandos[i++].p_func_comando=func_comando_desSec;
+  
+  comandos[i].comando="estSec";
+  comandos[i].descripcion="Estado del secuenciador";
+  comandos[i++].p_func_comando=func_comando_estSec;    
+
+  comandos[i].comando="MQTTConfig";
+  comandos[i].descripcion="Configuración de MQTT";
+  comandos[i++].p_func_comando=func_comando_MQTTConfig;
+
+  comandos[i].comando="entradas";
+  comandos[i].descripcion="JSON entradas";
+  comandos[i++].p_func_comando=func_comando_Entradas;
+
+  comandos[i].comando="salidas";
+  comandos[i].descripcion="JSON salidas";
+  comandos[i++].p_func_comando=func_comando_Salidas;
+
+  comandos[i].comando="GHN";
+  comandos[i].descripcion="Datos de GHN";
+  comandos[i++].p_func_comando=func_comando_GHN;
+
+  comandos[i].comando="debugME";
+  comandos[i].descripcion="Debug de la maquina de estados";
+  comandos[i++].p_func_comando=func_comando_debugMaquinaEstados;
+
+  comandos[i].comando="CheckConfig";
+  comandos[i].descripcion="Comprueba la configuracion del sistema";
+  comandos[i++].p_func_comando=func_comando_compruebaConfiguracion;
+
+  comandos[i].comando="setPWM";
+  comandos[i].descripcion="Actualiza el valor de activo para la salida PWM";
+  comandos[i++].p_func_comando=func_comando_setPWM;
+
+  comandos[i].comando="getPWM";
+  comandos[i].descripcion="Devuelve el valor de activo para la salida PWM";
+  comandos[i++].p_func_comando=func_comando_getPWM;
+
+  comandos[i].comando="setSalida";
+  comandos[i].descripcion="Selecciona la salida a configurar PWM";
+  comandos[i++].p_func_comando=func_comando_setSalida;
+
+  //resto
+  for(;i<MAX_COMANDOS;)
+    {
+    comandos[i].comando="vacio";
+    comandos[i].descripcion="Comando vacio";
+    comandos[i++].p_func_comando=func_comando_vacio;  
+    }
+    
+  func_comando_help(0,NULL,0.0);
+  }

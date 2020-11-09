@@ -21,25 +21,24 @@ Funcines que provee al libreria:
   void handle();  //Call this in loop() to run the service
   int getCommand();  //Gets update command type after OTA has started. Either U_FLASH or U_SPIFFS
 **********************************************************************/
+
+/***************************** Defines *****************************/
+/***************************** Defines *****************************/
+
+/***************************** Includes *****************************/
+#include <Global.h>
+#include <OTA.h>
 #include <ArduinoOTA.h>
 #include <esp_ota_ops.h>
 #include <esp_partition.h>
 #include <Traza.h>
+/***************************** Includes *****************************/
 
-void gestionaOTA(void)
-  {
-   ArduinoOTA.handle();
-   }
+void gestionaOTA(void) {ArduinoOTA.handle();}
 
-void inicioOTA(void)
-  {
-  Traza.mensaje("Actualizacion OTA\n");
-  }
+void inicioOTA(void) {Traza.mensaje("Actualizacion OTA\n");}
   
-void finOTA(void)
-  {
-  Traza.mensaje("Fin actualizacion\n");
-  }
+void finOTA(void) {Traza.mensaje("Fin actualizacion\n");}
 
 void progresoOTA(unsigned int progress, unsigned int total)
   {

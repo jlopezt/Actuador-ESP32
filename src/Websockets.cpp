@@ -5,11 +5,16 @@
 /*                                            */
 /**********************************************/
 
+/***************************** Defines *****************************/
 #define PUERTO_WEBSOCKETS 81
 #define NOT_CONNECTED     -1
+/***************************** Defines *****************************/
 
-//#include <WebSockets.h>
+/***************************** Includes *****************************/
+#include <Global.h>
+#include <WebSockets.h>
 #include <WebSocketsServer.h>
+/***************************** Includes *****************************/
 
 //boolean enviarWSTXT(String mensaje);
 typedef struct
@@ -20,6 +25,11 @@ typedef struct
 cliente_t cliente;
 
 WebSocketsServer webSocket= WebSocketsServer(PUERTO_WEBSOCKETS);    // create a websocket server on port 81
+
+void webSocketEvent(uint8_t clienteId, WStype_t type, uint8_t * payload, size_t length);
+void gestionaMensajes(uint8_t cliente, String mensaje);
+void hexdump(const void *mem, uint32_t len);
+
 /****************************************************************************************************************/
 /**********************************************/
 /*                                            */

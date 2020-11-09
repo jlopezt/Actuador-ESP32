@@ -4,15 +4,21 @@
 /* memoria del modulo esp6288                   */
 /*                                              */
 /************************************************/
-#include <FS.h>     //this needs to be first, or it all crashes and burns...
-#include <SPIFFS.h> //para el ESP32
 
+/***************************** Defines *****************************/
 #ifndef FILE_APPEND
 #define FILE_APPEND "a"
 #endif
 #ifndef FILE_WRITE
 #define FILE_WRITE "w"
 #endif
+/***************************** Defines *****************************/
+
+/***************************** Includes *****************************/
+#include <Ficheros.h>
+#include <FS.h>     //this needs to be first, or it all crashes and burns...
+#include <SPIFFS.h> //para el ESP32
+/***************************** Includes *****************************/
 
 /************************************************/
 /* Inicializa el sistema de ficheros del modulo */
@@ -118,7 +124,7 @@ boolean salvaFichero(String nombreFichero, String nombreFicheroBak, String conte
 /* Salva la cadena pasada al fichero especificado                     */
 /* Si ya existe añade                                                 */
 /**********************************************************************/  
-boolean anadeFichero(String nombreFichero, String contenidoFichero,int debug=0)
+boolean anadeFichero(String nombreFichero, String contenidoFichero,int debug)
   {
   boolean salvado=false;
 
