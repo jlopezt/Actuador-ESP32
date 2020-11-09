@@ -5,6 +5,14 @@
 /*  buscando incongruencias              */
 /*                                       */
 /*****************************************/
+/*
+From https://github.com/espressif/esp-idf/blob/357a277603/components/driver/include/driver/gpio.h
+/// Check whether it is a valid GPIO number
+#define GPIO_IS_VALID_GPIO(gpio_num)        (((1ULL << (gpio_num)) & SOC_GPIO_VALID_GPIO_MASK) != 0)
+/// Check whether it can be a valid GPIO number of output mode
+#define GPIO_IS_VALID_OUTPUT_GPIO(gpio_num) (((1ULL << (gpio_num)) & SOC_GPIO_VALID_OUTPUT_GPIO_MASK) != 0)
+*/
+
 #ifndef KO 
 #define KO               -1
 #endif
