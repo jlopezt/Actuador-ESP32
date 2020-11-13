@@ -1003,7 +1003,12 @@ void handleListaFicheros(AsyncWebServerRequest *request)
     //busco el primer separador
     to=contenido.indexOf(SEPARADOR); 
 
-    cad +="<style> table{border-collapse: collapse;} th, td{border: 1px solid black; padding: 10px; text-align: left;}</style>";
+    cad +="<style> table{border-collapse: collapse;} th, td{border: 1px solid black; padding: 5px; text-align: left;}</style>";
+    cad += "<br>\n";
+
+    cad += "<table style=\"border: 0px; border-color: #FFFFFF;\"><tr style=\"border: 0px; border-color: #FFFFFF;\">";
+    cad += "<td style=\"vertical-align: top; border: 0px; border-color: #FFFFFF;\">";
+
     cad += "<TABLE border=\"0\" width=\"50%\" cellpadding=\"0\" cellspacing=\"0\" width=\"300\" class=\"tabla\">\n";
     while(to!=-1)
       {
@@ -1025,11 +1030,13 @@ void handleListaFicheros(AsyncWebServerRequest *request)
       cad += "</TD></TR>";
       }
     cad += "</TABLE>\n";
-    cad += "<BR>";
+    cad += "</TD>";
     
     //Para crear un fichero nuevo
-    cad += "<h2>Crear un fichero nuevo:</h2>";
+    cad += "<td style=\"vertical-align: top; border: 0px; border-color: #FFFFFF;\">";    
+
     cad += "<table><tr><td>";      
+    cad += "<caption>Crear un fichero nuevo:</caption>";
     cad += "<form action=\"creaFichero\" target=\"_self\">";
     cad += "  <p>";
     cad += "    Nombre:<input type=\"text\" name=\"nombre\" value=\"\">";
@@ -1039,6 +1046,9 @@ void handleListaFicheros(AsyncWebServerRequest *request)
     cad += "    <input type=\"submit\" value=\"salvar\">";
     cad += "  </p>";
     cad += "</td></tr></table>";      
+
+    cad += "</td>";
+    cad += "</tr></table>";        
     }
   else cad += "<TR><TD>No se pudo recuperar la lista de ficheros</TD></TR>"; 
 

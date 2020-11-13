@@ -42,6 +42,7 @@
 /***************************** Includes *****************************/
 
 //Definicion de variables globales
+String modoMQTT="";
 IPAddress IPBroker; //IP del bus MQTT
 String BrokerDir; //IP o URL del broker
 uint16_t puertoBroker; //Puerto del bus MQTT
@@ -53,9 +54,10 @@ String ID_MQTT; //ID del modulo en su conexion al broker
 int8_t publicarEntradas; //Flag para determinar si se envia el json con los valores de las entradas
 int8_t publicarSalidas; //Flag para determinar si se envia el json con los valores de las salidas
 
-WiFiClientSecure espClient; 
-PubSubClient clienteMQTT(espClient);
-String ca_cert=""; //Certificado de CA para validar el del servidor
+WiFiClientSecure espClientSSL;
+WiFiClient espClient;
+PubSubClient clienteMQTT;
+String caCert;
 
 /************************************************/
 /* Inicializa valiables y estado del bus MQTT   */
@@ -65,9 +67,26 @@ void inicializaMQTT(void)
   //recupero datos del fichero de configuracion
   if (!recuperaDatosMQTT(false)) Traza.mensaje("error al recuperar config MQTT.\nConfiguracion por defecto.\n");
 
-  //Si va bien inicializo con los valores correstoc, si no con valores por defecto
-  /* set SSL/TLS certificate */
-  espClient.setCACert(ca_cert.c_str());
+  //Si va bien inicializo con los valores correctos, si no con valores por defecto
+  
+  if(modoMQTT=="TLS")
+    {
+    Traza.mensaje("Modo de conexion: %s\n", modoMQTT.c_str());
+    
+    //Leo el fichero con el certificado de CA
+    if(!leeFichero(DIR_CA_CERT,caCert)) Traza.mensaje("No se pudo leer el certificado CA\n");
+    else Traza.mensaje("Certificado CA:\n%s\n",caCert.c_str());
+
+    /* set SSL/TLS certificate */
+    espClientSSL.setCACert(caCert.c_str());
+    clienteMQTT.setClient(espClientSSL);
+    }
+  else
+    {
+    clienteMQTT.setClient(espClient);
+    }
+  Traza.mensaje("Cliente MQTT configurado");
+
   //configuro el servidor y el puerto
   if (BrokerDir==String("")) clienteMQTT.setServer(IPBroker, puertoBroker);
   else clienteMQTT.setServer(BrokerDir.c_str(), puertoBroker);
@@ -88,6 +107,7 @@ boolean recuperaDatosMQTT(boolean debug)
   if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
 
   //cargo el valores por defecto
+  modoMQTT=""; //Sin encriptacion SSL/TLS
   IPBroker.fromString("0.0.0.0");
   BrokerDir="";
   puertoBroker=0;
@@ -123,6 +143,7 @@ boolean parseaConfiguracionMQTT(String contenido)
     {
     Traza.mensaje("\nparsed json\n");
 //******************************Parte especifica del json a leer********************************
+    if (json.containsKey("modoMQTT"))  modoMQTT=json.get<String>("modoMQTT");
     ID_MQTT=json.get<String>("ID_MQTT");
     if (json.containsKey("IPBroker")) IPBroker.fromString(json.get<String>("IPBroker"));
     if (json.containsKey("BrokerDir")) BrokerDir=json.get<String>("BrokerDir");
@@ -136,10 +157,6 @@ boolean parseaConfiguracionMQTT(String contenido)
     
     Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nBrokerDir: %s\nIP Puerto del broker: %i\ntimeReconnectMQTT: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),BrokerDir.c_str(),puertoBroker,timeReconnectMQTT,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),publicarEntradas,publicarSalidas);
 //************************************************************************************************
-    //Leo el fichero con el certificado de CA
-    if(!leeFichero(DIR_CA_CERT, ca_cert)) Traza.mensaje("No se pudo leer el certificado CA\n");
-    else Traza.mensaje("Certificado CA:\n%s\n",ca_cert.c_str());
-
     return true;
     }
   return false;

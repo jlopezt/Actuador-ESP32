@@ -66,7 +66,7 @@ int8_t actualizaSalidasMaquinaEstados(uint8_t estado);
 /****************************************************/
 /* Funciones de consulta de dataos (encapsulan)     */
 /****************************************************/
-boolean setDebugMaquinaEstados(boolean debug);
+void setDebugMaquinaEstados(boolean debug);
 boolean getDebugMAquinaEstados(void);
 
 uint8_t getNumEstados(void);
