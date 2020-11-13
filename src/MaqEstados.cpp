@@ -313,7 +313,7 @@ int8_t actualizaSalidasMaquinaEstados(uint8_t estado)
 /****************************************************/
 /* Funciones de consulta de datos (encapsulan)     */
 /****************************************************/
-boolean setDebugMaquinaEstados(boolean debug){debugMaquinaEstados=debug;}
+void setDebugMaquinaEstados(boolean debug){debugMaquinaEstados=debug;}
 boolean getDebugMAquinaEstados(void){return debugMaquinaEstados;}
 
 uint8_t getNumEstados(void){return numeroEstados;}
