@@ -87,6 +87,8 @@ void atiendeMQTT(void);
 void enviaDatos(boolean debug);
 /******************************* UTILIDADES *************************************/
 IPAddress getIPBroker(void);
+String getBrokerDir(void);
+String getBroker(void);
 uint16_t getPuertoBroker(void);
 String getUsuarioMQTT(void);
 String getPasswordMQTT(void);

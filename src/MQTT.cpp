@@ -27,6 +27,8 @@
 //definicion del topic ping
 #define TOPIC_PING "ping"
 #define TOPIC_PING_RESPUESTA "ping/respuesta"
+
+#define DIR_CA_CERT "/ca.crt"
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/
@@ -36,10 +38,12 @@
 #include <Ficheros.h>
 
 #include <PubSubClient.h>
+#include <WiFiClientSecure.h>
 /***************************** Includes *****************************/
 
 //Definicion de variables globales
 IPAddress IPBroker; //IP del bus MQTT
+String BrokerDir; //IP o URL del broker
 uint16_t puertoBroker; //Puerto del bus MQTT
 uint16_t timeReconnectMQTT; //Tiempo de espera en la reconexion al bus
 String usuarioMQTT; //usuario par ala conxion al broker
@@ -49,8 +53,9 @@ String ID_MQTT; //ID del modulo en su conexion al broker
 int8_t publicarEntradas; //Flag para determinar si se envia el json con los valores de las entradas
 int8_t publicarSalidas; //Flag para determinar si se envia el json con los valores de las salidas
 
-WiFiClient espClient;
+WiFiClientSecure espClient; 
 PubSubClient clienteMQTT(espClient);
+String ca_cert=""; //Certificado de CA para validar el del servidor
 
 /************************************************/
 /* Inicializa valiables y estado del bus MQTT   */
@@ -61,8 +66,11 @@ void inicializaMQTT(void)
   if (!recuperaDatosMQTT(false)) Traza.mensaje("error al recuperar config MQTT.\nConfiguracion por defecto.\n");
 
   //Si va bien inicializo con los valores correstoc, si no con valores por defecto
-  //confituro el servidor y el puerto
-  clienteMQTT.setServer(IPBroker, puertoBroker);
+  /* set SSL/TLS certificate */
+  espClient.setCACert(ca_cert.c_str());
+  //configuro el servidor y el puerto
+  if (BrokerDir==String("")) clienteMQTT.setServer(IPBroker, puertoBroker);
+  else clienteMQTT.setServer(BrokerDir.c_str(), puertoBroker);
   //configuro el callback, si lo hay
   clienteMQTT.setCallback(callbackMQTT);
 
@@ -81,6 +89,7 @@ boolean recuperaDatosMQTT(boolean debug)
 
   //cargo el valores por defecto
   IPBroker.fromString("0.0.0.0");
+  BrokerDir="";
   puertoBroker=0;
   timeReconnectMQTT=100;
   ID_MQTT=String(NOMBRE_FAMILIA); //ID del modulo en su conexion al broker
@@ -94,7 +103,7 @@ boolean recuperaDatosMQTT(boolean debug)
     {
     //Algo salio mal, Confgiguracion por defecto
     Traza.mensaje("No existe fichero de configuracion MQTT o esta corrupto\n");
-    cad="{\"IPBroker\": \"0.0.0.0\", \"puerto\": 1883, \"timeReconnectMQTT\": 500, \"usuarioMQTT\": \"usuario\", \"passwordMQTT\": \"password\",  \"ID_MQTT\": \"" + String(NOMBRE_FAMILIA) + "\",  \"topicRoot\":  \"" + NOMBRE_FAMILIA + "\", \"publicarEntradas\": 0, \"publicarSalidas\": 0}";
+    cad="{\"IPBroker\": \"0.0.0.0\", \"BrokerDir\": \"\"; \"puerto\": 1883, \"timeReconnectMQTT\": 500, \"usuarioMQTT\": \"usuario\", \"passwordMQTT\": \"password\",  \"ID_MQTT\": \"" + String(NOMBRE_FAMILIA) + "\",  \"topicRoot\":  \"" + NOMBRE_FAMILIA + "\", \"publicarEntradas\": 0, \"publicarSalidas\": 0}";
     //if (salvaFichero(MQTT_CONFIG_FILE, MQTT_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion MQTT creado por defecto\n");    
     }
 
@@ -115,7 +124,8 @@ boolean parseaConfiguracionMQTT(String contenido)
     Traza.mensaje("\nparsed json\n");
 //******************************Parte especifica del json a leer********************************
     ID_MQTT=json.get<String>("ID_MQTT");
-    IPBroker.fromString(json.get<String>("IPBroker"));
+    if (json.containsKey("IPBroker")) IPBroker.fromString(json.get<String>("IPBroker"));
+    if (json.containsKey("BrokerDir")) BrokerDir=json.get<String>("BrokerDir");
     puertoBroker=json.get<uint16_t>("puerto");
     timeReconnectMQTT=json.get<uint16_t>("timeReconnectMQTT");
     usuarioMQTT=json.get<String>("usuarioMQTT");
@@ -124,13 +134,16 @@ boolean parseaConfiguracionMQTT(String contenido)
     publicarEntradas=json.get<int8_t>("publicarEntradas"); 
     publicarSalidas=json.get<int8_t>("publicarSalidas"); 
     
-    Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nIP Puerto del broker: %i\ntimeReconnectMQTT: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),puertoBroker,timeReconnectMQTT,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),publicarEntradas,publicarSalidas);
+    Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nBrokerDir: %s\nIP Puerto del broker: %i\ntimeReconnectMQTT: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),BrokerDir.c_str(),puertoBroker,timeReconnectMQTT,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),publicarEntradas,publicarSalidas);
 //************************************************************************************************
+    //Leo el fichero con el certificado de CA
+    if(!leeFichero(DIR_CA_CERT, ca_cert)) Traza.mensaje("No se pudo leer el certificado CA\n");
+    else Traza.mensaje("Certificado CA:\n%s\n",ca_cert.c_str());
+
     return true;
     }
   return false;
   }
-
 /***********************************************Funciones de gestion de mensajes MQTT**************************************************************/
 /***************************************************/
 /* Funcion que recibe el mensaje cuando se publica */
@@ -251,6 +264,7 @@ String generaJSONPing(boolean debug)
   cad += "\"myIP\": \"" + getIP(false) + "\",";
   cad += "\"ID_MQTT\": \"" + ID_MQTT + "\",";
   cad += "\"IPBbroker\": \"" + IPBroker.toString() + "\",";
+  cad += "\"BrokerDir\": \"" + BrokerDir + "\",";
   cad += "\"IPPuertoBroker\":" + String(puertoBroker) + "";
   cad += "}";
 
@@ -267,9 +281,9 @@ boolean conectaMQTT(void)
   int8_t intentos=0;
   String topic;
 
-  if(IPBroker==IPAddress(0,0,0,0)) 
+  if(IPBroker==IPAddress(0,0,0,0) && BrokerDir==String("")) 
     {
-    if(debugGlobal) Traza.mensaje("IP del broker = 0.0.0.0, no se intenta conectar.\n");
+    if(debugGlobal) Traza.mensaje("IP del broker = 0.0.0.0 y BrokerDir="", no se intenta conectar.\n");
     return (false);//SI la IP del Broker es 0.0.0.0 (IP por defecto) no intentaq conectar y sale con error
     }
   
@@ -378,6 +392,12 @@ void enviaDatos(boolean debug)
 
 /******************************* UTILIDADES *************************************/
 IPAddress getIPBroker(void){return IPBroker;}
+String getBrokerDir(void){return BrokerDir;}
+String getBroker(void){
+  if (BrokerDir!="") return BrokerDir;
+  
+  return IPBroker.toString();
+}
 uint16_t getPuertoBroker(void){return puertoBroker;}
 String getUsuarioMQTT(void){return usuarioMQTT;}
 String getPasswordMQTT(void){return passwordMQTT;}

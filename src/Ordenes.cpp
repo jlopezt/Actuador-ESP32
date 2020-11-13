@@ -350,7 +350,7 @@ void func_comando_estSec(int iParametro, char* sParametro, float fParametro)//"d
 
 void func_comando_MQTTConfig(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nIP Puerto del broker: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\nWill topic: %s\nWill msg: %s\nCelan session: %i\n",getIDMQTT().c_str(),getIPBroker().toString().c_str(),getPuertoBroker(),getUsuarioMQTT().c_str(),getPasswordMQTT().c_str(),getTopicRoot().c_str(),getPublicarEntradas(),getPublicarSalidas(),getTopicRoot()+"/"+getWillTopic().c_str(),getWillMsg().c_str(), getCleanSession());
+  Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nBroker Dir: %s\nIP Puerto del broker: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\nWill topic: %s\nWill msg: %s\nCelan session: %i\n",getIDMQTT().c_str(),getIPBroker().toString().c_str(),getBrokerDir().c_str(),getPuertoBroker(),getUsuarioMQTT().c_str(),getPasswordMQTT().c_str(),getTopicRoot().c_str(),getPublicarEntradas(),getPublicarSalidas(),getTopicRoot()+"/"+getWillTopic().c_str(),getWillMsg().c_str(), getCleanSession());
   }  
 
 void func_comando_Salidas(int iParametro, char* sParametro, float fParametro)//"debug")
