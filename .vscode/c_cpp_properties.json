@@ -213,7 +213,7 @@
                 ]
             },
             "defines": [
-                "PLATFORMIO=50002",
+                "PLATFORMIO=50003",
                 "ARDUINO_ESP32_DEV",
                 "ESP32",
                 "ESP_PLATFORM",
@@ -226,7 +226,7 @@
                 "ARDUINO_BOARD=\"Espressif ESP32 Dev Module\"",
                 ""
             ],
-            "intelliSenseMode": "clang-x64",
+            "intelliSenseMode": "gcc-x64",
             "cStandard": "c99",
             "cppStandard": "c++11",
             "compilerPath": "C:/Users/jlopezt/.platformio/packages/toolchain-xtensa32/bin/xtensa-esp32-elf-gcc.exe",
