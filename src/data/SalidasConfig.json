@@ -1,19 +1,19 @@
 {
   "Salidas": [
     {
-    "GPIO": 36, 
+    "GPIO": 32, 
     "nombre": "Pulsador",
     "inicio": "off",
     "anchoPulso": 1000,
     "modo": 0,
     "controlador": 0,
     "Estados": [
-      {"valor": 0, "texto": "Encendido"},
-      {"valor": 1, "texto": "Apagado"}
+      {"valor": 0, "texto": "Apagado"},
+      {"valor": 1, "texto": "Encendido"}
       ],
     "Mensajes": [
-      {"valor": 0, "texto": "Encendido"},
-      {"valor": 1, "texto": "Apagado"}
+      {"valor": 0, "texto": "Apagado"},
+      {"valor": 1, "texto": "Encendido"}
       ]
     }
   ]

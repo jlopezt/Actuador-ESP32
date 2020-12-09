@@ -1,177 +1,238 @@
 <!DOCTYPE html>
-<html>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/3/w3.css">
-<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">-->
-<Head>
-<style>
-body, html {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-}
+<html lang="es">
+  <head>
+    <title>Domoticae</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="css.css" media="screen" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
 
-iframe {
-	display: block;
-  border: none;
-  height: 100vh;
-}
-    
-footer {
-  width: 100%;
-  height: 5%;
-  border-collapse: collapse;
-  background-color: #ffffff;
-}	
+      body {
+        font-family: Trebuchet MS, Arial;
+        background-color: #f0f0ce;
+        color: #000000;
+      }
 
-ul {
-	list-style:none;
-	padding-left: 0px;
-	}
+      /* Style the header */
+      header {
+        background-color: #444;
+        padding: 20px;
+        text-align: left;
+        font-size: 35px;
+        font: verdana;
+        font-weight: bold;
+        color: white;
+      }
 
-li {
-	text-align: left;
-	}
-    
-.container {
-  width: 100%;
-  height: 95%;
-}
+      /* Create two columns/boxes that floats next to each other */
+      nav {
+        float: left;
+        width: 100%;
+        background: #888; /*#F0F0CE;*/
+        padding: 0px;
+      }
 
-.toppane {
-  width: 100%;
-  height: 100px;
-  border-collapse: collapse;
-  background-color: #ffffff;
-}	
+      /* Style the list inside the menu */
+      nav ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+      }
 
-.titulo{
-		text-align: left;
-		color: #000000;		
-    float: left;
-    background-color: #FFFFFF;
-    border-collapse: collapse;		
-		padding-top: 25px;
-		padding-left: 5%;
-		font-size: 30px;
-    line-height: 100%;
-		}
+      nav ul li {
+        display: inline;
+        font-family: Arial;
+        font-size: 12px;
+        text-decoration: none;
+        float: left;
+        padding: 10px;
+        background-color: #888;
+        color: #fff;
+      }
 
-.logo {
-	float: left;
-	height: 100%;
-	background-color: #FFFFFF;
-	}
-	
-.navbar {
-	background-color: #000000;	
-	}
+      nav ul li:hover {
+        background: #222;
+        font-weight: bold;
+        border-radius: 8px;
+      }
 
-.iframeMenu {
-	display: block;
-  border: none;
-  height: 40vh;
-}
+      article {
+        float: left;
+        padding: 0px;
+        width: 100%;
+        background-color: #ddd; /*#F0F0CE;*/
+        /*height: 600px; /* only for demonstration, should be removed */
+      }
 
-.dropbtn {
-  background-color: #000000;
-  color: white;
-  padding: 16px;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-}
+      section {
+        background-color: #888;
+      }
 
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
+      /* Clear floats after the columns */
+      section:after {
+        content: "";
+        display: table;
+        clear: both;
+      }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  right: 0;
-  background-color: #f1f1f1;
-  min-width: 300px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
-  left:0;
-}
+      /* Style the footer */
+      footer {
+        height: 40px;
+        background-color: #444;
+        padding: 10px;
+        text-align: right;
+        color: white;
+        font: verdana;
+        font-weight: bold;
+      }
 
-.dropdown-content a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-}
+      .izquierda {
+        float: left;
+        padding: 0px;
+        text-align: left;
+      }
+      .derecha {
+        float: right;
+        padding: 0px;
+        text-align: right;
+      }
 
-.dropdown-content a:hover {background-color: #f1f1f1;}
-.dropdown:hover .dropdown-content {display: block;}
-.dropdown:hover .dropbtn {background-color: #909090;}
-</style>
-</Head>
-<body>
-<div class="container">
-  <div class="toppane">
-  	<!-- logo -->
-		<img id="logo" class="logo" src="led_escalera_2.jpg" alt="Luz escalera">
-		<div class="titulo">Luz de la escalera</div>
-  </div>
+      .oculto {
+        display: none;
+      }
+      .visible {
+        display: inline;
+      }
 
-	<!-- Navigation -->
-	<nav class="navbar">
-  	<!--Opcion 1-->
-		<div class="dropdown">
-		  <button onclick="cargaPaginaFrame('iframe_main','./datos');" class="dropbtn">Inicio</button>
-		</div>
-		<!--Opcion 4-->
-		<div class="dropdown">
-		  <button onclick="cargaPaginaFrame('iframe_main','./listaFicheros2');" class="dropbtn">Ficheros</button>
-		</div>
-		
-	</nav>	
+      /* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
+      @media (max-width: 600px) {
+        nav,
+        article {
+          width: 100%;
+          height: auto;
+        }
+      }
+    </style>
+    <script>
+      function cambiaDiv() {
+        console.log("Entrando");
+        if (document.getElementById("atras").className == "oculto") {
+          console.log("Atras: " + document.getElementById("atras").className + " mostrando atras");
+          document.getElementById("atras").className = "visible";
+        } else {
+          console.log("Atras: " + document.getElementById("atras").className + " ocultando atras");
+          document.getElementById("atras").className = "oculto";
+        }
 
-	<div height="100%" width="100%">
-		<iframe id="iframe_main" src="./datos" name="iframe_main" height="100%" width="100%"></iframe>
-	</div>
-	
-</div>
+        if (document.getElementById("delante").className == "visible") {
+          console.log("Delante: " + document.getElementById("delante").className + " Ocultando delante");
+          document.getElementById("delante").className = "oculto";
+        } else {
+          console.log("Delante: " + document.getElementById("delante").className + " mostrando delante");
+          document.getElementById("delante").className = "visible";
+        }
+      }
 
-<!-- Footer -->
-<!--<footer class="w3-container w3-padding-64 w3-center w3-black w3-xlarge">-->
-<footer class="w3-container w3-center w3-black">
-  <p class="w3-medium">
-  Powered by <a href="http://home.lopeztola.com" target="_blank">L-T</a>
-  </p>
-</footer>
+      function inicializa(){
+        var xh = new XMLHttpRequest();
+        xh.onreadystatechange = function(){
+          if (xh.readyState == 4){
+            if(xh.status == 200) {
+              console.log("JSON: " + JSON)
+              var res = JSON.parse(xh.responseText);
+              //nombre
+              console.log("Nombre: "+res.nombre);
+              cambiaNombre(res.nombre);
+              //document.getElementById("nombreDispositivo").innerText=res.nombre;
+              //consigna
+              console.log("Version: "+res.version);
+              document.getElementById("version").innerText=res.version;
+            }
+          }
+        };
+        xh.open("GET", "/nombre", true);
+        xh.send(null);        
+        
+        //cargo el iframe con al info inicial
+        cambiaIFrame("/root");
 
-<script>
-function cargaPaginaFrame(Frame,URL)  {
-  document.getElementById(Frame).src = URL
-}
+        //relleno el frame oculto
 
-function foco(idElemento){
-  document.getElementById(idElemento).focus();
-}
+        //Ajusto la altura del iframe        
+        var margen = window.getComputedStyle(document.body,null).getPropertyValue("margin-top");
+        margen = margen.substr(0,margen.length-2);//le quito el px del final
+        var alto = window.innerHeight - 
+          (margen*2) - 
+          document.getElementById("header").offsetHeight - 
+          document.getElementById("nav").offsetHeight - 
+          document.getElementById("footer").offsetHeight;
 
-// Close the dropdown if the user clicks outside of it
+        document.getElementById("article").style.height=alto+"px";     
+      }
+      
+      function cambiaNombre(nombre){
+        document.getElementById("nombre_1").innerHTML=nombre.substr(0,nombre.length-3);
+        document.getElementById("nombre_2").innerHTML=nombre.substr(nombre.length-3,1);
+        document.getElementById("nombre_3").innerHTML=nombre.substr(nombre.length-2);
+      }
 
-window.onclick = function(event) {
-/*  if (!event.target.matches('.dropbtn')) {
-    var dropdowns = document.getElementsByClassName("dropdown-content");
-    var i;
-    for (i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      console.log(openDropdown.id);
-      openDropdown.style.display = 'none';
-      //openDropdown.style= '';
-			//openDropdown.removeAttribute('style');
-    }
-  }*/
-  document.getElementById('logo').focus();
-}
+      function cambiaIFrame(pagina){
+        //cargo el iframe con la pagina indicada
+        var c=document.getElementById("iframe_a");
+        console.log(c.getAttribute("src"));
+        c.setAttribute("src",pagina);
+      }
+    </script>
+  </head>
+  <body onload="inicializa();">
+    <header style="overflow: auto;" id="header">
+      <div class="izquierda" id="nombreDispositivo">
+        <span id="nombre_1"></span><span id="nombre_2" style="color:red"></span><span id="nombre_3"></span>
+      </div>
+      <div class="derecha" style="font-size: 20px;">
+        <span>DOMOTI</span><span style="color:red">C</span><span>AE</span><span style="font-size: 35px;"></span>
+      </div>
+    </header>
 
-</script>
-</body>
+    <section>
+      <div class="izquierda">
+        <nav id="nav">
+          <ul>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/root')">Inicio</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/entradas')">Entradas</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/salidas')">Salidas</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/planes')">Secuenciador</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/maquinaEstados')">Maq. estados</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/listaFicheros')">Ficheros</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/info')">Info</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/particiones')">Particiones</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/restart')">Reiniciar</li>
+          </ul>
+        </nav>
+      </div>
+      <div class="derecha">
+        <nav>
+          <ul>
+            <li style="color:#888;" onMouseOver="this.style.cursor='pointer'" onClick="cambiaDiv()">Cambiar</li>
+          </ul>
+        </nav>
+      </div>
+      <article id="article">
+        <div id="atras" class="oculto">          
+          <!--<iframe id="iframe_b" name="iframe_b" style="height:100%;width:100%;border:none;" src="http://www.orange.es"></iframe>-->         
+        </div>
+        <div id="delante" class="visible">
+          <iframe id="iframe_a" name="iframe_a" style="height:100%;width:100%;border:none;"></iframe>
+        </div>
+      </article>
+    </section>
+
+    <footer id="footer">
+      <div class="izquierda" id="version"></div>
+      <div class="derecha"><a href="https://domoticae.lopeztola.com" target="_self" style="text-decoration:none; color:white;">domoticae-2020</a></div>
+    </footer>
+  </body>
 </html>

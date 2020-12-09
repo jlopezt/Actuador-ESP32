@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <TITLE>Domoticae</TITLE>    
+    <link rel="stylesheet" type="text/css" href="css.css">
+    <script type="text/javascript" src="./paho-mqtt-min.js"></script>
+    <script type="text/javascript" src="./MQTT.js"></script>
+    <script type="text/javascript">
+        const FONDO     ="#DDDDDD";
+        const TEXTO     ="#000000";
+        const ACTIVO    ="#FFFF00";
+        const DESACTIVO ="#DDDDDD";
+
+        function inicializa() {
+            var xh = new XMLHttpRequest();
+            xh.onreadystatechange = function(){
+                if (xh.readyState == 4){
+                    if(xh.status == 200) {
+                    console.log("JSON: " + xh.responseText)
+                    actualizaEntradas(xh.responseText);
+                    actualizaSalidas(xh.responseText);
+                    }
+                }
+            };
+            xh.open("GET", "/datos2", true);
+            xh.send(null); 
+
+            connect();
+        }
+
+        function actualizaEntradas(datos) {
+            var res = JSON.parse(datos);
+
+            //entradas
+            var entradas=res.Entradas;
+            console.log("numero entradas: " + entradas.length);
+
+            entradas.forEach(function(entrada,indice,array) {
+                var hilera = document.getElementById("entrada_"+indice);
+                if(hilera==null){
+                    console.log("no existe la fila, la creo");
+                    var hilera = document.createElement("tr");
+                    hilera.setAttribute("id", "entrada_" + indice);
+                    hilera.setAttribute("class","modo2");
+                    document.getElementById("body_tabla_entradas").appendChild(hilera);
+        
+                    var celda = document.createElement("td");
+                    celda.setAttribute("id","entrada_id_"+indice);
+                    celda.setAttribute("align","right");
+                    hilera.appendChild(celda);
+
+                    celda = document.createElement("td");
+                    celda.setAttribute("id","entrada_nombre_"+indice);
+                    celda.setAttribute("align","right");
+                    hilera.appendChild(celda);
+
+                    celda = document.createElement("td");
+                    celda.setAttribute("id","entrada_estado_"+indice);
+                    celda.setAttribute("align","center");
+                    hilera.appendChild(celda);
+                }
+
+                document.getElementById("entrada_id_" + indice).innerHTML=entrada.id;
+                document.getElementById("entrada_nombre_" + indice).innerHTML=entrada.nombre;
+                document.getElementById("entrada_estado_" + indice).innerHTML=(entrada.valor=="0"?"Off":"On");
+            });
+
+            //Si hay filas de mas, las borro
+            var tabla = document.getElementById("tabla_entradas");
+            if(tabla.rows.length-1>entradas.length){ //si hay mas filas que habitaciones, le resto la cabecera
+                console.log("filas en tabla: " + (tabla.rows.length-1) + " | entradas: " + entradas.length);
+                for(i=tabla.rows.length;i>entradas.length+1;i--){
+                    console.log("borro la fila " + (i));
+                    tabla.deleteRow(i-1);
+                }
+            }
+        }
+
+        function actualizaSalidas(datos) {
+            var res = JSON.parse(datos);
+
+            //salidas
+            var salidas=res.Salidas;
+            console.log("numero salidas: " + salidas.length);
+
+            salidas.forEach(function(salida,indice,array) {
+                var hilera = document.getElementById("salida_"+indice);
+                if(hilera==null){
+                    console.log("no existe la fila, la creo");
+                    var hilera = document.createElement("tr");
+                    hilera.setAttribute("id", "salida_" + indice);
+                    hilera.setAttribute("class","modo2");
+                    document.getElementById("body_tabla_salidas").appendChild(hilera);
+        
+                    var celda = document.createElement("td");
+                    celda.setAttribute("id","salida_id_"+indice);
+                    celda.setAttribute("align","right");
+                    hilera.appendChild(celda);
+
+                    celda = document.createElement("td");
+                    celda.setAttribute("id","salida_nombre_"+indice);
+                    celda.setAttribute("align","right");
+                    hilera.appendChild(celda);
+
+                    celda = document.createElement("td");
+                    celda.setAttribute("id","salida_estado_"+indice);
+                    celda.setAttribute("align","center");
+                    hilera.appendChild(celda);
+
+                    celda = document.createElement("td");
+                    celda.setAttribute("id","salida_accion_"+indice);
+                    celda.setAttribute("align","center");
+                    hilera.appendChild(celda);
+                }
+
+                document.getElementById("salida_id_" + indice).innerHTML=salida.id;
+                document.getElementById("salida_nombre_" + indice).innerHTML=salida.nombre;
+                
+                var estado=document.getElementById("salida_estado_" + indice);
+                estado.innerHTML=salida.nombreEstado;
+                if(salida.valor=="0") {
+                    estado.style.backgroundColor=DESACTIVO;
+                }
+                else {
+                    estado.style.backgroundColor=ACTIVO;
+                }
+
+                var accion=document.getElementById("salida_accion_" + indice);
+                if (salida.valor=="0") {
+                    accion.innerHTML  = "<form action='activaSalida'><input  type='hidden' id='id' name='id' value='0'><input STYLE='color: #000000; text-align: center; background-color: #FFFF00; width: 80px' type='submit' value='activar'></form>";
+                    accion.innerHTML += "<form action='pulsoSalida'><input  type='hidden' id='id' name='id' value='0'><input STYLE='color: #000000; text-align: center; background-color: #FFFF00; width: 80px' type='submit' value='pulso'></form>";
+                }
+                else accion.innerHTML  = "<form action='desactivaSalida'><input  type='hidden' id='id' name='id' value='0'><input STYLE='color: #000000; text-align: center; background-color: #DDDDDD; width: 80px' type='submit' value='desactivar'></form>";
+            });
+
+            //Si hay filas de mas, las borro
+            var tabla = document.getElementById("tabla_salidas");
+            if(tabla.rows.length-1>salidas.length){ //si hay mas filas que salidas, le resto la cabecera
+                console.log("filas en tabla: " + (tabla.rows.length-1) + " | salidas: " + salidas.length);
+                for(i=tabla.rows.length;i>salidas.length+1;i--){
+                    console.log("borro la fila " + (i));
+                    tabla.deleteRow(i-1);
+                }
+            }
+        }
+    </script>
+  </head>
+
+  <BODY onload="inicializa()">
+    <TABLE id="tabla_entradas" border="0" width="50%" cellpadding="0" cellspacing="0" width="300" class="tabla">
+        <CAPTION>Entradas</CAPTION>
+        <tbody id="body_tabla_entradas">
+            <TR>
+                <th width='5%'>id</th>
+                <th width='50%'>Nombre</th>
+                <th width='45%'>Estado</th>
+            </TR>
+            <!--Una fila por cada habitacion--> 
+        </tbody>     
+    </TABLE>
+    <BR><br>
+
+    <TABLE id="tabla_salidas" border="0" width="50%" cellpadding="0" cellspacing="0" width="300" class="tabla">
+        <CAPTION>Salidas</CAPTION>
+        <tbody id="body_tabla_salidas">
+            <TR>
+                <th width='5%'>id</th>
+                <th width='25%'>Nombre</th>
+                <th width='25%'>Estado</th>
+                <th width='45%'>Acción</th>
+            </TR>
+            <!--Una fila por cada habitacion--> 
+        </tbody>     
+    </TABLE>
+    <BR><BR>
+    
+    <TABLE border="0" width="50%" cellpadding="0" cellspacing="0" width="300" class="tabla">
+        <CAPTION>Secuenciadores</CAPTION>
+        <TR>
+            <TH>plan</TH>
+            <TH>acción</TH>
+        </TR>
+    </TABLE>
+    <BR><BR>
+
+    <TABLE border="0" width="50%" cellpadding="0" cellspacing="0" width="300" class="tabla">
+        <CAPTION>Máquina de estados</CAPTION>
+        <TR>
+            <TH width="100">Estado: </TH>
+            <TD width="200" class="modo2">Medio</TD>
+        </TR>
+    </TABLE>
+  </BODY>
+</HTML>

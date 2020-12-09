@@ -1,18 +1,14 @@
 <html>
-	<head>
-	</head>
-	<body>
-
-		<form id="myForm" action="/speech">
-			<input type="text" name="phrase">
-			<input type="button" onclick="myFunction()" value="Submit form">
-		</form>
-
-		<script>
-		function myFunction() {
-		  document.getElementById("myForm").submit();
-		}
-		</script>
-
-	</body>
+  <head></head>
+  <body>
+    <input type="text">
+    <button>speech</button>
+    <script>
+        var d = document;
+        d.querySelector('button').addEventListener('click',function(){
+            xhr = new XMLHttpRequest();
+            xhr.open('GET','/habla?phrase='+encodeURIComponent(d.querySelector('input').value));
+            xhr.send();});
+    </script>
+  </body>
 </html>

@@ -1176,7 +1176,8 @@ String generaJsonEstadoSalidas(void)
       Salidas_0["pin"] = salidas[id].pin;
       Salidas_0["modo"] = salidas[id].modo;
       Salidas_0["controlador"] = salidas[id].controlador;
-      Salidas_0["valor"] = salidas[id].estado;    
+      Salidas_0["valor"] = salidas[id].estado;
+      Salidas_0["nombreEstado"] = nombreEstadoSalida(id,salidas[id].estado);
       Salidas_0["anchoPulso"] = salidas[id].anchoPulso;
       Salidas_0["finPulso"] = salidas[id].finPulso;  
       }
@@ -1216,6 +1217,7 @@ String generaJsonEstadoEntradas(void)
       Entradas_0["id"] = id;
       Entradas_0["nombre"] = entradas[id].nombre;
       Entradas_0["valor"] = entradas[id].estado;
+      Entradas_0["nombreEstado"] = nombreEstadoEntrada(id,entradas[id].estado);
       }
     }
 
@@ -1257,6 +1259,7 @@ String generaJsonEstado(void)
       Entradas_0["id"] = id;
       Entradas_0["nombre"] = entradas[id].nombre;
       Entradas_0["valor"] = entradas[id].estado;
+      Entradas_0["nombreEstado"] = nombreEstadoEntrada(id,entradas[id].estado);
       }
     }
 
@@ -1272,6 +1275,7 @@ String generaJsonEstado(void)
       Salidas_0["modo"] = salidas[id].modo;
       Salidas_0["controlador"] = salidas[id].controlador;
       Salidas_0["valor"] = salidas[id].estado;    
+      Salidas_0["nombreEstado"] = nombreEstadoSalida(id,salidas[id].estado);
       Salidas_0["anchoPulso"] = salidas[id].anchoPulso;
       Salidas_0["finPulso"] = salidas[id].finPulso;
       }

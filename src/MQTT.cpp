@@ -39,7 +39,6 @@
 
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
-#include <string.h>
 /***************************** Includes *****************************/
 
 //Definicion de variables globales
@@ -76,7 +75,7 @@ void inicializaMQTT(void)
     
     //Leo el fichero con el certificado de CA
     if(!leeFichero(DIR_CA_CERT,caCert)) Traza.mensaje("No se pudo leer el certificado CA\n");
-    else Traza.mensaje("Certificado CA:\n%s\n",caCert.c_str());
+    //else Traza.mensaje("Certificado CA:\n%s\n",caCert.c_str());
 
     /* set SSL/TLS certificate */
     espClientSSL.setCACert(caCert.c_str());

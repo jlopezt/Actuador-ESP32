@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8">
+		<TITLE>Domoticae</TITLE>
+		<link rel="stylesheet" type="text/css" href="css.css">
+		<script type="text/javascript">
+			function inicializa(){
+				console.log("Vamos...");
+				var xhEntradas = new XMLHttpRequest();
+                xhEntradas.onreadystatechange = function(){
+					if (xhEntradas.readyState == 4){
+						if(xhEntradas.status == 200) {
+						console.log("JSON: " + xhEntradas.responseText)
+						var res = JSON.parse(xhEntradas.responseText);
+
+						var entradas=res.entradas;
+						console.log("numero entradas: " + entradas.length);
+
+						entradas.forEach(function(entrada,indice,array) {
+							var hilera = document.getElementById("entrada_"+indice);
+							if(hilera==null){
+								console.log("no existe la fila, la creo");
+								var hilera = document.createElement("tr");
+								hilera.setAttribute("id", "entrada_" + indice);
+								hilera.setAttribute("class","modo2");
+								document.getElementById("body_tabla_entradas").appendChild(hilera);
+					
+								var celda = document.createElement("td");
+								celda.setAttribute("id","entrada_id_"+indice);
+								celda.setAttribute("align","right");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","entrada_nombre_"+indice);
+								celda.setAttribute("align","right");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","entrada_configurada_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","entrada_tipo_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","entrada_pin_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","entrada_estadoActivo_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","entrada_estadoFisico_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","entrada_estado_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","entrada_nombreEstado_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","entrada_mensajeEstado_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+								}
+
+							document.getElementById("entrada_id_" + indice).innerHTML=entrada.id;
+							document.getElementById("entrada_nombre_" + indice).innerHTML=entrada.nombre;
+							document.getElementById("entrada_configurada_" + indice).innerHTML=(entrada.configurada?"Si":"No");
+							document.getElementById("entrada_tipo_" + indice).innerHTML=entrada.controlador;
+							document.getElementById("entrada_pin_" + indice).innerHTML=entrada.pin;
+							document.getElementById("entrada_estadoActivo_" + indice).innerHTML=(entrada.estadoActivo==0?"Off":"On");
+							document.getElementById("entrada_estadoFisico_" + indice).innerHTML=(entrada.estadoFisico==0?"Off":"On");
+							document.getElementById("entrada_estado_" + indice).innerHTML=(entrada.estado=="0"?"Off":"On");
+							document.getElementById("entrada_nombreEstado_" + indice).innerHTML=entrada.nombreEstado;
+							document.getElementById("entrada_mensajeEstado_" + indice).innerHTML=entrada.mensajeEstado;
+							});
+						}
+					}
+				};
+				xhEntradas.open("GET", "/configEntradas", true);
+				xhEntradas.send(null);					
+			};
+		</script>
+	</HEAD>
+	<BODY onload="inicializa();">
+		<TABLE id="tabla_entradas" border="0" width="100%" cellpadding="0" cellspacing="0" width="300" class="tabla">
+			<CAPTION>Entradas</CAPTION>
+			<tbody  id="body_tabla_entradas">
+				<TR>
+					<TH>id</TH>
+					<TH>Nombre</TH>
+					<TH>Configurada</TH>
+					<TH>Tipo</TH>
+					<TH>Pin</TH>
+					<TH>Estado activo</TH>
+					<TH>Estado fisico</TH>
+					<TH>Estado</TH>
+					<TH>Nombre del estado</TH>
+					<TH>mensaje</TH>
+				</TR>
+				<!-- Una linea por cada entrada
+				<TR class="modo2">
+					<TD>3</TD><TD>Celula</TD><TD>1</TD><TD>INPUT</TD><TD>19</TD><TD>1</TD><TD>0</TD><TD>0</TD><TD>-</TD><TD>--</TD>
+				</TR>
+				-->
+			</tbody>
+		</table>
+	</BODY>
+</HTML>

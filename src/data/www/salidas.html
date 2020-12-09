@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8">
+		<TITLE>Domoticae</TITLE>
+		<link rel="stylesheet" type="text/css" href="css.css">
+		<script type="text/javascript">
+			function inicializa(){
+				var xhSalidas = new XMLHttpRequest();
+                xhSalidas.onreadystatechange = function(){
+					if (xhSalidas.readyState == 4){
+						if(xhSalidas.status == 200) {
+						console.log("JSON: " + xhSalidas.responseText)
+						var res = JSON.parse(xhSalidas.responseText);
+
+						var salidas=res.salidas;
+						console.log("numero salidas: " + salidas.length);
+
+						salidas.forEach(function(salida,indice,array) {
+							var hilera = document.getElementById("salida_"+indice);
+							if(hilera==null){
+								console.log("no existe la fila, la creo");
+								var hilera = document.createElement("tr");
+								hilera.setAttribute("id", "salida_" + indice);
+								hilera.setAttribute("class","modo2");
+								document.getElementById("body_tabla_salidas").appendChild(hilera);
+					
+								var celda = document.createElement("td");
+								celda.setAttribute("id","salida_id_"+indice);
+								celda.setAttribute("align","right");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_nombre_"+indice);
+								celda.setAttribute("align","right");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_configurada_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_pin_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_controlador_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_inicio_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_modo_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_tipo_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_valorPWM_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_anchoPulso_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_inicioPulso_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_finPulso_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_estado_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_nombreEstado_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+
+								celda = document.createElement("td");
+								celda.setAttribute("id","salida_mensajeEstado_"+indice);
+								celda.setAttribute("align","center");
+								hilera.appendChild(celda);
+								}
+							
+							document.getElementById("salida_id_" + indice).innerHTML=salida.id;
+							document.getElementById("salida_nombre_" + indice).innerHTML=salida.nombre;
+							document.getElementById("salida_configurada_" + indice).innerHTML=(salida.configurada==-1?"No":"Si");
+							document.getElementById("salida_pin_" + indice).innerHTML=salida.pin;
+							document.getElementById("salida_controlador_" + indice).innerHTML=(salida.controlador==-1?"-":salida.controlador);
+							document.getElementById("salida_inicio_" + indice).innerHTML=(salida.inicio=="0"?"Off":"On");
+							document.getElementById("salida_modo_" + indice).innerHTML=salida.modo;
+							document.getElementById("salida_tipo_" + indice).innerHTML=salida.tipo;
+							document.getElementById("salida_valorPWM_" + indice).innerHTML=salida.valorPWM;
+							document.getElementById("salida_anchoPulso_" + indice).innerHTML=salida.anchoPulso;
+							document.getElementById("salida_inicioPulso_" + indice).innerHTML=salida.inicioPulso;
+							document.getElementById("salida_finPulso_" + indice).innerHTML=salida.finPulso;
+							document.getElementById("salida_estado_" + indice).innerHTML=(salida.estado=="0"?"Off":"On");
+							document.getElementById("salida_nombreEstado_" + indice).innerHTML=salida.nombreEstado;
+							document.getElementById("salida_mensajeEstado_" + indice).innerHTML=salida.mensajeEstado;
+							});
+						}
+					}
+				};
+				xhSalidas.open("GET", "/configSalidas", true);
+				xhSalidas.send(null);
+			};
+		</script>
+	</HEAD>
+	<BODY onload="inicializa();">
+		<TABLE id="tabla_salidas" border="0" width="100%" cellpadding="0" cellspacing="0" width="300" class="tabla">
+			<CAPTION>Salidas</CAPTION>
+			<tbody id="body_tabla_salidas">
+				<TR>
+					<TH>id</TH>
+					<TH>Nombre</TH>
+					<TH>Configurada</TH>
+					<TH>Pin</TH>
+					<TH>Controlador</TH>
+					<TH>Inicio</TH>
+					<TH>Modo</TH>
+					<TH>Tipo</TH>
+					<TH>valor PWM</TH>
+					<TH>Ancho del pulso</TH>
+					<TH>Inicio del pulso</TH>
+					<TH>Fin del pulso</TH>
+					<TH>Estado</TH>
+					<TH>Nombre del estado</TH>
+					<TH>mensaje</TH>				
+				</TR>
+				<!-- Una linea por cada entrada
+				<TR class="modo2">
+				<TD>0</TD><TD>Pulsador</TD><TD>1</TD><TD>36</TD><TD>-1</TD><TD>0</TD><TD>Manual</TD><TD>Digital</TD><TD>-1</TD><TD>1000</TD><TD>0</TD><TD>0</TD><TD>0</TD><TD>Encendido</TD><TD>Encendido</TD>
+				</TR>
+				-->
+			</tbody>
+		</table>
+	</BODY>
+</HTML>

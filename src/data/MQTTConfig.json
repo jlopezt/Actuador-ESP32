@@ -1,9 +1,9 @@
 { 
-  "IPBroker": "10.68.0.101", 
-  "modoMQTT": "TLS",
-  "xxxBrokerDir": "mqtt.lopeztola.com",
-  "puerto": 8883, 
+  "xxxIPBroker": "10.68.0.101", 
   "xxxpuerto": 1883,
+  "modoMQTT": "TLS",
+  "BrokerDir": "mqtt.lopeztola.com",
+  "puerto": 8883, 
   "usuarioMQTT": "domoticae", 
   "passwordMQTT": "88716", 
   "ID_MQTT": "PuertaGaraje", 
