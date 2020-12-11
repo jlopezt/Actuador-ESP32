@@ -232,13 +232,7 @@ void func_comando_info(int iParametro, char* sParametro, float fParametro)//"inf
 
 void func_comando_flist(int iParametro, char* sParametro, float fParametro)//"fexist")
   {
-  String contenido="";  
-  if(listaFicheros(contenido)) 
-    {
-    contenido.replace("|","\n");
-    Traza.mensaje("Contendio del sistema de ficheros:\n%s\n",contenido.c_str());
-    }
-  else Traza.mensaje("Ha habido un problema.....\n");
+  Serial.printf("listado de ficheros:\n%s",listadoFicheros(String(sParametro)).c_str()); 
   }
 
 void func_comando_fexist(int iParametro, char* sParametro, float fParametro)//"fexist")

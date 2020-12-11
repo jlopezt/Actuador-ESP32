@@ -256,3 +256,23 @@ String getFecha(void)
   
   return cad;   
   }  
+
+/***************************************************************/
+/*                                                             */
+/*  Genera una cadena con la hora en formato dd-mm-yy HH:MM:SS */
+/*  a partir de la estrucutura time_t que se le pasa           */
+/*                                                             */
+/***************************************************************/
+String horaYfecha(time_t entrada)
+  {
+  String cad="";  
+  const char formato[]="%d-%m-%Y %H:%M:%S";
+  const uint8_t longitud=20;
+  char buf[longitud];
+
+  struct tm* ts = localtime(&entrada);
+  strftime(buf, sizeof(buf), formato, ts);
+  buf[longitud-1]=0;
+
+  return (String(buf));    
+  }

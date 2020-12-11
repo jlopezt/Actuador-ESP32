@@ -46,10 +46,7 @@ function onFail(context) {
 }
 
 function onConnectionLost(responseObject) {
-    if (responseObject.errorCode !== 0) {
-        window.alert("Error: " + responseObject.errorCode + " | mensaje: " + responseObject.errorMessage + " | Connection Lost!\nPlease Refresh.");
-        console.log("Error: " + responseObject.errorCode + " | mensaje: " + responseObject.errorMessage + " | Connection Lost!\nPlease Refresh.");
-    }
+    if (responseObject.errorCode !== 0) console.log("Error: " + responseObject.errorCode + " | mensaje: " + responseObject.errorMessage + " | Connection Lost!\nPlease Refresh.");
     connect();
 }
 

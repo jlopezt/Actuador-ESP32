@@ -45,10 +45,9 @@ boolean borraFichero(String nombreFichero);
 
 /************************************************/
 /* Recupera los ficheros almacenados en el      */
-/* dispositivo. Devuelve una cadena separada    */
-/* por SEPARADOR                                */
+/* dispositivo. Devuelve un JSON                */
 /************************************************/
-boolean listaFicheros(String &contenido);
+String listadoFicheros(String prefix);
 
 /************************************************/
 /* Devuelve si existe o no un fichero en el     */
@@ -61,5 +60,11 @@ boolean existeFichero(String nombre);
 /* dispositivo                                  */
 /************************************************/
 boolean formatearFS(void);
+
+/************************************************/
+/* Devuelve el nombre del direcotrio del        */
+/* fichro que se pasa como parametro            */
+/************************************************/
+String directorioFichero(String nombreFichero);
 
 #endif

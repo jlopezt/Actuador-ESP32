@@ -104,4 +104,12 @@ String getHora(void);
 /***************************************************************/
 String getFecha(void);
 
+/***************************************************************/
+/*                                                             */
+/*  Genera una cadena con la hora en formato dd-mm-yy HH:MM:SS */
+/*  a partir de la estrucutura time_t que se le pasa           */
+/*                                                             */
+/***************************************************************/
+String horaYfecha(time_t hora);
+
 #endif
