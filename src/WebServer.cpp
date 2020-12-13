@@ -115,7 +115,7 @@ void inicializaWebServer(void)
   serverX.on("/info", HTTP_ANY, handleInfo);  //URI de test
  
   //upload de ficheros
-  serverX.on("/upload", HTTP_GET, [](AsyncWebServerRequest *request) {request->redirect("/upload.html");});
+  serverX.on("/upload", HTTP_GET, [](AsyncWebServerRequest *request) {request->redirect("upload.html");});
   serverX.on("/upload", HTTP_POST, [](AsyncWebServerRequest *request) {
         request->send(200);
       }, handleUpload);
@@ -132,8 +132,8 @@ void inicializaWebServer(void)
 /********************************* FIn inicializacion y configuracion ***************************************************************/
 
 /************************* Gestores de las diferentes URL coniguradas ******************************/
-void handleMain(AsyncWebServerRequest *request) {request->redirect("/main.html");}//Redirect to our html web page 
-void handleRoot(AsyncWebServerRequest *request) {request->redirect("/root.html");}//Redirect to our html web page 
+void handleMain(AsyncWebServerRequest *request) {request->redirect("main.html");}//Redirect to our html web page 
+void handleRoot(AsyncWebServerRequest *request) {request->redirect("root.html");}//Redirect to our html web page 
 
 /*******************************UTILIDADES*****************************************************/
 /*************************************************/
@@ -172,7 +172,7 @@ void handleNombre(AsyncWebServerRequest *request)
 /*********************************************/  
 void handleRestart(AsyncWebServerRequest *request)
   {
-  request->redirect("/");
+  request->redirect("./");
   delay(500);
   ESP.restart();
   }
@@ -203,7 +203,7 @@ void handleSetNextBoot(AsyncWebServerRequest *request)
   {
   if(request->hasArg("p")) {setParticionProximoArranque(request->arg("p"));}//si existen esos argumentos
 
-  request->redirect("/particiones");
+  request->redirect("particiones");
   }
 /*******************************FIN UTILIDADES*****************************************************/
 /*******************************ACTIVACION/DESACITVACION ENTRADAS/SALIDAS*****************************************************/
@@ -245,7 +245,7 @@ void handleConfigSalidas(AsyncWebServerRequest *request)
   
   request->send(200, "text/json", cad);
   }
-void handleSalidas(AsyncWebServerRequest *request) {request->redirect("/salidas.html");}
+void handleSalidas(AsyncWebServerRequest *request) {request->redirect("salidas.html");}
   
 /*****************************************************/
 /*                                                   */
@@ -280,7 +280,7 @@ void handleConfigEntradas(AsyncWebServerRequest *request)
 
   request->send(200, "text/json", cad); 
   }
-void handleEntradas(AsyncWebServerRequest *request) {request->redirect("/entradas.html");}
+void handleEntradas(AsyncWebServerRequest *request) {request->redirect("entradas.html");}
 
 /*********************************************/
 /*                                           */
@@ -296,7 +296,7 @@ void handleActivaRele(AsyncWebServerRequest *request)
     //activaRele(id);
     conmutaSalida(id, ESTADO_ACTIVO, debugGlobal);
 
-    request->redirect("/root");
+    request->redirect("root");
     }
     else request->send(404, "text/plain", "");  
   }
@@ -314,7 +314,7 @@ void handleDesactivaRele(AsyncWebServerRequest *request)
 
     conmutaSalida(id, ESTADO_DESACTIVO, debugGlobal);
     
-    request->redirect("/root");
+    request->redirect("root");
     }
   else request->send(404, "text/plain", ""); 
   }
@@ -332,7 +332,7 @@ void handlePulsoRele(AsyncWebServerRequest *request)
 
     pulsoSalida(id);
     
-    request->redirect("/root");
+    request->redirect("root");
     }
   else request->send(404, "text/plain", ""); 
   }
@@ -351,7 +351,7 @@ void handleFuerzaManual(AsyncWebServerRequest *request)
 
     forzarModoManualSalida(id);
     
-    request->redirect("/root");
+    request->redirect("root");
     }
   else request->send(404, "text/plain", ""); 
   }
@@ -371,7 +371,7 @@ void handleRecuperaManual(AsyncWebServerRequest *request)
 
     recuperarModoSalida(id);
     
-    request->redirect("/root");
+    request->redirect("root");
     }
   else request->send(404, "text/plain", ""); 
   }
@@ -628,7 +628,7 @@ void handleCreaFichero(AsyncWebServerRequest *request)
     if(salvaFichero( nombreFichero, nombreFichero+".bak", contenidoFichero)) 
 	    {
       String cad=directorioFichero(nombreFichero);
-      request->redirect("/ficheros?dir=" + cad);
+      request->redirect("ficheros?dir=" + cad);
       return;
 	    }  
     else cad += "No se pudo salvar el fichero<br>"; 
@@ -657,7 +657,7 @@ void handleBorraFichero(AsyncWebServerRequest *request)
     if(borraFichero(nombreFichero)) 
       {
       String cad=directorioFichero(nombreFichero);
-      request->redirect("/ficheros?dir=" + cad);
+      request->redirect("ficheros?dir=" + cad);
       return;
       }
     else cad += "No sepudo borrar el fichero " + nombreFichero + ".\n"; 
@@ -769,7 +769,7 @@ void handleFicheros(AsyncWebServerRequest *request)
 
   if(request->hasArg("dir")) prefix=request->arg("dir");
 
-  request->redirect("/ficheros.html?dir=" + prefix);
+  request->redirect("ficheros.html?dir=" + prefix);
   }
   
 /****************************FIN DE GESTION DE FICHEROS******************************************/
@@ -890,7 +890,7 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
   if(final){
     Serial.printf("UploadEnd: %s, %u B\n", filename.c_str(), index+len);
     newFile.close();      
-    request->redirect("/resultadoUpload.html");
+    request->redirect("resultadoUpload.html");
   }
 }
 /****************************Google Home Notifier ******************************/
@@ -899,7 +899,7 @@ void handleSpeechPath(AsyncWebServerRequest *request)
   String phrase = request->arg("phrase");
   if (phrase == "") 
     {
-    request->send(401, "text / plain", "query 'phrase' is not found");
+    request->send(401, "text/plain", "query 'phrase' is not found");
     return;
     }
 

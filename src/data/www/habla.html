@@ -7,7 +7,7 @@
         var d = document;
         d.querySelector('button').addEventListener('click',function(){
             xhr = new XMLHttpRequest();
-            xhr.open('GET','/habla?phrase='+encodeURIComponent(d.querySelector('input').value));
+            xhr.open('GET','habla?phrase='+encodeURIComponent(d.querySelector('input').value));
             xhr.send();});
     </script>
   </body>

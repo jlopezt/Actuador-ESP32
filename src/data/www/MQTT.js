@@ -23,7 +23,7 @@ function connect(){
         useSSL: true,
         //useSSL: false,
         cleanSession: true,
-        userName : "domoticae",
+        userName : "jlopezt",
         password : "88716",
         onSuccess: onConnect,
         onFailure: onFail

@@ -153,11 +153,11 @@
             }
           }
         };
-        xh.open("GET", "/nombre", true);
+        xh.open("GET", "nombre", true);
         xh.send(null);        
         
         //cargo el iframe con al info inicial
-        cambiaIFrame("/root");
+        cambiaIFrame("root");
 
         //relleno el frame oculto
 
@@ -201,15 +201,15 @@
       <div class="izquierda">
         <nav id="nav">
           <ul>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/root')">Inicio</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/entradas')">Entradas</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/salidas')">Salidas</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/planes')">Secuenciador</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/maquinaEstados')">Maq. estados</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/ficheros')">Ficheros</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/info')">Info</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/particiones')">Particiones</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('/restart')">Reiniciar</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('root')">Inicio</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('entradas')">Entradas</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('salidas')">Salidas</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('planes')">Secuenciador</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('maquinaEstados')">Maq. estados</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('ficheros')">Ficheros</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('info')">Info</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('particiones')">Particiones</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('restart')">Reiniciar</li>
           </ul>
         </nav>
       </div>

@@ -45,7 +45,7 @@ void progresoOTA(unsigned int progress, unsigned int total)
   String cad="";
   float avance=100*(float)progress/total;
 
-  Traza.mensaje("actualizacion OTA en progreso: %5.1f %%\r",avance);
+  Traza.mensaje("actualizacion OTA en progreso: %5.1f %%\n",avance);
   }
 
 void erroresOTA(ota_error_t error)
