@@ -415,6 +415,7 @@ int entradasConfiguradas(void);
    }
                                                         */
 /********************************************************/   
+String generaJsonEstadoSalidas(boolean filtro);//void);
 String generaJsonEstadoSalidas(void);
 
 /***********************************************************/
@@ -429,6 +430,7 @@ String generaJsonEstadoSalidas(void);
   }
                                                            */
 /***********************************************************/   
+String generaJsonEstadoEntradas(boolean filtro);//void);
 String generaJsonEstadoEntradas(void);
 
 /********************************************************/

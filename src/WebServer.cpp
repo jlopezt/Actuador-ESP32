@@ -215,34 +215,7 @@ void handleSetNextBoot(AsyncWebServerRequest *request)
 /***************************************************/  
 void handleConfigSalidas(AsyncWebServerRequest *request)
   {
-  const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(15);
-  DynamicJsonBuffer jsonBuffer(capacity);
-  JsonObject& root = jsonBuffer.createObject();
-  JsonArray& salidas = root.createNestedArray("salidas");
-
-  for(uint8_t salida=0;salida<MAX_SALIDAS;salida++)
-    {
-    JsonObject& objeto = salidas.createNestedObject();
-    objeto["id"] = salida;
-    objeto["nombre"] = nombreSalida(salida);
-    objeto["configurada"] = releConfigurado(salida);
-    objeto["pin"] = pinSalida(salida);
-    objeto["controlador"] = controladorSalida(salida);
-    objeto["inicio"] = inicioSalida(salida);
-    objeto["modo"] = modoSalidaNombre(salida);
-    objeto["tipo"] = getTipoNombre(salida);
-    objeto["valorPWM"] = getValorPWM(salida);
-    objeto["anchoPulso"] = anchoPulsoSalida(salida);
-    objeto["inicioPulso"] = inicioSalida(salida);
-    objeto["finPulso"] = finPulsoSalida(salida);
-    objeto["estado"] = estadoSalida(salida);
-    objeto["nombreEstado"] = nombreEstadoSalida(salida,estadoSalida(salida));
-    objeto["mensajeEstado"] = mensajeEstadoSalida(salida,estadoSalida(salida));
-    }
-
-  String cad="";
-  root.printTo(cad);
-  
+  String cad=generaJsonEstadoSalidas(false);
   request->send(200, "text/json", cad);
   }
 void handleSalidas(AsyncWebServerRequest *request) {request->redirect("salidas.html");}
@@ -255,29 +228,7 @@ void handleSalidas(AsyncWebServerRequest *request) {request->redirect("salidas.h
 /*****************************************************/  
 void handleConfigEntradas(AsyncWebServerRequest *request)
   {
-  const size_t capacity = JSON_ARRAY_SIZE(3) + JSON_OBJECT_SIZE(1) + 3*JSON_OBJECT_SIZE(10);
-  DynamicJsonBuffer jsonBuffer(capacity);
-  JsonObject& root = jsonBuffer.createObject();
-  JsonArray& entradas = root.createNestedArray("entradas");
-
-  for(uint8_t entrada=0;entrada<MAX_ENTRADAS;entrada++)
-    {
-    JsonObject& objeto = entradas.createNestedObject();
-    objeto["id"] = entrada;
-    objeto["nombre"] = nombreEntrada(entrada);
-    objeto["configurada"] = entradaConfigurada(entrada);
-    objeto["tipo"] = tipoEntrada(entrada);
-    objeto["pin"] = pinEntrada(entrada);
-    objeto["estadoActivo"] = estadoActivoEntrada(entrada);
-    objeto["estadoFisico"] = estadoFisicoEntrada(entrada);
-    objeto["estado"] = estadoEntrada(entrada);
-    objeto["nombreEstado"] = nombreEstadoEntrada(entrada,estadoEntrada(entrada));
-    objeto["mensajeEstado"] = mensajeEstadoEntrada(entrada,estadoEntrada(entrada));
-    }
-
-  String cad="";
-  root.printTo(cad);
-
+  String cad=generaJsonEstadoEntradas(false);
   request->send(200, "text/json", cad); 
   }
 void handleEntradas(AsyncWebServerRequest *request) {request->redirect("entradas.html");}

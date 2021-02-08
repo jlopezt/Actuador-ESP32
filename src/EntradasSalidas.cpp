@@ -1156,36 +1156,45 @@ int entradasConfiguradas(void)
    }
                                                         */
 /********************************************************/   
-String generaJsonEstadoSalidas(void)
+String generaJsonEstadoSalidas(boolean filtro=true)//void)
   {
   String salida="";
 
-  const size_t bufferSize = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(8);
+  //const size_t bufferSize = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(8);
+  const size_t bufferSize = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(15);
+
   DynamicJsonBuffer jsonBuffer(bufferSize);
   
   JsonObject& root = jsonBuffer.createObject();
   
-  JsonArray& Salidas = root.createNestedArray("Salidas");
+  JsonArray& Salidas = root.createNestedArray("salidas");
   for(int8_t id=0;id<MAX_SALIDAS;id++)
     {
-    if(salidas[id].configurado==CONFIGURADO)
-      {
-      JsonObject& Salidas_0 = Salidas.createNestedObject();
-      Salidas_0["id"] = id;
-      Salidas_0["nombre"] = salidas[id].nombre;
-      Salidas_0["pin"] = salidas[id].pin;
-      Salidas_0["modo"] = salidas[id].modo;
-      Salidas_0["controlador"] = salidas[id].controlador;
-      Salidas_0["valor"] = salidas[id].estado;
-      Salidas_0["nombreEstado"] = nombreEstadoSalida(id,salidas[id].estado);
-      Salidas_0["anchoPulso"] = salidas[id].anchoPulso;
-      Salidas_0["finPulso"] = salidas[id].finPulso;  
-      }
+    JsonObject& Salidas_0 = Salidas.createNestedObject();
+    Salidas_0["id"] = id;
+    Salidas_0["nombre"] = nombreSalida(id);
+    Salidas_0["pin"] = pinSalida(id);
+    Salidas_0["modo"] = modoSalidaNombre(id);
+    Salidas_0["controlador"] = controladorSalida(id);
+    Salidas_0["estado"] = estadoSalida(id);
+    Salidas_0["nombreEstado"] = nombreEstadoSalida(id,estadoSalida(id));
+    Salidas_0["anchoPulso"] = anchoPulsoSalida(id);
+    Salidas_0["finPulso"] = finPulsoSalida(id);
+
+    if(!filtro) {
+      Salidas_0["tipo"] = getTipoNombre(id);
+      Salidas_0["valorPWM"] = getValorPWM(id);
+      Salidas_0["inicioPulso"] = inicioSalida(id);
+      Salidas_0["mensajeEstado"] = mensajeEstadoSalida(id,estadoSalida(id));
+      Salidas_0["configurada"] = releConfigurado(id);
+      Salidas_0["inicio"] = inicioSalida(id);
+      }    
     }
     
   root.printTo(salida);
   return salida;  
   }  
+String generaJsonEstadoSalidas(void) {return generaJsonEstadoSalidas(true);}
 
 /***********************************************************/
 /*                                                         */
@@ -1199,31 +1208,39 @@ String generaJsonEstadoSalidas(void)
   }
                                                            */
 /***********************************************************/   
-String generaJsonEstadoEntradas(void)
+String generaJsonEstadoEntradas(boolean filtro)//void)
   {
   String salida="";
 
-  const size_t bufferSize = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(3);
+  //const size_t bufferSize = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(3);
+  const size_t bufferSize = JSON_ARRAY_SIZE(3) + JSON_OBJECT_SIZE(1) + 3*JSON_OBJECT_SIZE(10);
   DynamicJsonBuffer jsonBuffer(bufferSize);
   
   JsonObject& root = jsonBuffer.createObject();
   
-  JsonArray& Entradas = root.createNestedArray("Entradas");
+  JsonArray& Entradas = root.createNestedArray("entradas");
   for(int8_t id=0;id<MAX_ENTRADAS;id++)
     {
-    if(entradas[id].configurada==CONFIGURADO)
-      {
-      JsonObject& Entradas_0 = Entradas.createNestedObject();
-      Entradas_0["id"] = id;
-      Entradas_0["nombre"] = entradas[id].nombre;
-      Entradas_0["valor"] = entradas[id].estado;
-      Entradas_0["nombreEstado"] = nombreEstadoEntrada(id,entradas[id].estado);
+    JsonObject& Entradas_0 = Entradas.createNestedObject(); 
+    Entradas_0["id"] = id;
+    Entradas_0["nombre"] = nombreEntrada(id);
+    Entradas_0["estado"] = estadoEntrada(id);
+    Entradas_0["nombreEstado"] = nombreEstadoEntrada(id,estadoEntrada(id));
+
+    if(!filtro){
+      Entradas_0["configurada"] = entradaConfigurada(id);
+      Entradas_0["tipo"] = tipoEntrada(id);
+      Entradas_0["pin"] = pinEntrada(id);
+      Entradas_0["estadoActivo"] = estadoActivoEntrada(id);
+      Entradas_0["estadoFisico"] = estadoFisicoEntrada(id);
+      Entradas_0["mensajeEstado"] = mensajeEstadoEntrada(id,estadoEntrada(id));
       }
     }
 
   root.printTo(salida);
   return salida;  
   }
+String generaJsonEstadoEntradas(void){return generaJsonEstadoEntradas(true);}
 
 /********************************************************/
 /*                                                      */
