@@ -15,7 +15,8 @@
 /***************************** Includes *****************************/
 #include <Global.h>
 #include <Ordenes.h>
-#include <EntradasSalidas.h>
+#include <Entradas.h>
+#include <Salidas.h>
 #include <RedWifi.h>
 #include <SNTP.h>
 #include <Secuenciador.h>

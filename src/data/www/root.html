@@ -14,18 +14,29 @@
         const DESACTIVO ="#DDDDDD";
 
         function inicializa() {
-            var xh = new XMLHttpRequest();
-            xh.onreadystatechange = function(){
-                if (xh.readyState == 4){
-                    if(xh.status == 200) {
-                    console.log("JSON: " + xh.responseText)
-                    actualizaEntradas(xh.responseText);
-                    actualizaSalidas(xh.responseText);
+            var xhEntradas = new XMLHttpRequest();
+            xhEntradas.onreadystatechange = function(){
+                if (xhEntradas.readyState == 4){
+                    if(xhEntradas.status == 200) {
+                    console.log("JSON: " + xhEntradas.responseText)
+                    actualizaEntradas(xhEntradas.responseText);
                     }
                 }
             };
-            xh.open("GET", "estado", true);
-            xh.send(null); 
+            xhEntradas.open("GET", "estadoEntradas", true);
+            xhEntradas.send(null); 
+
+            var xhSalidas = new XMLHttpRequest();
+            xhSalidas.onreadystatechange = function(){
+                if (xhSalidas.readyState == 4){
+                    if(xhSalidas.status == 200) {
+                    console.log("JSON: " + xhSalidas.responseText)
+                    actualizaSalidas(xhSalidas.responseText);
+                    }
+                }
+            };
+            xhSalidas.open("GET", "estadoSalidas", true);
+            xhSalidas.send(null); 
 
             connect();
         }
@@ -34,7 +45,7 @@
             var res = JSON.parse(datos);
 
             //entradas
-            var entradas=res.Entradas;
+            var entradas=res.entradas;
             console.log("numero entradas: " + entradas.length);
 
             entradas.forEach(function(entrada,indice,array) {
@@ -64,7 +75,7 @@
 
                 document.getElementById("entrada_id_" + indice).innerHTML=entrada.id;
                 document.getElementById("entrada_nombre_" + indice).innerHTML=entrada.nombre;
-                document.getElementById("entrada_estado_" + indice).innerHTML=(entrada.valor=="0"?"Off":"On");
+                document.getElementById("entrada_estado_" + indice).innerHTML=(entrada.estado==0?"Off":"On");
             });
 
             //Si hay filas de mas, las borro
@@ -82,7 +93,7 @@
             var res = JSON.parse(datos);
 
             //salidas
-            var salidas=res.Salidas;
+            var salidas=res.salidas;
             console.log("numero salidas: " + salidas.length);
 
             salidas.forEach(function(salida,indice,array) {
@@ -120,19 +131,18 @@
                 
                 var estado=document.getElementById("salida_estado_" + indice);
                 estado.innerHTML=salida.nombreEstado;
-                if(salida.valor=="0") {
-                    estado.style.backgroundColor=DESACTIVO;
-                }
-                else {
-                    estado.style.backgroundColor=ACTIVO;
-                }
-
                 var accion=document.getElementById("salida_accion_" + indice);
-                if (salida.valor=="0") {
+                if(salida.estado==0) {
+                    estado.style.backgroundColor=DESACTIVO;
+
                     accion.innerHTML  = "<form action='activaSalida'><input  type='hidden' id='id' name='id' value='0'><input STYLE='color: #000000; text-align: center; background-color: #FFFF00; width: 80px' type='submit' value='activar'></form>";
                     accion.innerHTML += "<form action='pulsoSalida'><input  type='hidden' id='id' name='id' value='0'><input STYLE='color: #000000; text-align: center; background-color: #FFFF00; width: 80px' type='submit' value='pulso'></form>";
                 }
-                else accion.innerHTML  = "<form action='desactivaSalida'><input  type='hidden' id='id' name='id' value='0'><input STYLE='color: #000000; text-align: center; background-color: #DDDDDD; width: 80px' type='submit' value='desactivar'></form>";
+                else {
+                    estado.style.backgroundColor=ACTIVO;
+                    
+                    accion.innerHTML  = "<form action='desactivaSalida'><input  type='hidden' id='id' name='id' value='0'><input STYLE='color: #000000; text-align: center; background-color: #DDDDDD; width: 80px' type='submit' value='desactivar'></form>";
+                }
             });
 
             //Si hay filas de mas, las borro

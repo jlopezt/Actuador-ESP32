@@ -32,7 +32,8 @@
 /***************************** Includes *****************************/
 #include <Global.h>
 #include <RedWifi.h>
-#include <EntradasSalidas.h>
+#include <Entradas.h>
+#include <Salidas.h>
 #include <Ficheros.h>
 #include <FTP.h>
 #include <GoogleHomeNotifier.h>

@@ -33,7 +33,8 @@
 
 /***************************** Includes *****************************/
 #include <MQTT.h>
-#include <EntradasSalidas.h>
+#include <Entradas.h>
+#include <Salidas.h>
 #include <RedWifi.h>
 #include <Ficheros.h>
 
