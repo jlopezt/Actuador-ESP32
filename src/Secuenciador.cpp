@@ -11,7 +11,8 @@
 /***************************** Includes *****************************/
 #include <Global.h>
 #include <Secuenciador.h>
-#include <EntradasSalidas.h>
+#include <Entradas.h>
+#include <Salidas.h>
 #include <SNTP.h>
 #include <Ficheros.h>
 /***************************** Includes *****************************/

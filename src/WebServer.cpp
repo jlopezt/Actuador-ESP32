@@ -13,7 +13,8 @@
 /***************************** Includes *****************************/
 #include <Global.h>
 #include <WebServer.h>
-#include <EntradasSalidas.h>
+#include <Entradas.h>
+#include <Salidas.h>
 #include <Secuenciador.h>
 #include <MaqEstados.h>
 #include <OTA.h>
@@ -40,11 +41,15 @@ String miniPie="</body></html>";
 void handleNombre(AsyncWebServerRequest *request);
 void handleMain(AsyncWebServerRequest *request);
 void handleRoot(AsyncWebServerRequest *request);
-void handleEstado(AsyncWebServerRequest *request);
+
 void handleEntradas(AsyncWebServerRequest *request);
+void handleEstadoEntradas(AsyncWebServerRequest *request);
 void handleConfigEntradas(AsyncWebServerRequest *request);
+
 void handleSalidas(AsyncWebServerRequest *request);
+void handleEstadoSalidas(AsyncWebServerRequest *request);
 void handleConfigSalidas(AsyncWebServerRequest *request);
+
 void handlePulsoRele(AsyncWebServerRequest *request);
 void handleRecuperaManual(AsyncWebServerRequest *request);
 void handleFuerzaManual(AsyncWebServerRequest *request);
@@ -82,7 +87,8 @@ void inicializaWebServer(void)
 
   serverX.on("/", HTTP_GET, handleMain); //Responde con la identificacion del modulo    
   serverX.on("/root", HTTP_GET, handleRoot); //devuelve un JSON con las medidas, reles y modo para actualizar la pagina de datos
-  serverX.on("/estado", HTTP_GET, handleEstado); //Responde con la identificacion del modulo
+  serverX.on("/estadoEntradas", HTTP_GET, handleEstadoEntradas); //Responde con la identificacion del modulo
+  serverX.on("/estadoSalidas", HTTP_GET, handleEstadoSalidas); //Responde con la identificacion del modulo
   serverX.on("/nombre", HTTP_GET, handleNombre); //devuelve un JSON con las medidas, reles y modo para actualizar la pagina de datos
   serverX.on("/salidas", HTTP_GET, handleSalidas); //Servicio de estdo de reles
   serverX.on("/configSalidas", HTTP_GET, handleConfigSalidas); //Servicio de estdo de reles
@@ -138,18 +144,10 @@ void handleRoot(AsyncWebServerRequest *request) {request->redirect("root.html");
 /*******************************UTILIDADES*****************************************************/
 /*************************************************/
 /*                                               */
-/*  Servicio de consulta de estado de            */
-/*  las Salidas y las entradas                   */
-/*  devuelve un formato json                     */
+/*  Servicio de consulta del nombre del          */
+/*  dispositivo y devuelve un formato json       */
 /*                                               */
 /*************************************************/  
-void handleEstado(AsyncWebServerRequest *request)
-  {
-  String cad=generaJsonEstado();
-  
-  request->send(200, "text/json", cad); 
-  }  
-
 void handleNombre(AsyncWebServerRequest *request)
   {
   const size_t capacity = JSON_OBJECT_SIZE(2);
@@ -163,6 +161,32 @@ void handleNombre(AsyncWebServerRequest *request)
   root.printTo(cad);
   request->send(200,"text/json",cad);
   }
+
+/*************************************************/
+/*                                               */
+/*  Servicio de consulta de estado de            */
+/*  las entradas y devuelve un formato json      */
+/*                                               */
+/*************************************************/  
+void handleEstadoEntradas(AsyncWebServerRequest *request)
+  {
+  String cad=generaJsonEstadoEntradas();
+  
+  request->send(200, "text/json", cad); 
+  }  
+
+/*************************************************/
+/*                                               */
+/*  Servicio de consulta de estado de            */
+/*  las Salidas , devuelve un formato json       */
+/*                                               */
+/*************************************************/  
+void handleEstadoSalidas(AsyncWebServerRequest *request)
+  {
+  String cad=generaJsonEstadoSalidas();
+  
+  request->send(200, "text/json", cad); 
+  }  
 
 /*********************************************/
 /*                                           */

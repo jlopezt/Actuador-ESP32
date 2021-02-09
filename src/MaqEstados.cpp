@@ -24,7 +24,8 @@
 /***************************** Includes *****************************/
 #include <Global.h>
 #include <MaqEstados.h>
-#include <EntradasSalidas.h>
+#include <Entradas.h>
+#include <Salidas.h>
 #include <Ficheros.h>
 /***************************** Includes *****************************/
 

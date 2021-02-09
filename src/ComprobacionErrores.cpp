@@ -20,7 +20,8 @@ From https://github.com/espressif/esp-idf/blob/357a277603/components/driver/incl
 /***************************** Includes *****************************/
 #include <Global.h>
 #include <ComprobacionErrores.h>
-#include <EntradasSalidas.h>
+#include <Entradas.h>
+#include <Salidas.h>
 #include <Secuenciador.h>
 #include <MaqEstados.h>
 #include <SNTP.h>
