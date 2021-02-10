@@ -252,13 +252,13 @@ void actualizaMaquinaEstados(int debug)
   boolean localDebug=debug || debugMaquinaEstados;
     
   //Actualizo el vaor de las entradas
-  for(uint8_t i=0;i<numeroEntradas;i++) entradasActual[i]=estadoEntrada(mapeoEntradas[i]);
+  for(uint8_t i=0;i<numeroEntradas;i++) entradasActual[i]=entradas[mapeoEntradas[i]].getEstado();//  estadoEntrada(mapeoEntradas[i]);
 
   if(localDebug) 
     {
     Traza.mensaje("Estado inicial: (%i) %s\n",estadoActual,estados[estadoActual].nombre.c_str());
     Traza.mensaje("Estado de las entradas:\n");
-    for(uint8_t i=0;i<numeroEntradas;i++) Traza.mensaje("Entrada %i (dispositivo %i)=> valor %i\n",i, mapeoEntradas[i],entradasActual[i]);
+    for(uint8_t i=0;i<numeroEntradas;i++) Traza.mensaje("Entrada %i (dispositivo %i: %s)=> valor %i\n",i, mapeoEntradas[i],entradas[mapeoEntradas[i]].getNombre().c_str(),entradasActual[i]);
     }
     
   //busco en las transiciones a que estado debe evolucionar la maquina
@@ -304,7 +304,7 @@ int8_t actualizaSalidasMaquinaEstados(uint8_t estado)
 
   for(uint8_t i=0;i<numeroSalidas;i++) 
     {
-    if(salidaMaquinaEstados(mapeoSalidas[i], estados[estado].valorSalidas[i])==NO_CONFIGURADO) retorno=0;
+    if(salidas[mapeoSalidas[i]].salidaMaquinaEstados(estados[estado].valorSalidas[i])==NO_CONFIGURADO) retorno=0;
     }
 
   return retorno;

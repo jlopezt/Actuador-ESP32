@@ -1,6 +1,6 @@
 /*****************************************/
 /*                                       */
-/*  Control de entradas y salidas        */
+/*  Control de salidas                   */
 /*                                       */
 /*****************************************/
 
@@ -9,159 +9,104 @@
 
 /***************************** Includes *****************************/
 #include <Salidas.h>
-#include <Entradas.h>
+#include <salida.h>
 
 #include <MQTT.h>
 #include <Ficheros.h>
 /***************************** Includes *****************************/
 
-//definicion de los tipos de dataos para las salidas
-//Salidas
-typedef struct{
-  int8_t configurado;       //0 si el rele no esta configurado, 1 si lo esta
-  String nombre;            //nombre configurado para el rele
-  int8_t estado;            //1 activo, 0 no activo (respecto a nivelActivo), modo pulso y modo maquina
-  int8_t modo;              //0: manual, 1: secuanciador, 2: seguimiento
-  int8_t modo_inicial;      //Modo incial, cuando se fuerza a manual este no cambia y cuando vuelve, se recupera de aqui  
-  int8_t pin;               // Pin al que esta conectado el rele
-  int8_t tipo;              //Tipo dgital normal o LED(PWM)
-  int16_t valorPWM;         //Valor de la salida en PWM
-  int8_t canal;             //Canal de PWM al que se va a a asociar el pin
-  int16_t frecuencia;       //Frecuencia de trabajo del PWM para ese canal
-  int8_t resolucion;        //Resolucion en bits del PWM  
-  int16_t anchoPulso;       // Ancho en milisegundos del pulso para esa salida
-  int8_t controlador;       //1 si esta asociado a un secuenciador que controla la salida, 0 si no esta asociado
-  unsigned long finPulso;   //fin en millis del pulso para la activacion de ancho definido
-  int8_t inicio;            // modo inicial del rele "on"-->1/"off"-->0
-  String nombreEstados[2];  //Son salidas binarias, solo puede haber 2 mensajes. El 0 nombre del estado en valor 0 y el 1 nombre del estado en valor 1
-  String mensajes[2];       //Son salidas binarias, solo puede haber 2 mensajes. El 0 cuando pasa a 0 y el 1 cuando pasa a 1
-  }salida_t; 
-salida_t salidas[MAX_SALIDAS];
-
+/***************************** Variables locales *****************************/
 int8_t salidaActiva=-1;
+//definicion de los tipos de dataos para las salidas
+salida* salidas=new salida[MAX_SALIDAS];
+/***************************** Fin variables locales *****************************/
+
 /************************************** Funciones de configuracion ****************************************/
 /*********************************************/
 /* Inicializa los valores de los registros de*/
 /* las salidas y recupera la configuracion   */
 /*********************************************/
-void inicializaSalidas(void)
-  {  
+void inicializaSalidas(void){  
   //Salidas
-  for(int8_t i=0;i<MAX_SALIDAS;i++)
-    {
-    //inicializo la parte logica
-    salidas[i].configurado=NO_CONFIGURADO;
-    salidas[i].nombre="No configurado";
-    salidas[i].estado=NO_CONFIGURADO;
-    salidas[i].modo=NO_CONFIGURADO;
-    salidas[i].modo_inicial=NO_CONFIGURADO;
-    salidas[i].pin=-1;
-    salidas[i].tipo=TIPO_DIGITAL;
-    salidas[i].valorPWM=0;
-    salidas[i].canal=-1;
-    salidas[i].frecuencia=FRECUENCIA_PWM;
-    salidas[i].resolucion=RESOLUCION_PWM;
-    salidas[i].anchoPulso=0;
-    salidas[i].controlador=NO_CONFIGURADO;
-    salidas[i].finPulso=0;
-    salidas[i].inicio=0;
-    salidas[i].nombreEstados[0]="0";
-    salidas[i].nombreEstados[1]="1";    
-    salidas[i].mensajes[0]="";
-    salidas[i].mensajes[1]="";
-    }
+  for(int8_t i=0;i<MAX_SALIDAS;i++) {salidas[i]=salida();}
          
   //leo la configuracion del fichero
   if(!recuperaDatosSalidas(debugGlobal)) Traza.mensaje("Configuracion de los reles por defecto\n");
-  else
-    {  
+  else{  
     //Salidas
-    for(int8_t i=0;i<MAX_SALIDAS;i++)
-      {    
-      if(salidas[i].configurado==CONFIGURADO) 
-        {   
-        //Guardo el modo para recuperarlo si se pasa a manual
-        salidas[i].modo_inicial=salidas[i].modo;
-        
-        //parte logica
-        salidas[i].estado=salidas[i].inicio;  
+    for(int8_t i=0;i<MAX_SALIDAS;i++){    
+      if(salidas[i].getConfigurada()){   
+        //parte logica        
+        salidas[i].conmuta(salidas[i].getEstadoInicial());//salidas[i].estado=salidas[i].inicio;  
         
         //parte fisica
-        switch (salidas[i].tipo)
-          {
+        switch (salidas[i].getTipo()){
           case TIPO_DIGITAL:
-            pinMode(salidas[i].pin, OUTPUT); //es salida
+            pinMode(salidas[i].getPin(), OUTPUT); //es salida
             break;  
           case TIPO_LED:
-            ledcSetup(salidas[i].canal,salidas[i].frecuencia,salidas[i].resolucion);
-            ledcAttachPin(salidas[i].pin,salidas[i].canal);
+            ledcSetup(salidas[i].getCanal(),salidas[i].getFrecuencia(),salidas[i].getResolucion());
+            ledcAttachPin(salidas[i].getPin(),salidas[i].getCanal());
             break;
-          }
+        }
 
         //Lo inicializo segun lo configurado               
-        if(salidas[i].inicio==1) 
-          {
-          switch (salidas[i].tipo)
-            {
+        if(salidas[i].getEstadoInicial()==ESTADO_ACTIVO){
+          switch (salidas[i].getTipo()){
             case TIPO_DIGITAL:
-              digitalWrite(salidas[i].pin, nivelActivo);  
+              digitalWrite(salidas[i].getPin(), nivelActivo);  
               break;
             case TIPO_LED:
-              if(nivelActivo==1) ledcWrite(salidas[i].canal,salidas[i].valorPWM);
-              else ledcWrite(salidas[i].canal,(1<<RESOLUCION_PWM)-salidas[i].valorPWM);            
+              if(nivelActivo==1) ledcWrite(salidas[i].getCanal(),salidas[i].getValorPWM());
+              else ledcWrite(salidas[i].getCanal(),(1<<RESOLUCION_PWM)-salidas[i].getValorPWM());
               break;
-            }
           }
-        else 
-          {
-          switch (salidas[i].tipo)
-            {
-            case TIPO_DIGITAL:
-              digitalWrite(salidas[i].pin, !nivelActivo); 
-              break;
-            case TIPO_LED:
-              if(nivelActivo==1) ledcWrite(salidas[i].canal,0);
-              else ledcWrite(salidas[i].canal,(1<<RESOLUCION_PWM));            
-              break;
-            }          
-          }
-        
-        Traza.mensaje("Nombre salida[%i]=%s | pin salida: %i | estado= %i | inicio: %i | modo: %i\n",i,salidas[i].nombre.c_str(),salidas[i].pin,salidas[i].estado,salidas[i].inicio, salidas[i].modo);
-        Traza.mensaje("\tEstados y  mensajes:\n");
-        for(uint8_t j=0;j<2;j++) Traza.mensaje("\t\tEstado %i: %s | mensaje: %s\n",j,salidas[i].nombreEstados[j].c_str(),salidas[i].mensajes[j].c_str());
         }
+        else{
+          switch (salidas[i].getTipo()){
+            case TIPO_DIGITAL:
+              digitalWrite(salidas[i].getPin(), !nivelActivo); 
+              break;
+            case TIPO_LED:
+              if(nivelActivo==1) ledcWrite(salidas[i].getCanal(),0);
+              else ledcWrite(salidas[i].getCanal(),(1<<RESOLUCION_PWM));            
+              break;
+          }
+        }
+        
+        Traza.mensaje("Nombre salida[%i]=%s | pin salida: %i | tipo: %i | estado= %i | estado inicial: %i | modo: %i\n",i,salidas[i].getNombre().c_str(),salidas[i].getPin(),salidas[i].getTipo(),salidas[i].getEstado(),salidas[i].getEstadoInicial(), salidas[i].getModo());
+        Traza.mensaje("\tEstados y  mensajes:\n");
+        for(uint8_t j=0;j<2;j++) Traza.mensaje("\t\tEstado %i: %s | mensaje: %s\n",j,salidas[i].getNombreEstado(j).c_str(),salidas[i].getMensajeEstado(j).c_str());
       }
-    }  
-  }
+    }
+  }  
+}
 
 /*********************************************/
 /* Lee el fichero de configuracion de las    */
 /* salidas o genera conf por defecto         */
 /*********************************************/
-boolean recuperaDatosSalidas(int debug)
-  {
+boolean recuperaDatosSalidas(int debug){
   String cad="";
 
   if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
   
-  if(!leeFichero(SALIDAS_CONFIG_FILE, cad)) 
-    {
+  if(!leeFichero(SALIDAS_CONFIG_FILE, cad)){
     //Confgiguracion por defecto
     Traza.mensaje("No existe fichero de configuracion de Salidas\n");    
     cad="{\"Salidas\": []}";
     //salvo la config por defecto
     //if(salvaFichero(SALIDAS_CONFIG_FILE, SALIDAS_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion de Salidas creado por defecto\n");
-    }      
+  }
     
   return parseaConfiguracionSalidas(cad);
-  }
+}
 
 /*********************************************/
 /* Parsea el json leido del fichero de       */
 /* configuracio de las salidas               */
 /*********************************************/
-boolean parseaConfiguracionSalidas(String contenido)
-  { 
+boolean parseaConfiguracionSalidas(String contenido){ 
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
   
@@ -174,654 +119,101 @@ boolean parseaConfiguracionSalidas(String contenido)
   Traza.mensaje("\nparsed json\n");
 //******************************Parte especifica del json a leer********************************
   JsonArray& Salidas = json["Salidas"];
+  
+  //variables teporales para almacenar los valores leidos del json
+  String nombre="";
+  int8_t tipo=-1;
+  int8_t pin=-1;
+  int8_t inicio=-1;
+  int8_t modo=-1;
 
+  int16_t anchoPulso=-1;
+  int8_t controlador=-1;
+
+  int16_t valorPWM=-1;
+  int8_t canal=-1;
+  int16_t frecuencia=-1;
+  int8_t resolucion=-1;
+
+  String nombres[2]={"",""};
+  String mensajes[2]={"",""};
+  
   int8_t max;
   max=(Salidas.size()<MAX_SALIDAS?Salidas.size():MAX_SALIDAS);
-  for(int8_t i=0;i<max;i++)
-    { 
+  Traza.mensaje("Se configurarán %i salidas\n",max);
+  for(int8_t i=0;i<max;i++){ 
     JsonObject& salida = json["Salidas"][i];
 
-    salidas[i].configurado=CONFIGURADO;//lo marco como configurado  
-    if(salida.containsKey("GPIO")) salidas[i].pin=salida.get<int>("GPIO"); else return false;
-    if(salida.containsKey("nombre")) salidas[i].nombre=salida.get<String>("nombre");
-    if(salida.containsKey("inicio")) 
-      {
-      if(salida.get<String>("inicio")=="on") salidas[i].inicio=1; //Si de inicio debe estar activado o desactivado
-      else salidas[i].inicio=0;
-      }      
-    if(salida.containsKey("tipo")) salidas[i].tipo=salida.get<int>("tipo");
-    if(salida.containsKey("valorPWM")) salidas[i].valorPWM=salida.get<int>("valorPWM");
-    if(salida.containsKey("anchoPulso")) salidas[i].anchoPulso=salida.get<int>("anchoPulso");
-    if(salida.containsKey("modo")) salidas[i].modo=salida.get<int>("modo");
-    if(salida.containsKey("tipo")) salidas[i].tipo=salida.get<int>("tipo");
-    if(salida.containsKey("valorPWM")) salidas[i].valorPWM=salida.get<int>("valorPWM");
-    if(salida.containsKey("canal")) salidas[i].canal=salida.get<int>("canal");
-    if(salida.containsKey("frecuencia")) salidas[i].frecuencia=salida.get<int>("frecuencia");
-    if(salida.containsKey("resolucion")) salidas[i].resolucion=salida.get<int>("resolucion");   
-    if(salida.containsKey("controlador")) salidas[i].controlador=salida.get<int>("controlador");
+    if(salida.containsKey("nombre")) nombre=salida.get<String>("nombre");
+    if(salida.containsKey("tipo")) tipo=salida.get<int>("tipo");
+    if(salida.containsKey("GPIO")) pin=salida.get<int>("GPIO"); else return false;
+    if(salida.containsKey("inicio")){
+      if(salida.get<String>("inicio")=="on") inicio=1; //Si de inicio debe estar activado o desactivado
+      else inicio=0;
+    }
+    if(salida.containsKey("modo")) modo=salida.get<int>("modo");
+    if(salida.containsKey("anchoPulso")) anchoPulso=salida.get<int>("anchoPulso");
+    if(salida.containsKey("controlador")) controlador=salida.get<int>("controlador");
+    if(salida.containsKey("valorPWM")) valorPWM=salida.get<int>("valorPWM");
+    if(salida.containsKey("canal")) canal=salida.get<int>("canal");
+    if(salida.containsKey("frecuencia")) frecuencia=salida.get<int>("frecuencia");
+    if(salida.containsKey("resolucion")) resolucion=salida.get<int>("resolucion");   
    
-    if(salida.containsKey("Estados"))
-      {
+    if(salida.containsKey("Estados")){
       int8_t est_max=salida["Estados"].size();//maximo de mensajes en el JSON
-      if (est_max>2) est_max=2;               //Si hay mas de 2, solo leo 2
-      for(int8_t e=0;e<est_max;e++)  
-        {
-        if (salida["Estados"][e]["valor"]==e) salidas[i].nombreEstados[e]=String((const char *)salida["Estados"][e]["texto"]);
-        }
-      }
-    if(salida.containsKey("Mensajes"))
-      {
-      int8_t men_max=salida["Mensajes"].size();//maximo de mensajes en el JSON
-      if (men_max>2) men_max=2;                //Si hay mas de 2, solo leo 2
-      for(int8_t m=0;m<men_max;m++)  
-        {
-        if (salida["Mensajes"][m]["valor"]==m) salidas[i].mensajes[m]=String((const char *)salida["Mensajes"][m]["texto"]);
-        }
+      if (est_max>2) est_max=2;               //Si hay mas de 2; solo leo 2
+      for(int8_t e=0;e<est_max;e++){
+        if (salida["Estados"][e]["valor"]==e) nombres[e]=String((const char *)salida["Estados"][e]["texto"]);
       }
     }
+    if(salida.containsKey("Mensajes")){
+      int8_t men_max=salida["Mensajes"].size();//maximo de mensajes en el JSON
+      if (men_max>2) men_max=2;                //Si hay mas de 2, solo leo 2
+      for(int8_t m=0;m<men_max;m++){
+        if (salida["Mensajes"][m]["valor"]==m) mensajes[m]=String((const char *)salida["Mensajes"][m]["texto"]);
+      }
+    }
+    salidas[i].configuraSalida(nombre, tipo, pin, inicio, valorPWM, anchoPulso, modo, canal, frecuencia, resolucion, controlador, nombres, mensajes);
+  }
 
-  Traza.mensaje("*************************\nSalidas:\n"); 
-  for(int8_t i=0;i<MAX_SALIDAS;i++) 
-    {
-    //Traza.mensaje("%01i: %s| pin: %i| ancho del pulso: %i| configurado= %i| entrada asociada= %i\n",i,salidas[i].nombre.c_str(),salidas[i].pin,salidas[i].anchoPulso,salidas[i].configurado,salidas[i].entradaAsociada); 
-    Traza.mensaje("%01i: %s | configurado= %i | pin: %i | modo: %i | controlador: %i | ancho del pulso: %i\n",i,salidas[i].nombre.c_str(),salidas[i].configurado,salidas[i].pin, salidas[i].modo,salidas[i].controlador, salidas[i].anchoPulso); 
-    Traza.mensaje("Estados:\n");
-    for(int8_t e=0;e<2;e++) 
-      {
-      Traza.mensaje("Estado[%02i]: %s\n",e,salidas[i].nombreEstados[e].c_str());     
-      }   
-    Traza.mensaje("Mensajes:\n");
-    for(int8_t m=0;m<2;m++) 
-      {
-      Traza.mensaje("Mensaje[%02i]: %s\n",m,salidas[i].mensajes[m].c_str());     
-      }    
-    }    
-  Traza.mensaje("*************************\n");  
+  if(debugGlobal) {
+    Traza.mensaje("*************************\nSalidas:\n"); 
+    for(int8_t i=0;i<MAX_SALIDAS;i++){
+      Traza.mensaje("%01i: %s | configurado= %i | pin: %i | tipo: %i | modo: %i | controlador: %i | ancho del pulso: %i\n",i,salidas[i].getNombre().c_str(),salidas[i].getConfigurada(),salidas[i].getPin(),salidas[i].getTipo(), salidas[i].getModo(),salidas[i].getControlador(), salidas[i].getAnchoPulso()); 
+      Traza.mensaje("Estados:\n");
+      for(int8_t e=0;e<2;e++){Traza.mensaje("Estado[%02i]: %s\n",e,salidas[i].getNombreEstado(e).c_str());}
+      Traza.mensaje("Mensajes:\n");
+      for(int8_t m=0;m<2;m++) {Traza.mensaje("Mensaje[%02i]: %s\n",m,salidas[i].getMensajeEstado(m).c_str());}    
+    }
+    Traza.mensaje("*************************\n");  
+  }
 //************************************************************************************************
   return true; 
-  }
+}
 /**********************************************************Fin configuracion******************************************************************/  
 
 /**********************************************************SALIDAS******************************************************************/    
-int8_t actualizaPulso(int8_t salida)
-  {
-  if(salida <0 || salida>=MAX_SALIDAS) return NO_CONFIGURADO; //Rele fuera de rango
-  if(salidas[salida].configurado!=CONFIGURADO) return NO_CONFIGURADO; //No configurado
-  if(salidas[salida].estado!=ESTADO_PULSO) return NO_CONFIGURADO; //No configurado
-    
-  if(salidas[salida].finPulso>salidas[salida].anchoPulso)//el contador de millis no desborda durante el pulso
-    {
-    if(millis()>=salidas[salida].finPulso) //El pulso ya ha acabado
-      {
-      conmutaSalida(salida,ESTADO_DESACTIVO,debugGlobal);  
-      Traza.mensaje("Fin del pulso. millis()= %i\n",millis());
-      }//del if del fin de pulso
-    }//del if de desboda
-  else //El contador de millis desbordar durante el pulso
-    {
-    if(UINT64_MAX-salidas[salida].anchoPulso>millis())//Ya ha desbordado
-      {
-      if(millis()>=salidas[salida].finPulso) //El pulso ha acabado
-        {
-        conmutaSalida(salida,ESTADO_DESACTIVO,debugGlobal);
-        Traza.mensaje("Fin del pulso. millis()= %i\n",millis());
-        }//del if del fin de pulso
-      }//del if ha desbordado ya
-    }//else del if de no desborda  
-
-  return CONFIGURADO;  
-  }
-  
-/******************************************************/
-/* Evalua el estado de cada salida y la actualiza     */
-/* segun el modo de operacion                         */
-/* estado=0 o 1 encendido o apagado segun nivelActivo */
-/* estado=2 modo secuenciador                         */
-/* estado=3 modo seguimiento de entrada (anchoPulso)  */
-/******************************************************/
-void actualizaSalida(int8_t salida)
-  {
-  switch (salidas[salida].modo)
-    {
-    case MODO_MANUAL://manual
-      if(salidas[salida].estado==ESTADO_PULSO) actualizaPulso(salida);//si esta en modo pulso
-      break;
-    case MODO_SECUENCIADOR://Controlada por un secuenciador
-      break;
-    case MODO_SEGUIMIENTO://Sigue a una entradaseguimiento      
-      //Si es un seguidor de pulso
-      if(salidas[salida].anchoPulso>0)
-        {
-        if(estadoEntrada(salidas[salida].controlador)==ESTADO_ACTIVO) pulsoSalida(salida); //Si la entrada esta activa, actualizo
-        else if(salidas[salida].estado==ESTADO_PULSO) actualizaPulso(salida);//si no esta activa, reviso el pulso
-        }
-      
-      //Si es un seguidor tal cual
-      else if(actuaSalida(salida, estadoEntrada(salidas[salida].controlador))==-1) Traza.mensaje("Error al actualizar la salida seguidor %i\n\n",salida);
-
-      break;
-    case MODO_MAQUINA://Controlada por una maquina de estados  
-      break;
-    default:  
-      break;    
-    }
-  }
-
 /*************************************************/
-/*Logica de los reles:                           */
+/*Logica de las salidas:                         */
 /*Si esta activo para ese intervalo de tiempo(1) */
 /*Si esta por debajo de la tMin cierro rele      */
 /*si no abro rele                                */
 /*************************************************/
-void actualizaSalidas(bool debug)
-  {
-  for(int8_t id=0;id<MAX_SALIDAS;id++)
-    {
-    if (salidas[id].configurado==CONFIGURADO) actualizaSalida(id);
-    }//del for    
-  }//de la funcion
+void actualizaSalidas(bool debug){
+  for(int8_t id=0;id<MAX_SALIDAS;id++){if (salidas[id].getConfigurada()) salidas[id].actualiza();}
+}
 
-/*************************************************/
-/*                                               */
-/*  Devuelve el estado  del rele indicado en id  */
-/*  puede ser 0 apagado, 1 encendido, 2 pulsando */
-/*                                               */
-/*************************************************/
-int8_t estadoSalida(int8_t id)
-  {
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO; //Rele fuera de rango
-  if(salidas[id].configurado!=CONFIGURADO) return -1; //No configurado
-  
-  return salidas[id].estado;
- }
-
-/********************************************************/
-/*                                                      */
-/*  Devuelve el tipo de salida digital/PWM              */
-/*                                                      */
-/********************************************************/
-int8_t getTipo(int8_t id)
-  {
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO; //Rele fuera de rango
-  if(salidas[id].configurado!=CONFIGURADO) return -1; //No configurado
-  
-  return salidas[id].tipo;
-  }
-
-/********************************************************/
-/*                                                      */
-/*  Devuelve el nombre del tipo de salida digital/PWM   */
-/*                                                      */
-/********************************************************/
-String getTipoNombre(int8_t id)
-  {
-  if(id <0 || id>=MAX_SALIDAS) return "ERROR"; //Rele fuera de rango
-  if(salidas[id].configurado!=CONFIGURADO) return "ERROR"; //No configurado
-
-  String cad="";
-  switch(salidas[id].tipo)
-    {
-    case TIPO_DIGITAL:
-      cad="Digital";
-      break;
-    case TIPO_LED:  
-      cad="LED";
-      break;
-    default:
-      cad="Error";
-      break;      
-    }
-    
-  return cad;
-  }
-
-/********************************************************/
-/*                                                      */
-/*  Devuelve el valor de PWM,                           */
-/*  si la salida es de ese tipo                         */
-/*                                                      */
-/********************************************************/
-int16_t getValorPWM(int8_t id)
-  {
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO; //Rele fuera de rango
-  if(salidas[id].configurado!=CONFIGURADO) return -1; //No configurado
-  
-  if(salidas[id].tipo==TIPO_PWM) return salidas[id].valorPWM;
-  else return NO_CONFIGURADO;
-  }
-
-/********************************************************/
-/*                                                      */
-/*  establece el valor de la salida PWM                 */
-/*                                                      */
-/********************************************************/
-int8_t setValorPWM(int8_t id, int16_t valor) 
-  {
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO; //Rele fuera de rango
-  if(salidas[id].configurado!=CONFIGURADO) return -1; //No configurado
-
-  if(salidas[id].tipo==TIPO_PWM) 
-    {
-    uint16_t PWMMax=1;//b0000000000000001
-    PWMMax<<= RESOLUCION_PWM;
-    if(valor>=PWMMax) valor=PWMMax-1;
-    salidas[id].valorPWM=valor;
-    return 0;
-    }
-    
-  return NO_CONFIGURADO;
-  }
-
-/********************************************************/
-/*                                                      */
-/*  Devuelve el nombre del rele con el id especificado  */
-/*                                                      */
-/********************************************************/
-String nombreSalida(int8_t id)
-  { 
-  if(id <0 || id>=MAX_SALIDAS) return "ERROR"; //Rele fuera de rango    
-  return salidas[id].nombre;
-  } 
-
-/*************************************************/
-/*conmuta el rele indicado en id                 */
-/*devuelve 1 si ok, -1 si ko                     */
-/* LA ENTRADA ES EL ESTADO LOGICO. ADAPTO EL     */
-/*  ESTADO FISICO SEGUN nivelActivo              */
-/*************************************************/
-int8_t conmutaSalida(int8_t id, int8_t estado_final, int debug)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO; //Rele fuera de rango
-  if(salidas[id].configurado==NO_CONFIGURADO) return NO_CONFIGURADO; //El rele no esta configurado
-  
-  //parte logica
-  salidas[id].estado=estado_final;//Lo que llega es el estado logico. No hace falta mapeo
-  
-  //parte fisica. Me he hecho un mapa de karnaugh y sale asi
-  if(estado_final==nivelActivo) 
-    {
-    switch (salidas[id].tipo)
-      {
-      case TIPO_DIGITAL:
-        digitalWrite(salidas[id].pin, HIGH); //controlo el rele
-        break;
-      case TIPO_LED:
-        if(nivelActivo==1) ledcWrite(salidas[id].canal,salidas[id].valorPWM);
-        else ledcWrite(salidas[id].canal,(1<<RESOLUCION_PWM)-salidas[id].valorPWM);
-        break;
-      }    
-    }
-  else 
-    {
-    switch (salidas[id].tipo)
-      {
-      case TIPO_DIGITAL:
-        digitalWrite(salidas[id].pin, LOW); //controlo el rele
-        break;
-      case TIPO_LED:
-        ledcWrite(salidas[id].canal,0);
-        if(nivelActivo==1) ledcWrite(salidas[id].canal,0);
-        else ledcWrite(salidas[id].canal,(1<<RESOLUCION_PWM));
-        break;
-      }    
-    }
-  
-  if(debug)
-    {
-    Traza.mensaje("id: %i; GPIO: %i; estado: ",(int)id,(int)salidas[id].pin);
-    Traza.mensaje("%i\n",digitalRead(salidas[id].pin));
-    }
-    
-  return 1;
-  }
-
-/****************************************************/
-/*   Genera un pulso en rele indicado en id         */
-/*   devuelve 1 si ok, -1 si ko                     */
-/****************************************************/
-int8_t pulsoSalida(int8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-  if(salidas[id].configurado==NO_CONFIGURADO) return -1; //El rele no esta configurado
-  if(salidas[id].modo!=MODO_MANUAL && salidas[id].modo!=MODO_SEGUIMIENTO) return NO_CONFIGURADO;
-      
-  //Pongo el rele en nivel Activo  
-  if(!conmutaSalida(id, ESTADO_ACTIVO, debugGlobal)) return 0; //Si no puede retorna -1
-
-  //cargo el campo con el valor definido para el ancho del pulso
-  salidas[id].estado=ESTADO_PULSO;//estado EN_PULSO
-  salidas[id].finPulso=millis()+salidas[id].anchoPulso; 
-
-  Traza.mensaje("Incio de pulso %i| fin calculado %i\n",millis(),salidas[id].finPulso);
-  
-  return 1;  
-  }
-
-/********************************************************/
-/*                                                      */
-/*     Recubre las dos funciones anteriores para        */
-/*     actuar sobre un rele                             */
-/*                                                      */
-/********************************************************/ 
-int8_t actuaSalida(int8_t id, int8_t estado)
-  {
-  //Si esta en modo secuenciador o modo maquina no deberia actuar, solo si esta en modo manual o seguimiento
-  if(salidas[id].modo!=MODO_MANUAL && salidas[id].modo!=MODO_SEGUIMIENTO) return -1;
-   
-  switch(estado)
-    {
-    case ESTADO_DESACTIVO:
-      return conmutaSalida(id, ESTADO_DESACTIVO, debugGlobal);
-      break;
-    case ESTADO_ACTIVO:
-      return conmutaSalida(id, ESTADO_ACTIVO, debugGlobal);
-      break;
-    case ESTADO_PULSO:
-      return pulsoSalida(id);
-      break;      
-    default://no deberia pasar nunca!!
-      return -1;
-    }
-  }
-
-/****************************************************/
-/*   Genera un pulso en rele indicado en id         */
-/*   devuelve 1 si ok, -1 si ko                     */
-/****************************************************/
-int8_t salidaMaquinaEstados(int8_t id, int8_t estado)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-  if(salidas[id].modo!=MODO_MAQUINA) return NO_CONFIGURADO;
-
-  return conmutaSalida(id, estado, false);
-  }
-
-/********************************************************/
-/*                                                      */
-/*     Devuelve si el reles esta configurados           */
-/*                                                      */
-/********************************************************/ 
-int releConfigurado(uint8_t id)
-  {
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-    
-  return salidas[id].configurado;
-  } 
-  
 /********************************************************/
 /*                                                      */
 /*     Devuelve el numero de reles configurados         */
 /*                                                      */
 /********************************************************/ 
-int relesConfigurados(void)
-  {
+int salidasConfiguradas(void){
   int resultado=0;
   
-  for(int8_t i=0;i<MAX_SALIDAS;i++)
-    {
-    if(salidas[i].configurado==CONFIGURADO) resultado++;
-    }
+  for(int8_t i=0;i<MAX_SALIDAS;i++){if(salidas[i].getConfigurada()) resultado++;}
   return resultado;
-  } 
-
-/********************************************************/
-/*                                                      */
-/*     Asocia la salida a un plan de secuenciador       */
-/*                                                      */
-/********************************************************/ 
-void asociarSecuenciador(int8_t id, int8_t plan)
-  {
-  //validaciones previas
-  if(id >=0 && id<MAX_SALIDAS) 
-    {
-    salidas[id].modo=MODO_SECUENCIADOR;
-    salidas[id].controlador=plan; 
-    }
-  }  
-
-/********************************************************/
-/*                                                      */
-/*     Fuerza el modo manual en una salida que esta en  */
-/*     en otro modo                                     */
-/*                                                      */
-/********************************************************/ 
-int8_t forzarModoManualSalida(int8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-
-  salidas[id].modo=MODO_MANUAL;
-
-  return CONFIGURADO;
-  }
-
-/********************************************************/
-/*                                                      */
-/*     Fuerza el modo manual en una salida que esta en  */
-/*     en otro modo                                     */
-/*                                                      */
-/********************************************************/ 
-int8_t recuperarModoSalida(int8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-
-  salidas[id].modo=salidas[id].modo_inicial;
-  conmutaSalida(id, ESTADO_DESACTIVO, debugGlobal);
-  return CONFIGURADO;
-  }  
-
-/********************************************************/
-/*                                                      */
-/*     Devuelve el estado incial de la salida           */
-/*                                                      */
-/********************************************************/ 
-int8_t inicioSalida(int8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-       
-  return salidas[id].inicio;  
-  }  
-
-/********************************************************/
-/*                                                      */
-/*     Devuelve el nombre de la salida                  */
-/*                                                      */
-/********************************************************/ 
-String nombreSalida(uint8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return "ERROR";
-       
-  return salidas[id].nombre;  
-  }   
-
-/********************************************************/
-/*                                                      */
-/*     Devuelve el modo de la salida                    */
-/*                                                      */
-/********************************************************/ 
-uint8_t pinSalida(uint8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-       
-  return salidas[id].pin;  
-  }   
-
-/********************************************************/
-/*                                                      */
-/*     Devuelve el ancho del pulso de la salida         */
-/*                                                      */
-/********************************************************/ 
-uint16_t anchoPulsoSalida(uint8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-       
-  return salidas[id].anchoPulso;  
-  }   
-
-/********************************************************/
-/*                                                      */
-/*     Devuelve el fin del pulso de la salida           */
-/*                                                      */
-/********************************************************/ 
-unsigned long finPulsoSalida(uint8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-       
-  return salidas[id].finPulso;  
-  }   
-
-/********************************************************/
-/*                                                      */
-/*     Devuelve el valor de inicio de la salida         */
-/*                                                      */
-/********************************************************/ 
-int8_t inicioSalida(uint8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-       
-  return salidas[id].inicio;
-  }   
-
-/********************************************************/
-/*                                                      */
-/*  Devuelve el nombre del estado de una salida         */
-/*                                                      */
-/********************************************************/ 
-String nombreEstadoSalida(uint8_t id, uint8_t estado)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return "ERROR";
-  if(estado>2) return "ERROR";
-       
-  if (estado!=ESTADO_DESACTIVO) return salidas[id].nombreEstados[ESTADO_ACTIVO];
-  
-  return salidas[id].nombreEstados[ESTADO_DESACTIVO];
-  }   
-
-/********************************************************/
-/*                                                      */
-/*  Devuelve el nombre del estado actual de una salida  */
-/*                                                      */
-/********************************************************/ 
-String nombreEstadoSalidaActual(uint8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return "ERROR";
-       
-  if (salidas[id].estado!=ESTADO_DESACTIVO) return salidas[id].nombreEstados[ESTADO_ACTIVO];
-  
-  return salidas[id].nombreEstados[ESTADO_DESACTIVO];
-  }   
-
-/********************************************************/
-/*                                                      */
-/*  Devuelve el mensaje de una salida en un estado      */
-/*                                                      */
-/********************************************************/ 
-String mensajeEstadoSalida(uint8_t id, uint8_t estado)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return "ERROR";
-  if(estado>2) return "ERROR";
-       
-  return salidas[id].mensajes[estado];
-  }   
-
-/********************************************************/
-/*                                                      */
-/*  Devuelve el mensaje del estado actual una salida    */
-/*                                                      */
-/********************************************************/ 
-String mensajeEstadoSalidaActual(uint8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return "ERROR";
-       
-  return salidas[id].mensajes[salidas[id].estado];
-  }   
-
-/********************************************************/
-/*                                                      */
-/*     Devuelve el controlador de la salida si esta     */
-/*     asociada a un plan de secuenciador               */
-/*                                                      */
-/********************************************************/ 
-int8_t controladorSalida(int8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-  if(salidas[id].modo!=MODO_SECUENCIADOR && salidas[id].modo!=MODO_SEGUIMIENTO) return NO_CONFIGURADO;
-       
-  return salidas[id].controlador;  
-  }   
-
-/********************************************************/
-/*                                                      */
-/*     Devuelve el modo de la salida                    */
-/*                                                      */
-/********************************************************/ 
-uint8_t modoSalida(uint8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-       
-  return salidas[id].modo;  
-  }   
-
-/********************************************************/
-/*                                                      */
-/*     Devuelve el modo de la salida                    */
-/*                                                      */
-/********************************************************/ 
-String modoSalidaNombre(uint8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return "ERROR";
-
-  String cad="";
-  switch(salidas[id].modo)
-    {
-    case MODO_MANUAL:
-      cad="Manual";
-      break;
-    case MODO_SECUENCIADOR:
-      cad="Secuenciador";
-      break;
-    case MODO_SEGUIMIENTO:
-      cad="Seguimiento";
-      break;
-    case MODO_MAQUINA:
-      cad="Maq. Estados";
-      break;    
-    default:
-      cad="Error";
-      break;
-    }
-  return cad;
-  }   
-
-/********************************************************/
-/*                                                      */
-/*     Devuelve el modo inicial de la salida            */
-/*                                                      */
-/********************************************************/ 
-uint8_t modoInicalSalida(uint8_t id)
-  {
-  //validaciones previas
-  if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-       
-  return salidas[id].modo_inicial;  
-  }   
+}
 
 /********************************************************** Fin salidas ******************************************************************/  
 
@@ -838,8 +230,7 @@ uint8_t modoInicalSalida(uint8_t id)
    }
                                                         */
 /********************************************************/   
-String generaJsonEstadoSalidas(boolean filtro)
-  {
+String generaJsonEstadoSalidas(boolean filtro){
   String salida="";
 
   //const size_t bufferSize = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(8);
@@ -850,46 +241,41 @@ String generaJsonEstadoSalidas(boolean filtro)
   JsonObject& root = jsonBuffer.createObject();
   
   JsonArray& Salidas = root.createNestedArray("salidas");
-  for(int8_t id=0;id<MAX_SALIDAS;id++)
-    {
-    if(salidas[id].configurado==CONFIGURADO || !filtro) 
-      {       
+  for(int8_t id=0;id<MAX_SALIDAS;id++){
+    if(salidas[id].getConfigurada() || !filtro){       
       JsonObject& Salidas_0 = Salidas.createNestedObject();
       Salidas_0["id"] = id;
-      Salidas_0["nombre"] = nombreSalida(id);
-      Salidas_0["pin"] = pinSalida(id);
-      Salidas_0["modo"] = modoSalidaNombre(id);
-      Salidas_0["controlador"] = controladorSalida(id);
-      Salidas_0["estado"] = estadoSalida(id);
-      Salidas_0["nombreEstado"] = nombreEstadoSalida(id,estadoSalida(id));
-      Salidas_0["anchoPulso"] = anchoPulsoSalida(id);
-      Salidas_0["finPulso"] = finPulsoSalida(id);
+      Salidas_0["nombre"] = salidas[id].getNombre();
+      Salidas_0["pin"] = salidas[id].getPin();
+      Salidas_0["modo"] = salidas[id].getModoNombre();
+      Salidas_0["controlador"] = salidas[id].getControlador();
+      Salidas_0["estado"] = salidas[id].getEstado();
+      Salidas_0["nombreEstado"] = salidas[id].getNombreEstadoActual();
+      Salidas_0["anchoPulso"] = salidas[id].getAnchoPulso();
+      Salidas_0["finPulso"] = salidas[id].getFinPulso();
 
-      if(!filtro) {
-        Salidas_0["tipo"] = getTipoNombre(id);
-        Salidas_0["valorPWM"] = getValorPWM(id);
-        Salidas_0["inicioPulso"] = inicioSalida(id);
-        Salidas_0["mensajeEstado"] = mensajeEstadoSalida(id,estadoSalida(id));
-        Salidas_0["configurada"] = releConfigurado(id);
-        Salidas_0["inicio"] = inicioSalida(id);
-        }    
+      if(!filtro){
+        Salidas_0["tipo"] = salidas[id].getTipoNombre();
+        Salidas_0["valorPWM"] = salidas[id].getValorPWM();
+        Salidas_0["mensajeEstado"] = salidas[id].getMensajeEstadoActual();
+        Salidas_0["configurada"] = salidas[id].getConfigurada();
+        Salidas_0["inicio"] = salidas[id].getEstadoInicial();
       }
     }
+  }
     
   root.printTo(salida);
   return salida;  
-  }  
+}  
 String generaJsonEstadoSalidas(void) {return generaJsonEstadoSalidas(true);}
 
-
-int8_t setSalidaActiva(int8_t id)
-  {
+int8_t setSalidaActiva(int8_t id){
   if(id <0 || id>=MAX_SALIDAS) return NO_CONFIGURADO;
-  if(salidas[id].configurado==NO_CONFIGURADO) return -1; //El rele no esta configurado
+  if(salidas[id].getConfigurada()) return -1; //El rele no esta configurado
   
   salidaActiva=id;
 
   return CONFIGURADO;
-  }  
+}
   
 int8_t getSalidaActiva(void){return salidaActiva;}

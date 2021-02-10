@@ -269,7 +269,7 @@ void handleActivaRele(AsyncWebServerRequest *request)
     int8_t id=request->arg("id").toInt();
 
     //activaRele(id);
-    conmutaSalida(id, ESTADO_ACTIVO, debugGlobal);
+    salidas[id].conmuta(ESTADO_ACTIVO);
 
     request->redirect("root");
     }
@@ -287,7 +287,7 @@ void handleDesactivaRele(AsyncWebServerRequest *request)
     {
     int8_t id=request->arg("id").toInt();
 
-    conmutaSalida(id, ESTADO_DESACTIVO, debugGlobal);
+    salidas[id].conmuta(ESTADO_DESACTIVO);
     
     request->redirect("root");
     }
@@ -305,7 +305,7 @@ void handlePulsoRele(AsyncWebServerRequest *request)
     {
     int8_t id=request->arg("id").toInt();
 
-    pulsoSalida(id);
+    salidas[id].setPulso();
     
     request->redirect("root");
     }
@@ -324,7 +324,7 @@ void handleFuerzaManual(AsyncWebServerRequest *request)
     {
     int8_t id=request->arg("id").toInt();
 
-    forzarModoManualSalida(id);
+    salidas[id].setModoManual();
     
     request->redirect("root");
     }
@@ -344,7 +344,7 @@ void handleRecuperaManual(AsyncWebServerRequest *request)
     {
     int8_t id=request->arg("id").toInt();
 
-    recuperarModoSalida(id);
+    salidas[id].setModoInicial();
     
     request->redirect("root");
     }
@@ -385,8 +385,8 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
     {
     cad += "<TR class=\"modo2\">";  
     cad += "<TD>" + String(i) + ":" + String(getMapeoEntradas(i)) + "</TD>";  
-    cad += "<TD>" + nombreEntrada(getMapeoEntradas(i))+ "</TD>";
-    cad += "<TD>" + String(getEntradasActual(i)) + ":" + String(estadoEntrada(getMapeoEntradas(i))) + "</TD>";
+    cad += "<TD>" + entradas[getMapeoEntradas(i)].getNombre()+ "</TD>";
+    cad += "<TD>" + String(getEntradasActual(i)) + ":" + String(entradas[getMapeoEntradas(i)].getEstado()) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
@@ -404,8 +404,8 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
     {
     cad += "<TR class\"modo2\">";  
     cad += "<TD>" + String(i) + ":" + String(getMapeoSalidas(i)) + "</TD>";  
-    cad += "<TD>" + String(nombreSalida(getMapeoSalidas(i))) + "</TD>";
-    cad += "<TD>" + String(estadoSalida(getMapeoSalidas(i))) + "</TD>";
+    cad += "<TD>" + String(salidas[getMapeoSalidas(i)].getNombre()) + "</TD>";
+    cad += "<TD>" + String(salidas[getMapeoSalidas(i)].getEstado()) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
@@ -441,7 +441,7 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += "<TH ROWSPAN=2>Estado final</TH>";
   cad += "</TR>";
   cad += "<TR>";
-  for(uint8_t i=0;i<getNumEntradasME();i++) cad += "<TH>" + String(nombreEntrada(i)) + "</TH>";
+  for(uint8_t i=0;i<getNumEntradasME();i++) cad += "<TH>" + String(entradas[i].getNombre()) + "</TH>";
   cad += "</TR>";
 
   for(uint8_t i=0;i<getNumTransiciones();i++)
@@ -535,7 +535,7 @@ void handleInfo(AsyncWebServerRequest *request)
   cad += "<BR>";  
   for(int8_t i=0;i<MAX_SALIDAS;i++)
     {
-    cad += "Rele " + String(i) + " nombre: " + nombreSalida(i) + "| estado: " + estadoSalida(i);    
+    cad += "Rele " + String(i) + " nombre: " + salidas[i].getNombre() + "| estado: " + salidas[i].getEstado();    
     cad += "<BR>";   
     }
   cad += "-----------------------------------------------<BR>"; 

@@ -3,6 +3,7 @@
     {
     "GPIO": 32, 
     "nombre": "Pulsador",
+    "Tipo": 0,
     "inicio": "off",
     "anchoPulso": 1000,
     "modo": 0,

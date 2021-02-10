@@ -82,8 +82,10 @@
 							document.getElementById("entrada_configurada_" + indice).innerHTML=(entrada.configurada?"Si":"No");
 							document.getElementById("entrada_tipo_" + indice).innerHTML=entrada.tipo;
 							document.getElementById("entrada_pin_" + indice).innerHTML=entrada.pin;
-							document.getElementById("entrada_estadoActivo_" + indice).innerHTML=(entrada.estadoActivo==0?"Off":"On");
-							document.getElementById("entrada_estadoFisico_" + indice).innerHTML=(entrada.estadoFisico==0?"Off":"On");
+							//document.getElementById("entrada_estadoActivo_" + indice).innerHTML=(entrada.estadoActivo==0?"Off":"On");
+							//document.getElementById("entrada_estadoFisico_" + indice).innerHTML=(entrada.estadoFisico==0?"Off":"On");
+							document.getElementById("entrada_estadoActivo_" + indice).innerHTML=entrada.estadoActivo;
+							document.getElementById("entrada_estadoFisico_" + indice).innerHTML=entrada.estadoFisico;
 							document.getElementById("entrada_estado_" + indice).innerHTML=(entrada.estado=="0"?"Off":"On");
 							document.getElementById("entrada_nombreEstado_" + indice).innerHTML=entrada.nombreEstado;
 							document.getElementById("entrada_mensajeEstado_" + indice).innerHTML=entrada.mensajeEstado;

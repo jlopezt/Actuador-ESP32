@@ -228,7 +228,7 @@ void respondeGenericoMQTT(char* topic, byte* payload, unsigned int length)
     else if(root.get<String>("estado")=="on") estado=1;           
     else if(root.get<String>("estado")=="pulso") estado=2;     
      
-    if(actuaSalida(id, estado)==-1) Traza.mensaje("Se intento actuar sobre una salida que no esta en modo manual\n");
+    if(salidas[id].setSalida(estado)==-1) Traza.mensaje("Se intento actuar sobre una salida que no esta en modo manual\n");
     }
   else Traza.mensaje("Mensaje no esperado: %s\n",mensaje);
   /**********************Fin JSON***********************/    
