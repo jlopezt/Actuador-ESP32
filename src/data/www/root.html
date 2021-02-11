@@ -38,6 +38,18 @@
             xhSalidas.open("GET", "estadoSalidas", true);
             xhSalidas.send(null); 
 
+            var xhME = new XMLHttpRequest();
+            xhME.onreadystatechange = function(){
+                if (xhME.readyState == 4){
+                    if(xhME.status == 200) {
+                    console.log("JSON: " + xhME.responseText)
+                    actualizaMaquinaEstados(xhME.responseText);
+                    }
+                }
+            };
+            xhME.open("GET", "estadoMaquinaEstados", true);
+            xhME.send(null); 
+
             connect();
         }
 
@@ -129,19 +141,26 @@
                 document.getElementById("salida_id_" + indice).innerHTML=salida.id;
                 document.getElementById("salida_nombre_" + indice).innerHTML=salida.nombre;
                 
+                //document.getElementById("salida_estado_" + indice).innerHTML=salida.nombreEstado;
                 var estado=document.getElementById("salida_estado_" + indice);
                 estado.innerHTML=salida.nombreEstado;
-                var accion=document.getElementById("salida_accion_" + indice);
-                if(salida.estado==0) {
-                    estado.style.backgroundColor=DESACTIVO;
 
-                    accion.innerHTML  = "<form action='activaSalida'><input  type='hidden' id='id' name='id' value='0'><input STYLE='color: #000000; text-align: center; background-color: #FFFF00; width: 80px' type='submit' value='activar'></form>";
-                    accion.innerHTML += "<form action='pulsoSalida'><input  type='hidden' id='id' name='id' value='0'><input STYLE='color: #000000; text-align: center; background-color: #FFFF00; width: 80px' type='submit' value='pulso'></form>";
+                var accion=document.getElementById("salida_accion_" + indice);
+                if(salida.modo=="Manual"){
+                    if(salida.estado==0) {
+                        estado.style.backgroundColor=DESACTIVO;
+
+                        accion.innerHTML  = "<form action='activaSalida'><input  type='hidden' id='activa_" + indice + "' name='id' value='" + indice + "'><input STYLE='color: #000000; text-align: center; background-color: #FFFF00; width: 80px' type='submit' value='activar'></form>";
+                        accion.innerHTML += "<form action='pulsoSalida'><input  type='hidden' id='pulso_" + indice + "' name='id' value='" + indice + "'><input STYLE='color: #000000; text-align: center; background-color: #FFFF00; width: 80px' type='submit' value='pulso'></form>";
+                    }
+                    else {
+                        estado.style.backgroundColor=ACTIVO;
+                        
+                        accion.innerHTML  = "<form action='desactivaSalida'><input  type='hidden' id='id' name='id' value='0'><input STYLE='color: #000000; text-align: center; background-color: #DDDDDD; width: 80px' type='submit' value='desactivar'></form>";
+                    }
                 }
-                else {
-                    estado.style.backgroundColor=ACTIVO;
-                    
-                    accion.innerHTML  = "<form action='desactivaSalida'><input  type='hidden' id='id' name='id' value='0'><input STYLE='color: #000000; text-align: center; background-color: #DDDDDD; width: 80px' type='submit' value='desactivar'></form>";
+                else{
+                    accion.innerHTML="<p>Modo " + salida.modo + "</p>";
                 }
             });
 
@@ -155,6 +174,15 @@
                 }
             }
         }
+
+        function actualizaMaquinaEstados(datos) {
+            var res = JSON.parse(datos);
+
+            //salidas
+            var estado=res.estado;
+            console.log("estado: " + estado);
+            document.getElementById("estadoME").innerHTML=estado;
+        }        
     </script>
   </head>
 
@@ -199,7 +227,7 @@
         <CAPTION>Máquina de estados</CAPTION>
         <TR>
             <TH width="100">Estado: </TH>
-            <TD width="200" class="modo2">Medio</TD>
+            <TD id="estadoME" width="200" class="modo2">Medio</TD>
         </TR>
     </TABLE>
   </BODY>

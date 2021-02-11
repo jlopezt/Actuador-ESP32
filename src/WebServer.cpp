@@ -57,6 +57,8 @@ void handleDesactivaRele(AsyncWebServerRequest *request);
 void handleActivaRele(AsyncWebServerRequest *request);
 
 void handleMaquinaEstados(AsyncWebServerRequest *request);
+void handleEstadoMaquinaEstados(AsyncWebServerRequest *request);
+
 void handleDesactivaSecuenciador(AsyncWebServerRequest *request);
 void handleActivaSecuenciador(AsyncWebServerRequest *request);
 void handlePlanes(AsyncWebServerRequest *request);
@@ -106,6 +108,7 @@ void inicializaWebServer(void)
   serverX.on("/desactivaSecuenciador", HTTP_ANY, handleDesactivaSecuenciador);  //Servicio para desactivar el secuenciador
   
   serverX.on("/maquinaEstados", HTTP_ANY, handleMaquinaEstados);  //Servicio de representacion de las transiciones d ela maquina de estados
+  serverX.on("/estadoMaquinaEstados", HTTP_ANY, handleEstadoMaquinaEstados);  //Servicio de representacion de las transiciones d ela maquina de estados
 
   serverX.on("/ficheros", HTTP_ANY, handleFicheros);  //URI de leer fichero    
   serverX.on("/listaFicheros", HTTP_ANY, handleListaFicheros);  //URI de leer fichero  
@@ -368,7 +371,7 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += "<CAPTION>Estado actual</CAPTION>\n"; 
   cad += "<TR>\n";
   cad += "<TH width=\"100\">Estado: </TH>";
-  cad += "<TD width=\"200\" class=\"modo2\">" + getNombreEstadoActual() + "</TD>";
+  cad += "<TD width=\"200\" class=\"modo2\">" + maquinaEstados.getNombreEstadoActual() + "</TD>";
   cad += "</TR>\n";
   cad += "</TABLE>\n";
   cad += "<BR>";
@@ -381,12 +384,12 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += "<TH>Nombre</TH>";
   cad += "<TH>Ultimo estado leido</TH>";
   cad += "</TR>";    
-  for(uint8_t i=0;i<getNumEntradasME();i++)
+  for(uint8_t i=0;i<maquinaEstados.getNumEntradas();i++)
     {
     cad += "<TR class=\"modo2\">";  
-    cad += "<TD>" + String(i) + ":" + String(getMapeoEntradas(i)) + "</TD>";  
-    cad += "<TD>" + entradas[getMapeoEntradas(i)].getNombre()+ "</TD>";
-    cad += "<TD>" + String(getEntradasActual(i)) + ":" + String(entradas[getMapeoEntradas(i)].getEstado()) + "</TD>";
+    cad += "<TD>" + String(i) + ":" + String(maquinaEstados.getMapeoEntrada(i)) + "</TD>";  
+    cad += "<TD>" + entradas[maquinaEstados.getMapeoEntrada(i)].getNombre()+ "</TD>";
+    cad += "<TD>" + String(maquinaEstados.getEntradasActual(i)) + ":" + String(entradas[maquinaEstados.getMapeoEntrada(i)].getEstado()) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
@@ -400,12 +403,12 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += "<TH>Nombre</TH>";
   cad += "<TH>Estado actual</TH>";
   cad += "</TR>";    
-  for(uint8_t i=0;i<getNumSalidasME();i++)
+  for(uint8_t i=0;i<maquinaEstados.getNumSalidas();i++)
     {
-    cad += "<TR class\"modo2\">";  
-    cad += "<TD>" + String(i) + ":" + String(getMapeoSalidas(i)) + "</TD>";  
-    cad += "<TD>" + String(salidas[getMapeoSalidas(i)].getNombre()) + "</TD>";
-    cad += "<TD>" + String(salidas[getMapeoSalidas(i)].getEstado()) + "</TD>";
+    cad += "<TR class=\"modo2\">";  
+    cad += "<TD>" + String(i) + ":" + String(maquinaEstados.getMapeoSalida(i)) + "</TD>";  
+    cad += "<TD>" + String(salidas[maquinaEstados.getMapeoSalida(i)].getNombre()) + "</TD>";
+    cad += "<TD>" + String(salidas[maquinaEstados.getMapeoSalida(i)].getEstado()) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
@@ -417,15 +420,15 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += "<TR>"; 
   cad += "<TH>id</TH>";  
   cad += "<TH>Nombre</TH>";
-  for(uint8_t i=0;i<getNumSalidasME();i++) cad += "<TD>Salida[" + String(i) + "] salida asociada(" + getMapeoSalidas(i) + ")</TD>";
+  for(uint8_t i=0;i<maquinaEstados.getNumSalidas();i++) cad += "<TH>" + salidas[maquinaEstados.getMapeoSalida(i)].getNombre() + "</TH>";
   cad += "</TR>"; 
     
-  for(uint8_t i=0;i<getNumEstados();i++)
+  for(uint8_t i=0;i<maquinaEstados.getNumEstados();i++)
     {
     cad += "<TR class=\"modo2\">";  
     cad += "<TD>" + String(i) + "</TD>";  
-    cad += "<TD>" + getNombreEstados(i) + "</TD>";
-    for(uint8_t j=0;j<getNumSalidasME();j++) cad += "<TD>" + String(getValorSalidaEstados(i,j)) + "</TD>";
+    cad += "<TD>" + maquinaEstados.estados[i].getNombre() + "</TD>";
+    for(uint8_t j=0;j<maquinaEstados.getNumSalidas();j++) cad += "<TD>" + String(maquinaEstados.estados[i].getValorSalida(j)) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
@@ -437,19 +440,19 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
 
   cad += "<TR>";
   cad += "<TH ROWSPAN=2>Estado inicial</TH>";
-  cad += "<TH COLSPAN=" + String(getNumEntradasME()) + ">Entradas</TH>";
+  cad += "<TH COLSPAN=" + String(maquinaEstados.getNumEntradas()) + ">Entradas</TH>";
   cad += "<TH ROWSPAN=2>Estado final</TH>";
   cad += "</TR>";
   cad += "<TR>";
-  for(uint8_t i=0;i<getNumEntradasME();i++) cad += "<TH>" + String(entradas[i].getNombre()) + "</TH>";
+  for(uint8_t i=0;i<maquinaEstados.getNumEntradas();i++) cad += "<TH>" + String(entradas[i].getNombre()) + "</TH>";
   cad += "</TR>";
 
-  for(uint8_t i=0;i<getNumTransiciones();i++)
+  for(uint8_t i=0;i<maquinaEstados.getNumTransiciones();i++)
     {
     cad += "<TR class=\"modo2\">";
-    cad += "<TD>" + String(getNombreEstado(getEstadoInicialTransicion(i))) + "</TD>";
-    for(uint8_t j=0;j<getNumEntradasME();j++) cad += "<TD>" + String(getValorEntradaTransicion(i,j)) + "</TD>";
-    cad += "<TD>" + String(getNombreEstado(getEstadoFinalTransicion(i))) + "</TD>";    
+    cad += "<TD>" + String(maquinaEstados.estados[maquinaEstados.transiciones[i].getEstadoInicial()].getNombre()) + "</TD>";
+    for(uint8_t j=0;j<maquinaEstados.getNumEntradas();j++) cad += "<TD>" + String(maquinaEstados.transiciones[i].getValorEntrada(j)) + "</TD>";
+    cad += "<TD>" + String(maquinaEstados.estados[maquinaEstados.transiciones[i].getEstadoFinal()].getNombre()) + "</TD>";    
     cad += "</TR>";
     }
   cad += "</TABLE>";
@@ -458,6 +461,15 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += miniPie;
   request->send(200, "text/html", cad);
   }
+
+/***********************************************/
+/* Genera el JSON de estado de la Maq. Estados */
+/***********************************************/
+void handleEstadoMaquinaEstados(AsyncWebServerRequest *request){
+    String cad=maquinaEstados.generaJsonEstadoMaquinaEstados();
+
+    request->send(200, "text/json", cad);
+}
 /****************************FIN MAQUINA ESTADOS******************************************/
 /****************************SECUENCIADOR******************************************/
 /*********************************************/

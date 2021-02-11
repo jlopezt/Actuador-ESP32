@@ -73,7 +73,7 @@ String compruebaES(void)
     if(entradas[entrada].getConfigurada())
       {
       if(entradas[entrada].getNombre()=="") cad += "Entrada " + String(entrada) + " | Nombre no configurado\n";  
-      if(entradas[entrada].getEstadoActivo()!=ESTADO_DESACTIVO && entradas[entrada].getEstadoFisico()!=ESTADO_ACTIVO) cad += "Entrada " + String(entrada) + " | estadoActivo valor no valido\n";
+      if(entradas[entrada].getEstadoActivo()!=ESTADO_DESACTIVO && entradas[entrada].getEstadoActivo()!=ESTADO_ACTIVO) cad += "Entrada " + String(entrada) + " | estadoActivo valor no valido\n";
       if(entradas[entrada].getPin()<0 || entradas[entrada].getPin()>MAX_PINES_ESP32) cad += "Entrada " + String(entrada) + " | pin no valido\n";  
       if(entradas[entrada].getTipo()!="INPUT" && entradas[entrada].getTipo()!="INPUT_PULLUP") cad += "Entrada " + String(entrada) + " | tipo no valido\n";        
       }
@@ -127,51 +127,51 @@ String compruebaMaquinaEstados(void)
   
   //Entradas
   cad += "Entradas\n";
-  uint8_t nEntradas=getNumEntradasME();
+  uint8_t nEntradas=maquinaEstados.getNumEntradas();
   
   cad += "configuradas " + String(nEntradas) + " entradas\n";
   for(uint8_t entrada=0;entrada<nEntradas;entrada++)
     {      
-    if(getNumEntradaME(entrada)>MAX_ENTRADAS) cad += "Entrada " + String(entrada) + " | el numero de entrada es mayor a MAX_ENTRADAS\n";  
-    if(entradas[getNumEntradaME(entrada)].getConfigurada()) cad += "Entrada " + String(entrada) + " | la entrada asociada no esta configurada\n";  
+    if(maquinaEstados.getMapeoEntrada(entrada)>MAX_ENTRADAS) cad += "Entrada " + String(entrada) + " | el numero de entrada es mayor a MAX_ENTRADAS\n";  
+    if(!entradas[maquinaEstados.getMapeoEntrada(entrada)].getConfigurada()) cad += "Entrada " + String(entrada) + " | la entrada asociada no esta configurada\n";  
     }
 
   //Salidas
   cad += "Salidas\n";
-  uint8_t nSalidas=getNumSalidasME() ;
+  uint8_t nSalidas=maquinaEstados.getNumSalidas();
   
   cad += "configuradas " + String(nSalidas) + " salidas\n";
   for(uint8_t salida=0;salida<nSalidas;salida++)
     {
-    if(getNumSalidaME(salida)>MAX_SALIDAS) cad += "Salida " + String(salida) + " | el numero de salida es mayor a MAX_SALIDAS\n";  
+    if(maquinaEstados.getMapeoSalida(salida)>MAX_SALIDAS) cad += "Salida " + String(salida) + " | el numero de salida es mayor a MAX_SALIDAS\n";  
     if(!salidas[salida].getConfigurada()) cad += "Salida " + String(salida) + " | salida no configurada\n";  
     else
       {
-      if(salidas[getNumSalidaME(salida)].getModo()!=MODO_MAQUINA) cad += "Salida " + String(salida) + " | la salida asociada no tiene el modo correcto\n";  
+      if(salidas[maquinaEstados.getMapeoSalida(salida)].getModo()!=MODO_MAQUINA) cad += "Salida " + String(salida) + " | la salida asociada no tiene el modo correcto\n";  
       }
     }
 
   //Estados
   cad += "Estados\n";
-  uint8_t nEstados=getNumEstados() ;
+  uint8_t nEstados=maquinaEstados.getNumEstados() ;
   
   cad += "configurados " + String(nEstados) + " estados\n";
   for(uint8_t estado=0;estado<nEstados;estado++)
     {
-    if(getNombreEstado(estado)=="") cad += "Estado " + String(estado) + " | el nombre no esta configurado\n";  
+    if(maquinaEstados.estados[estado].getNombre()=="") cad += "Estado " + String(estado) + " | el nombre no esta configurado\n";  
 
     for(int8_t i=0;i<nSalidas;i++)
       {
       for(int8_t j=0;j<nSalidas;j++) 
         {
-        if(getValorSalidaEstados(estado,i)!=ESTADO_DESACTIVO && getValorSalidaEstados(estado,i)!=ESTADO_ACTIVO) cad += "Estado " + String(estado) + " Salida " + String(j) + " | el valor configurado no es valido\n";  
+        if(maquinaEstados.estados[estado].getValorSalida(i)!=ESTADO_DESACTIVO && maquinaEstados.estados[estado].getValorSalida(i)!=ESTADO_ACTIVO) cad += "Estado " + String(estado) + " Salida " + String(j) + " | el valor configurado no es valido\n";  
         }
       }
     }
 
   //Trasnsiciones
   cad += "Trasnsiciones\n";
-  uint8_t nTransiciones=getNumTransiciones() ;
+  uint8_t nTransiciones=maquinaEstados.getNumTransiciones() ;
   
   cad += "configuradas " + String(nTransiciones) + " trasnsiciones\n";
   for(uint8_t transi=0;transi<nTransiciones;transi++)
@@ -180,15 +180,15 @@ String compruebaMaquinaEstados(void)
     boolean correctoFinal=false;
     for(int8_t estado=0;estado<nEstados;estado++) 
       {
-      if(getEstadoInicialTransicion(transi)==getIdEstados(estado)) correctoInicial=true;
-      if(getEstadoFinalTransicion(transi)==getIdEstados(estado)) correctoFinal=true;
+      if(maquinaEstados.transiciones[transi].getEstadoInicial()==maquinaEstados.estados[estado].getId()) correctoInicial=true;
+      if(maquinaEstados.transiciones[transi].getEstadoFinal()==maquinaEstados.estados[estado].getId()) correctoFinal=true;
       }
     if(!correctoInicial) cad += "Transicion " + String(transi) + " | el estado inicial no es valido\n";  
     if(!correctoFinal) cad += "Transicion " + String(transi) + " | el estado final no es valido\n";  
 
     for(int8_t entrada=0;entrada<nEntradas;entrada++)
       {
-      if(getValorEntradaTransicion(transi, entrada)!=ESTADO_DESACTIVO && getValorEntradaTransicion(transi, entrada)!=ESTADO_ACTIVO) cad += "Transicion " + String(transi) + " Entrada " + String(entrada) + " | el valor configurado no es valido\n";
+      if(maquinaEstados.transiciones[transi].getValorEntrada(entrada)!=ESTADO_DESACTIVO && maquinaEstados.transiciones[transi].getValorEntrada(entrada)!=ESTADO_ACTIVO && maquinaEstados.transiciones[transi].getValorEntrada(entrada)!=ESTADO_NEUTRO_ME) cad += "Transicion " + String(transi) + " Entrada " + String(entrada) + " | el valor configurado no es valido\n";
       }
     }
   return cad;

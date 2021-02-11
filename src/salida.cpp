@@ -226,8 +226,8 @@ int8_t salida::conmuta(int8_t estado_final){
     }
   }
   
-    Traza.mensaje("nombre: %s; GPIO: %i; estado: ",nombre.c_str(),(int)pin);
-    Traza.mensaje("%i\n",digitalRead(pin));
+  //Traza.mensaje("nombre: %s; GPIO: %i; Estado fisico: ",nombre.c_str(),(int)pin);
+  //Traza.mensaje("%i\n",digitalRead(pin));
     
   return 1;
 }

@@ -85,5 +85,8 @@ function actualizaDatos(topic,datos) {
         case "casaPre/PuertaGaraje/salidas":
             actualizaSalidas(datos);
             break;
+        case "casaPre/PuertaGaraje/maquinaEstados":
+            actualizaMaquinaEstados(datos);
+            break;            
     }
 }

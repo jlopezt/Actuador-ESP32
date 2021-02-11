@@ -9,5 +9,6 @@
   "ID_MQTT": "PuertaGaraje", 
   "topicRoot": "casaPre", 
   "publicarEntradas": 1,
-  "publicarSalidas": 1
+  "publicarSalidas": 1,
+  "publicarMaquinaEstados":1
 }

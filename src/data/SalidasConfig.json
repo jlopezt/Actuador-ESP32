@@ -16,6 +16,23 @@
       {"valor": 0, "texto": "Apagado"},
       {"valor": 1, "texto": "Encendido"}
       ]
-    }
+    },
+    {
+      "GPIO": 33, 
+      "nombre": "Maq.Estados",
+      "Tipo": 0,
+      "inicio": "off",
+      "anchoPulso": 1000,
+      "modo": 3,
+      "controlador": 0,
+      "Estados": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+        ],
+      "Mensajes": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+        ]
+      }    
   ]
 }

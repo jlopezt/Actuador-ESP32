@@ -1,14 +1,14 @@
 {
 	"Entradas": [0,1,2,3],
-	"Salidas": [],
+	"Salidas": [1],
 	"Estados":[
-		{"id":0, "nombre": "Error",  "salidas":[]},
-		{"id":1, "nombre": "Inicio", "salidas":[]},
-		{"id":2, "nombre": "Arriba", "salidas":[]},
-		{"id":3, "nombre": "Abajo",  "salidas":[]},
-		{"id":4, "nombre": "Medio",  "salidas":[]},
-		{"id":5, "nombre": "Alarma", "salidas":[]},
-		{"id":6, "nombre": "Objeto", "salidas":[]}
+		{"id":0, "nombre": "Error",  "salidas":[0]},
+		{"id":1, "nombre": "Inicio", "salidas":[0]},
+		{"id":2, "nombre": "Arriba", "salidas":[0]},
+		{"id":3, "nombre": "Abajo",  "salidas":[1]},
+		{"id":4, "nombre": "Medio",  "salidas":[0]},
+		{"id":5, "nombre": "Alarma", "salidas":[1]},
+		{"id":6, "nombre": "Objeto", "salidas":[0]}
 		],
 	"Transiciones":[
     {"inicial":0,"entradas":[-1,-1,1,-1],"final":5},

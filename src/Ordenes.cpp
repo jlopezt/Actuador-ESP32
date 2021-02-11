@@ -366,8 +366,8 @@ void func_comando_GHN(int iParametro, char* sParametro, float fParametro)//"debu
 void func_comando_debugMaquinaEstados(int iParametro, char* sParametro, float fParametro)//"debug")
   {
   //debugMaquinaEstados=!debugMaquinaEstados;
-  setDebugMaquinaEstados(!getDebugMAquinaEstados());
-  if (getDebugMAquinaEstados()) Traza.mensaje("El debug de la maquina de estados esta on\n");
+  maquinaEstados.setDebugMaquinaEstados(!maquinaEstados.getDebugMAquinaEstados());
+  if (maquinaEstados.getDebugMAquinaEstados()) Traza.mensaje("El debug de la maquina de estados esta on\n");
   else Traza.mensaje("El debug de la maquina de estados esta off\n");
   }  
 

@@ -154,7 +154,7 @@ void setup()
   
   //Maquina de estados
   Traza.mensaje("\n\nInit maquina de estados----------------------------------------------------------------\n");
-  inicializaMaquinaEstados();
+  maquinaEstados.inicializaMaquinaEstados();
   
   //Ordenes serie
   Traza.mensaje("\n\nInit Ordenes ----------------------------------------------------------------------\n");  
@@ -192,7 +192,7 @@ void loop()
   //Prioridad 2: Funciones de control.
   if ((vuelta % FRECUENCIA_ENTRADAS)==0) consultaEntradas(debugGlobal); //comprueba las entradas
   if ((vuelta % FRECUENCIA_SECUENCIADOR)==0) actualizaSecuenciador(debugGlobal); //Actualiza la salida del secuenciador
-  if ((vuelta % FRECUENCIA_MAQUINAESTADOS)==0) actualizaMaquinaEstados(debugGlobal); //Actualiza la maquina de estados
+  if ((vuelta % FRECUENCIA_MAQUINAESTADOS)==0) maquinaEstados.actualizaMaquinaEstados(debugGlobal); //Actualiza la maquina de estados
   if ((vuelta % FRECUENCIA_SALIDAS)==0) actualizaSalidas(debugGlobal); //comprueba las salidas
   //Prioridad 3: Interfaces externos de consulta    
   if ((vuelta % FRECUENCIA_SERVIDOR_FTP)==0) gestionaFTP(); //atiende el servidor ftp
