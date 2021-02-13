@@ -15,9 +15,8 @@
 /***************************** Includes *****************************/
 
 /***************************** Contructores ****************************/
-entrada::entrada(void){    
+Entrada::Entrada(void){    
     //inicializo la parte logica
-    configurada=false;//NO_CONFIGURADO;  //la inicializo a no configurada
     nombre="No configurado";
     estado=NO_CONFIGURADO;   
     estadoFisico=ESTADO_DESACTIVO; 
@@ -32,9 +31,8 @@ entrada::entrada(void){
 /***************************** Fin contructores ****************************/
 
 /***************************** Configuracion ****************************/
-void entrada::configuraEntrada(String _nombre, String _tipo, int8_t _pin, int8_t _estadoActivo, String _nombres[2], String _mensajes[2]){    
+void Entrada::configuraEntrada(String _nombre, String _tipo, int8_t _pin, int8_t _estadoActivo, String _nombres[2], String _mensajes[2]){    
     //inicializo la parte logica
-    configurada=true;//CONFIGURADO;  //la inicializo a no configurada
     nombre=_nombre;
     estado=CONFIGURADO;   
     estadoFisico=ESTADO_DESACTIVO; 
@@ -54,11 +52,7 @@ void entrada::configuraEntrada(String _nombre, String _tipo, int8_t _pin, int8_t
 /*Devuelve el estado 0|1 del rele indicado en id */
 /*                                               */
 /*************************************************/
-int8_t entrada::getEstado(void){
-  if(configurada!=CONFIGURADO) return NO_CONFIGURADO;
-
-  return (estado);
-}
+int8_t Entrada::getEstado(void){return (estado);}
 
 /*************************************************/
 /*                                               */
@@ -66,15 +60,11 @@ int8_t entrada::getEstado(void){
 /* se ha leido, sin cruzar con nada              */
 /*                                               */
 /*************************************************/
-int8_t entrada::getEstadoFisico(void){
-  if(configurada!=CONFIGURADO) return NO_CONFIGURADO;
-  
-  return estadoFisico;
-}
+int8_t Entrada::getEstadoFisico(void){return estadoFisico;}
 /****************************** Fin get estado *****************************/
 
 /****************************** set estado *****************************/
-void entrada::setEstadoFisico(void){
+void Entrada::setEstadoFisico(void){
     int8_t valor_inicial = estado;
 
     estadoFisico=digitalRead(pin);
@@ -89,49 +79,38 @@ void entrada::setEstadoFisico(void){
 /****************************** get configuracion *****************************/
 /********************************************************/
 /*                                                      */
-/*     Devuelve si la entrada esta configurada          */
-/*                                                      */
-/********************************************************/ 
-boolean entrada::getConfigurada(void){return (configurada==CONFIGURADO);}   
-
-/********************************************************/
-/*                                                      */
 /*  Devuelve el nombre del rele con el id especificado  */
 /*                                                      */
 /********************************************************/
-String entrada::getNombre(void) {return nombre;} 
+String Entrada::getNombre(void) {return nombre;} 
 
 /********************************************************/
 /*                                                      */
 /*     Devuelve el pin de la entrada                    */
 /*                                                      */
 /********************************************************/ 
-uint8_t entrada::getPin(void) {return pin;}   
+uint8_t Entrada::getPin(void) {return pin;}   
 
 /********************************************************/
 /*                                                      */
 /*     Devuelve el tipo de la entrada                   */
 /*                                                      */
 /********************************************************/ 
-String entrada::getTipo(void) {return tipo;}   
+String Entrada::getTipo(void) {return tipo;}   
 
 /*************************************************/
 /*                                               */
 /* Devuelve el estado activo 0|1 de la entrada   */
 /*                                               */
 /*************************************************/
-int8_t entrada::getEstadoActivo(void){
-  if(configurada!=CONFIGURADO) return NO_CONFIGURADO;
-  
-  return estadoActivo;
-}
+int8_t Entrada::getEstadoActivo(void){return estadoActivo;}
 
 /********************************************************/
 /*                                                      */
 /*  Devuelve el nombre del estado de una entrada        */
 /*                                                      */
 /********************************************************/ 
-String entrada::getNombreEstado(uint8_t estado){
+String Entrada::getNombreEstado(uint8_t estado){
   //validaciones previas
   if(estado>2) return "ERROR";
        
@@ -143,7 +122,7 @@ String entrada::getNombreEstado(uint8_t estado){
 /*  Devuelve el mensaje de una entrada en un estado     */
 /*                                                      */
 /********************************************************/ 
-String entrada::getMensajeEstado(uint8_t estado){
+String Entrada::getMensajeEstado(uint8_t estado){
   //validaciones previas
   if(estado>2) return "ERROR";
        
@@ -157,7 +136,7 @@ String entrada::getMensajeEstado(uint8_t estado){
 /* audio en un GHN                               */
 /*                                               */
 /*************************************************/
-void entrada::enviaMensaje(int8_t estado){
+void Entrada::enviaMensaje(int8_t estado){
   String mensaje="";
 
   mensaje="{\"origen\": \"" + nombre + "\",\"mensaje\":\"" + mensajes[estado] + "\"}";

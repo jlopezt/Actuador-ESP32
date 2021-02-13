@@ -395,7 +395,7 @@ void enviaDatos(boolean debug)
   //**************************************ENTRADAS******************************************
   if(publicarEntradas==1)
     {
-    payload=generaJsonEstadoEntradas();//genero el json de las entradas
+    payload=entradas.generaJsonEstado();//genero el json de las entradas
     //Lo envio al bus    
     if(enviarMQTT(ID_MQTT+"/"+"entradas", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
     else if(debug)Traza.mensaje("¡¡Error al enviar json al broker!!\n");

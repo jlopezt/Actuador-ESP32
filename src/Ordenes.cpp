@@ -320,7 +320,7 @@ void func_comando_debug(int iParametro, char* sParametro, float fParametro)//"de
 void func_comando_ES(int iParametro, char* sParametro, float fParametro)//"debug")
   {
   Traza.mensaje("Entradas\n");
-  for(int8_t i=0;i<MAX_ENTRADAS;i++) Traza.mensaje("%i: nombre: %s | configurada: %i | estado: %i | tipo: %s | pin: %i\n",i,entradas[i].getNombre().c_str(),entradas[i].getConfigurada(),entradas[i].getEstado(),entradas[i].getTipo().c_str(),entradas[i].getPin());
+  for(int8_t i=0;i<entradas.getNumEntradas();i++) Traza.mensaje("%i: nombre: %s | estado: %i | tipo: %s | pin: %i\n",i,entradas.getEntrada(i).getNombre().c_str(),entradas.getEntrada(i).getEstado(),entradas.getEntrada(i).getTipo().c_str(),entradas.getEntrada(i).getPin());
   Traza.mensaje("Salidas\n");
   for(int8_t i=0;i<MAX_SALIDAS;i++) Traza.mensaje("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i | modo: %i | controlador: %i | ancho pulso: %i | fin pulso: %i\n",i,salidas[i].getNombre().c_str(),salidas[i].getConfigurada(),salidas[i].getEstado(),salidas[i].getEstadoInicial(),salidas[i].getPin(),salidas[i].getModo(),salidas[i].getControlador(),salidas[i].getAnchoPulso(),salidas[i].getFinPulso());  
   } 
@@ -355,7 +355,7 @@ void func_comando_Salidas(int iParametro, char* sParametro, float fParametro)//"
 
 void func_comando_Entradas(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  Traza.mensaje("%s\n",generaJsonEstadoEntradas().c_str());
+  Traza.mensaje("%s\n",entradas.generaJsonEstado().c_str());
   }    
 
 void func_comando_GHN(int iParametro, char* sParametro, float fParametro)//"debug")

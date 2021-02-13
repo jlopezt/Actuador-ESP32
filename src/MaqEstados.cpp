@@ -34,8 +34,8 @@ MaquinaEstados::MaquinaEstados(void){
   //Estado de la maquina
   debugMaquinaEstados=false;
   estadoActual=ESTADO_INICIAL;
-  for(uint8_t i=0;i<MAX_ENTRADAS;i++) entradasActual[i]=NO_CONFIGURADO;
-  for(uint8_t i=0;i<MAX_ENTRADAS;i++) salidasActual[i]=NO_CONFIGURADO;
+  for(uint8_t i=0;i<entradas.getNumEntradas();i++) entradasActual[i]=NO_CONFIGURADO;
+  for(uint8_t i=0;i<entradas.getNumEntradas();i++) salidasActual[i]=NO_CONFIGURADO;
   
   //Variables de configuracion
   numeroEstados=0;
@@ -44,15 +44,10 @@ MaquinaEstados::MaquinaEstados(void){
   numeroSalidas=0;
 
   //Entradas
-  for(uint8_t i=0;i<MAX_ENTRADAS;i++) mapeoEntradas[i]=NO_CONFIGURADO;
+  for(uint8_t i=0;i<entradas.getNumEntradas();i++) mapeoEntradas[i]=NO_CONFIGURADO;
     
   //Salidas
   for(uint8_t i=0;i<MAX_SALIDAS;i++) mapeoSalidas[i]=NO_CONFIGURADO;
-
-  //inicializo estados
-  for(int8_t i=0;i<MAX_ESTADOS;i++) estados[i]=Estado();//Inicializo todas a valores por defecto, solo las configuradas vienen en el fichero
-  //inicializo transiciones
-  for(int8_t i=0;i<MAX_TRANSICIONES;i++) transiciones[i]=Transicion();//Inicializo todas a valores por defecto, solo las configuradas vienen en el fichero
 }
 /************************************** Fin constructor ****************************************/
 
@@ -110,7 +105,7 @@ boolean MaquinaEstados::parseaConfiguracionMaqEstados(String contenido)
 
   /********************Entradas******************************/
   JsonArray& E = json["Entradas"];
-  numeroEntradas=(E.size()<MAX_ENTRADAS?E.size():MAX_ENTRADAS);
+  numeroEntradas=(E.size()<entradas.getNumEntradas()?E.size():entradas.getNumEntradas());
   for(uint8_t i=0;i<numeroEntradas;i++) mapeoEntradas[i]=E[i];   
 
   Traza.mensaje("Entradas asociadas a la maquina de estados: %i\n",numeroEntradas);
@@ -128,6 +123,9 @@ boolean MaquinaEstados::parseaConfiguracionMaqEstados(String contenido)
   JsonArray& Estados = json["Estados"];
 
   numeroEstados=(Estados.size()<MAX_ESTADOS?Estados.size():MAX_ESTADOS);
+
+  estados=new Estado[numeroEstados];
+
   for(int8_t i=0;i<numeroEstados;i++)
     { 
     JsonObject& est = Estados[i];   
@@ -162,6 +160,9 @@ boolean MaquinaEstados::parseaConfiguracionMaqEstados(String contenido)
   JsonArray& Transiciones = json["Transiciones"];
 
   numeroTransiciones=(Transiciones.size()<MAX_TRANSICIONES?Transiciones.size():MAX_TRANSICIONES);
+
+  transiciones=new Transicion[numeroTransiciones];
+
   for(int8_t i=0;i<numeroTransiciones;i++)
     { 
     JsonObject& trans = Transiciones[i];   
@@ -170,7 +171,7 @@ boolean MaquinaEstados::parseaConfiguracionMaqEstados(String contenido)
     
     JsonArray& Entradas = trans["entradas"];   
     int8_t num_entradas;
-    num_entradas=(Entradas.size()<MAX_ENTRADAS?Entradas.size():MAX_ENTRADAS);
+    num_entradas=(Entradas.size()<entradas.getNumEntradas()?Entradas.size():entradas.getNumEntradas());
     if(num_entradas!=numeroEntradas) 
       {
       Traza.mensaje("Numero de entradas incorrecto en estado %i. definidas %i, esperadas %i\n",i,num_entradas,numeroEntradas);
@@ -207,13 +208,13 @@ void MaquinaEstados::actualizaMaquinaEstados(int debug)
   boolean localDebug=debug || debugMaquinaEstados;
     
   //Actualizo el vaor de las entradas
-  for(uint8_t i=0;i<numeroEntradas;i++) entradasActual[i]=entradas[mapeoEntradas[i]].getEstado();//  estadoEntrada(mapeoEntradas[i]);
+  for(uint8_t i=0;i<numeroEntradas;i++) entradasActual[i]=entradas.getEntrada(mapeoEntradas[i]).getEstado();//  estadoEntrada(mapeoEntradas[i]);
 
   if(localDebug) 
     {
     Traza.mensaje("Estado inicial: (%i) %s\n",estadoActual,estados[estadoActual].getNombre().c_str());
     Traza.mensaje("Estado de las entradas:\n");
-    for(uint8_t i=0;i<numeroEntradas;i++) Traza.mensaje("Entrada %i (dispositivo %i: %s)=> valor %i\n",i, mapeoEntradas[i],entradas[mapeoEntradas[i]].getNombre().c_str(),entradasActual[i]);
+    for(uint8_t i=0;i<numeroEntradas;i++) Traza.mensaje("Entrada %i (dispositivo %i: %s)=> valor %i\n",i, mapeoEntradas[i],entradas.getEntrada(mapeoEntradas[i]).getNombre().c_str(),entradasActual[i]);
     }
     
   //busco en las transiciones a que estado debe evolucionar la maquina
@@ -285,7 +286,7 @@ String MaquinaEstados::getNombreEstadoActual(void){return estados[estadoActual].
 
 uint8_t MaquinaEstados::getMapeoEntrada(uint8_t id) 
   {
-  if (id<0 || id>MAX_ENTRADAS) return NO_CONFIGURADO;
+  if (id<0 || id>entradas.getNumEntradas()) return NO_CONFIGURADO;
   return mapeoEntradas[id];
   }
 
@@ -297,7 +298,7 @@ uint8_t MaquinaEstados::getMapeoSalida(uint8_t id)
 
 uint8_t MaquinaEstados::getEntradasActual(uint8_t id) 
   {
-  if (id<0 || id>MAX_ENTRADAS) return NO_CONFIGURADO;
+  if (id<0 || id>entradas.getNumEntradas()) return NO_CONFIGURADO;
   return entradasActual[id];
   }
 
@@ -332,8 +333,8 @@ String MaquinaEstados::generaJsonEstadoMaquinaEstados(void)
   for(int8_t id=0;id<numeroEntradas;id++){
     JsonObject& Entradas_0 = Entradas.createNestedObject(); 
     Entradas_0["id"] = id;
-    Entradas_0["nombre"] = entradas[mapeoEntradas[id]].getNombre();
-    Entradas_0["estado"] = entradas[mapeoEntradas[id]].getEstado();
+    Entradas_0["nombre"] = entradas.getEntrada(mapeoEntradas[id]).getNombre();
+    Entradas_0["estado"] = entradas.getEntrada(mapeoEntradas[id]).getEstado();
   }
 
   JsonArray& Salidas = root.createNestedArray("salidas");
@@ -352,38 +353,32 @@ String MaquinaEstados::generaJsonEstadoMaquinaEstados(void)
 
 /*********************************************************ESTADO******************************************************************/    
 Estado::Estado(void){  
-  for(int8_t i=0;i<MAX_ESTADOS;i++){
-    //inicializo la parte logica
-    id=i;
-    nombre="Estado_" + String(i);
-    for(uint8_t j=0;j<MAX_SALIDAS;j++) valorSalidas[j]=NO_CONFIGURADO;
-  }
+  id=0;
+  nombre="Estado_" + String(id);
+  for(uint8_t j=0;j<MAX_SALIDAS;j++) valorSalida[j]=NO_CONFIGURADO;
 }
 
 void Estado::setId(uint8_t _id) {id=_id;}
 void Estado::setNombre(String _nombre) {nombre=_nombre;}
-void Estado::setValorSalida(uint8_t _salida, int8_t _valor) {valorSalidas[_salida]=_valor;}
+void Estado::setValorSalida(uint8_t _salida, int8_t _valor) {valorSalida[_salida]=_valor;}
 
 uint8_t Estado::getId() {return id;}
 String Estado::getNombre(void) {return nombre;}
-int8_t Estado::getValorSalida(uint8_t salida) {return valorSalidas[salida];}
+int8_t Estado::getValorSalida(uint8_t salida) {return valorSalida[salida];}
 /*********************************************************ESTADO******************************************************************/    
 
 /*********************************************************TRANSICION******************************************************************/    
 Transicion::Transicion(void){
-  for(int8_t i=0;i<MAX_TRANSICIONES;i++){
-    //inicializo la parte logica
-    setEstadoInicial(NO_CONFIGURADO);
-    setEstadoFinal(NO_CONFIGURADO);
-    for(uint8_t j=0;j<MAX_ENTRADAS;j++) setValorEntrada(j,NO_CONFIGURADO);
-  }
+  estadoInicial=NO_CONFIGURADO;
+  estadoFinal=NO_CONFIGURADO;
+  for(uint8_t j=0;j<entradas.getNumEntradas();j++) valorEntrada[j]=NO_CONFIGURADO;
 }
 
 void Transicion::setEstadoInicial(uint8_t _estado) {estadoInicial=_estado;}
 void Transicion::setEstadoFinal(uint8_t _estado) {estadoFinal=_estado;}
-void Transicion::setValorEntrada(uint8_t _entrada, int8_t _valor) {valorEntradas[_entrada]=_valor;}
+void Transicion::setValorEntrada(uint8_t _entrada, int8_t _valor) {valorEntrada[_entrada]=_valor;}
 
 uint8_t Transicion::getEstadoInicial(void) {return estadoInicial;}
 uint8_t Transicion::getEstadoFinal(void) {return estadoFinal;}
-int8_t Transicion::getValorEntrada(int8_t entrada) {return valorEntradas[entrada];}
+int8_t Transicion::getValorEntrada(int8_t entrada) {return valorEntrada[entrada];}
 /*********************************************************FIN TRANSICION******************************************************************/    

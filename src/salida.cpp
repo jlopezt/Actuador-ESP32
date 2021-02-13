@@ -106,11 +106,11 @@ void salida::actualiza(void){
     case MODO_SEGUIMIENTO://Sigue a una entradaseguimiento      
       //Si es un seguidor de pulso
       if(anchoPulso>0){
-        if(entradas[controlador].getEstado()==ESTADO_ACTIVO) setPulso(); //Si la entrada esta activa, actualizo
+        if(entradas.getEntrada(controlador).getEstado()==ESTADO_ACTIVO) setPulso(); //Si la entrada esta activa, actualizo
         else if(estado==ESTADO_PULSO) actualizaPulso();//si no esta activa, reviso el pulso
       }
       //Si es un seguidor tal cual
-      else if(setSalida(entradas[controlador].getEstado())==-1) Traza.mensaje("Error al actualizar la salida seguidor %s\n\n",nombre.c_str());
+      else if(setSalida(entradas.getEntrada(controlador).getEstado())==-1) Traza.mensaje("Error al actualizar la salida seguidor %s\n\n",nombre.c_str());
       break;
     case MODO_MAQUINA://Controlada por una maquina de estados  
       break;
@@ -151,6 +151,9 @@ String salida::getTipoNombre(){
       break;
     case TIPO_LED:  
       cad="LED";
+      break;
+    case TIPO_PWM:
+      cad="PWM";
       break;
     default:
       cad="Error";

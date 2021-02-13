@@ -33,7 +33,7 @@ class Estado{
     private:
         uint8_t id;
         String nombre;
-        int8_t valorSalidas[MAX_SALIDAS];
+        int8_t valorSalida[MAX_SALIDAS];
     public:
         //constructor
         Estado(void);
@@ -52,7 +52,7 @@ class Transicion{
     private:        
         uint8_t estadoInicial;
         uint8_t estadoFinal;
-        int8_t valorEntradas[MAX_ENTRADAS];//Puede ser -1, significa que no importa el valor
+        int8_t valorEntrada[MAX_ENTRADAS];//Puede ser -1, significa que no importa el valor
     public:
         //constructor
         Transicion(void);
@@ -76,10 +76,7 @@ class MaquinaEstados{
         uint8_t mapeoSalidas[MAX_SALIDAS]; //posicion es la salida de la maquina de estados, el valor es el id de la salida del dispositivo
 
         uint8_t numeroEstados;
-        //Estado* estados=new Estado[MAX_ESTADOS];
-
         uint8_t numeroTransiciones; //numero de lazos de la maquina de estados. A cada transicion se asocia un estado inicial, unos valores de las entradas y un estado final
-        //Transicion* transiciones=new Transicion[MAX_TRANSICIONES];
 
         uint8_t estadoActual;
         int8_t entradasActual[MAX_ENTRADAS]; //VAlor leido de las entradas
@@ -87,8 +84,8 @@ class MaquinaEstados{
         boolean debugMaquinaEstados;
 
     public:
-        Estado* estados=new Estado[MAX_ESTADOS];
-        Transicion* transiciones=new Transicion[MAX_TRANSICIONES];
+        Estado* estados;
+        Transicion* transiciones;
 
         //contructor
         MaquinaEstados(void);

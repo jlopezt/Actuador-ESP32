@@ -28,10 +28,9 @@
 /***************************** Includes *****************************/
 
 /********************************************* entrada *******************************************************************/
-class entrada{
+class Entrada{
     private:
         //valores de configuracion
-        boolean configurada;      //Si la entrada esta configurada o no
         String nombre;            //Nombre de la entrada
         String tipo;              //Puede ser INPUT, INPUT_PULLUP, No valido!!-->INPUT_PULLDOWN
         int8_t pin;               //Pin fisico alque esta conectada
@@ -44,13 +43,12 @@ class entrada{
 
     public:
         //constructor
-        entrada(void);
+        Entrada(void);
 
         //Configuracion
         void configuraEntrada(String _nombre, String _tipo, int8_t _pin, int8_t _estadoActivo, String _nombres[2], String _mensajes[2]);
 
         //funciones GET
-        boolean getConfigurada(void); //boolean entradaConfigurada(void); //Devuelve si la entrada esta configurada          
         String getNombre(void);//String nombreEntrada(void); //Devuelve el nombre del rele con el id especificado  
         String getTipo(void);//String tipoEntrada(void); //Devuelve el tipo de la entrada                   
         uint8_t getPin(void);//uint8_t pinEntrada(void); //Devuelve el pin de la entrada                    

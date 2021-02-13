@@ -173,7 +173,7 @@ void handleNombre(AsyncWebServerRequest *request)
 /*************************************************/  
 void handleEstadoEntradas(AsyncWebServerRequest *request)
   {
-  String cad=generaJsonEstadoEntradas();
+  String cad=entradas.generaJsonEstado();
   
   request->send(200, "text/json", cad); 
   }  
@@ -255,7 +255,7 @@ void handleSalidas(AsyncWebServerRequest *request) {request->redirect("salidas.h
 /*****************************************************/  
 void handleConfigEntradas(AsyncWebServerRequest *request)
   {
-  String cad=generaJsonEstadoEntradas(false);
+  String cad=entradas.generaJsonEstado(false);
   request->send(200, "text/json", cad); 
   }
 void handleEntradas(AsyncWebServerRequest *request) {request->redirect("entradas.html");}
@@ -388,8 +388,8 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
     {
     cad += "<TR class=\"modo2\">";  
     cad += "<TD>" + String(i) + ":" + String(maquinaEstados.getMapeoEntrada(i)) + "</TD>";  
-    cad += "<TD>" + entradas[maquinaEstados.getMapeoEntrada(i)].getNombre()+ "</TD>";
-    cad += "<TD>" + String(maquinaEstados.getEntradasActual(i)) + ":" + String(entradas[maquinaEstados.getMapeoEntrada(i)].getEstado()) + "</TD>";
+    cad += "<TD>" + entradas.getEntrada(maquinaEstados.getMapeoEntrada(i)).getNombre()+ "</TD>";
+    cad += "<TD>" + String(maquinaEstados.getEntradasActual(i)) + ":" + String(entradas.getEntrada(maquinaEstados.getMapeoEntrada(i)).getEstado()) + "</TD>";
     cad += "</TR>";
     }
   cad += "</TABLE>";
@@ -444,7 +444,7 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
   cad += "<TH ROWSPAN=2>Estado final</TH>";
   cad += "</TR>";
   cad += "<TR>";
-  for(uint8_t i=0;i<maquinaEstados.getNumEntradas();i++) cad += "<TH>" + String(entradas[i].getNombre()) + "</TH>";
+  for(uint8_t i=0;i<maquinaEstados.getNumEntradas();i++) cad += "<TH>" + String(entradas.getEntrada(i).getNombre()) + "</TH>";
   cad += "</TR>";
 
   for(uint8_t i=0;i<maquinaEstados.getNumTransiciones();i++)

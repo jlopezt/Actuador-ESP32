@@ -65,18 +65,15 @@ String compruebaES(void)
 
   //ENTRADAS
   cad += "Entradas\n";
-  uint8_t nEntradas=entradasConfiguradas() ;
-  
+  //uint8_t nEntradas=entradasConfiguradas() ;
+  uint8_t nEntradas=entradas.getNumEntradas();
   cad += "configuradas " + String(nEntradas) + " entradas\n";
-  for(uint8_t entrada=0;entrada<nEntradas;entrada++)
+  for(uint8_t _entrada=0;_entrada<nEntradas;_entrada++)
     {
-    if(entradas[entrada].getConfigurada())
-      {
-      if(entradas[entrada].getNombre()=="") cad += "Entrada " + String(entrada) + " | Nombre no configurado\n";  
-      if(entradas[entrada].getEstadoActivo()!=ESTADO_DESACTIVO && entradas[entrada].getEstadoActivo()!=ESTADO_ACTIVO) cad += "Entrada " + String(entrada) + " | estadoActivo valor no valido\n";
-      if(entradas[entrada].getPin()<0 || entradas[entrada].getPin()>MAX_PINES_ESP32) cad += "Entrada " + String(entrada) + " | pin no valido\n";  
-      if(entradas[entrada].getTipo()!="INPUT" && entradas[entrada].getTipo()!="INPUT_PULLUP") cad += "Entrada " + String(entrada) + " | tipo no valido\n";        
-      }
+    if(entradas.getEntrada(_entrada).getNombre()=="") cad += "Entrada " + String(_entrada) + " | Nombre no configurado\n";  
+    if(entradas.getEntrada(_entrada).getEstadoActivo()!=ESTADO_DESACTIVO && entradas.getEntrada(_entrada).getEstadoActivo()!=ESTADO_ACTIVO) cad += "Entrada " + String(_entrada) + " | estadoActivo valor no valido\n";
+    if(entradas.getEntrada(_entrada).getPin()<0 || entradas.getEntrada(_entrada).getPin()>MAX_PINES_ESP32) cad += "Entrada " + String(_entrada) + " | pin no valido\n";  
+    if(entradas.getEntrada(_entrada).getTipo()!="INPUT" && entradas.getEntrada(_entrada).getTipo()!="INPUT_PULLUP") cad += "Entrada " + String(_entrada) + " | tipo no valido\n";        
     }
 
   //SALIDAS
@@ -93,9 +90,9 @@ String compruebaES(void)
       if(salidas[salida].getPin()<0 || salidas[salida].getPin()>MAX_PINES_ESP32) cad += "Salida " + String(salida) + " | pin no valido\n";  
       if(salidas[salida].getAnchoPulso()<0) cad += "Salida " + String(salida) + " | ancho de pulso no valido\n";  
       if(salidas[salida].getControlador()>0 && salidas[salida].getModo()!=MODO_SECUENCIADOR && salidas[salida].getModo()!=MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | controlador configurado en un modo incorrecto\n";  
-      if(!entradas[salidas[salida].getControlador()].getConfigurada() && salidas[salida].getModo()==MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
+      if(salidas[salida].getModo()==MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
       if(!planConfigurado(salidas[salida].getControlador()) && salidas[salida].getModo()==MODO_SECUENCIADOR) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
-      if(salidas[salida].getModo()==MODO_SEGUIMIENTO && entradas[salidas[salida].getControlador()].getConfigurada()) cad += "Salida " + String(salida) + " | configurada en modo seguimiento pero el controlador configurado no es una entrada valida\n";  
+      if(salidas[salida].getModo()==MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | configurada en modo seguimiento pero el controlador configurado no es una entrada valida\n";  
       if(salidas[salida].getModo()==MODO_SECUENCIADOR && planConfigurado(salidas[salida].getControlador())!=CONFIGURADO) cad += "Salida " + String(salida) + " | configurada en modo secuenciador pero el controlador configurado no es un plan valido\n";  
       if(salidas[salida].getEstadoInicial()!=ESTADO_DESACTIVO && salidas[salida].getEstadoInicial()!=ESTADO_ACTIVO) cad += "Salida " + String(salida) + " | inicio no valido\n";
       }
@@ -132,8 +129,7 @@ String compruebaMaquinaEstados(void)
   cad += "configuradas " + String(nEntradas) + " entradas\n";
   for(uint8_t entrada=0;entrada<nEntradas;entrada++)
     {      
-    if(maquinaEstados.getMapeoEntrada(entrada)>MAX_ENTRADAS) cad += "Entrada " + String(entrada) + " | el numero de entrada es mayor a MAX_ENTRADAS\n";  
-    if(!entradas[maquinaEstados.getMapeoEntrada(entrada)].getConfigurada()) cad += "Entrada " + String(entrada) + " | la entrada asociada no esta configurada\n";  
+    if(maquinaEstados.getMapeoEntrada(entrada)>entradas.getNumEntradas()) cad += "Entrada " + String(entrada) + " | el numero de entrada es mayor al numero de entradas configurado\n";  
     }
 
   //Salidas

@@ -142,7 +142,7 @@ void setup()
   
   //Entradas
   Traza.mensaje("\n\nInit entradas ------------------------------------------------------------------------\n");
-  inicializaEntradas();
+  entradas.inicializa();
 
   //Salidas
   Traza.mensaje("\n\nInit salidas ------------------------------------------------------------------------\n");
@@ -190,7 +190,7 @@ void loop()
   //Prioridad 0: OTA es prioritario.
   if ((vuelta % FRECUENCIA_OTA)==0) gestionaOTA(); //Gestion de actualizacion OTA
   //Prioridad 2: Funciones de control.
-  if ((vuelta % FRECUENCIA_ENTRADAS)==0) consultaEntradas(debugGlobal); //comprueba las entradas
+  if ((vuelta % FRECUENCIA_ENTRADAS)==0) entradas.consulta(debugGlobal); //comprueba las entradas
   if ((vuelta % FRECUENCIA_SECUENCIADOR)==0) actualizaSecuenciador(debugGlobal); //Actualiza la salida del secuenciador
   if ((vuelta % FRECUENCIA_MAQUINAESTADOS)==0) maquinaEstados.actualizaMaquinaEstados(debugGlobal); //Actualiza la maquina de estados
   if ((vuelta % FRECUENCIA_SALIDAS)==0) actualizaSalidas(debugGlobal); //comprueba las salidas

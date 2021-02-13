@@ -14,32 +14,30 @@
 #include <Ficheros.h>
 /***************************** Includes *****************************/
 
-//definicion de los tipos de datos para las entradas
-entrada* entradas=new entrada[MAX_ENTRADAS];
+Entradas entradas;
+
+/************************************** Constructor ****************************************/
+Entradas::Entradas(void){numeroEntradas=0;}
+/************************************** Fin constructor ****************************************/
 
 /************************************** Funciones de configuracion ****************************************/
 /*********************************************/
 /* Inicializa los valores de los registros de*/
 /* las entradas y recupera la configuracion  */
 /*********************************************/
-void inicializaEntradas(void){  
-  //inicializo la parte logica
-  for(int8_t i=0;i<MAX_ENTRADAS;i++) entradas[i]=entrada();//Inicializo todas a valores por defecto, solo las configuradas vienen en el fichero
-
+void Entradas::inicializa(void){  
   //leo la configuracion del fichero
   if(!recuperaDatosEntradas(debugGlobal)) Traza.mensaje("Configuracion de los reles por defecto\n");
   else{ 
     //parte fisica
-    for(int8_t i=0;i<MAX_ENTRADAS;i++){
-      if(entradas[i].getConfigurada()){  
-        if(entradas[i].getTipo()=="INPUT_PULLUP") pinMode(entradas[i].getPin(), INPUT_PULLUP);
-        else if(entradas[i].getTipo()=="INPUT_PULLDOWN") pinMode(entradas[i].getPin(), INPUT_PULLDOWN);
-        else pinMode(entradas[i].getPin(), INPUT); //PULLUP
+    for(int8_t i=0;i<entradas.getNumEntradas();i++){
+      if(entrada[i].getTipo()=="INPUT_PULLUP") pinMode(entrada[i].getPin(), INPUT_PULLUP);
+      else if(entrada[i].getTipo()=="INPUT_PULLDOWN") pinMode(entrada[i].getPin(), INPUT_PULLDOWN);
+      else pinMode(entrada[i].getPin(), INPUT); //PULLUP
 
-        Traza.mensaje("Nombre entrada[%i]=%s | pin entrada: %i | tipo: %s | estado activo %i\n",i,entradas[i].getNombre().c_str(),entradas[i].getPin(),entradas[i].getTipo().c_str(),entradas[i].getEstadoActivo());
-        Traza.mensaje("\tEstados y mensajes:\n");
-        for(uint8_t j=0;j<2;j++) Traza.mensaje("\t\tEstado %i: %s | mensaje: %s\n",j,entradas[i].getNombreEstado(j).c_str(),entradas[i].getMensajeEstado(j).c_str());        
-      }
+      Traza.mensaje("Nombre entrada[%i]=%s | pin entrada: %i | tipo: %s | estado activo %i\n",i,entrada[i].getNombre().c_str(),entrada[i].getPin(),entrada[i].getTipo().c_str(),entrada[i].getEstadoActivo());
+      Traza.mensaje("\tEstados y mensajes:\n");
+      for(uint8_t j=0;j<2;j++) Traza.mensaje("\t\tEstado %i: %s | mensaje: %s\n",j,entrada[i].getNombreEstado(j).c_str(),entrada[i].getMensajeEstado(j).c_str());        
     }
   }  
 }
@@ -48,7 +46,7 @@ void inicializaEntradas(void){
 /* Lee el fichero de configuracion de las    */
 /* entradas o genera conf por defecto        */
 /*********************************************/
-boolean recuperaDatosEntradas(int debug){
+boolean Entradas::recuperaDatosEntradas(int debug){
   String cad="";
 
   if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
@@ -67,7 +65,7 @@ boolean recuperaDatosEntradas(int debug){
 /* Parsea el json leido del fichero de       */
 /* configuracio de las entradas              */
 /*********************************************/
-boolean parseaConfiguracionEntradas(String contenido){
+boolean Entradas::parseaConfiguracionEntradas(String contenido){
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
 
@@ -81,10 +79,12 @@ boolean parseaConfiguracionEntradas(String contenido){
   //******************************Parte especifica del json a leer********************************
   JsonArray& Entradas = json["Entradas"];
 
-  int8_t max;
-  max=(Entradas.size()<MAX_ENTRADAS?Entradas.size():MAX_ENTRADAS);
-  Traza.mensaje("Se configurarán %i entradas\n",max);
-  for(int8_t i=0;i<max;i++){ 
+  numeroEntradas=(Entradas.size()<MAX_ENTRADAS?Entradas.size():MAX_ENTRADAS);
+  Traza.mensaje("Se configurarán %i entradas\n",numeroEntradas);
+
+  entradas.entrada=new Entrada[numeroEntradas];
+
+  for(int8_t i=0;i<numeroEntradas;i++){ 
     String nombre="";
     String tipo="";
     int8_t pin=-1;
@@ -92,45 +92,45 @@ boolean parseaConfiguracionEntradas(String contenido){
     String nombres[2];
     String mensajes[2];
 
-    JsonObject& entrada = json["Entradas"][i];
+    JsonObject& _entrada = json["Entradas"][i];
           
-    if(entrada.containsKey("nombre")) nombre=entrada.get<String>("nombre"); 
-    if(entrada.containsKey("tipo")) tipo=entrada.get<String>("tipo"); 
-    if(entrada.containsKey("GPIO")) pin=entrada.get<int>("GPIO"); else return false;
-    if(entrada.containsKey("estadoActivo")) estadoActivo=entrada.get<int>("estadoActivo");
+    if(_entrada.containsKey("nombre")) nombre=_entrada.get<String>("nombre"); 
+    if(_entrada.containsKey("tipo")) tipo=_entrada.get<String>("tipo"); 
+    if(_entrada.containsKey("GPIO")) pin=_entrada.get<int>("GPIO"); else return false;
+    if(_entrada.containsKey("estadoActivo")) estadoActivo=_entrada.get<int>("estadoActivo");
    
-    if(entrada.containsKey("Estados")){
-      int8_t est_max=entrada["Estados"].size();//maximo de mensajes en el JSON
+    if(_entrada.containsKey("Estados")){
+      int8_t est_max=_entrada["Estados"].size();//maximo de mensajes en el JSON
       if (est_max>2) est_max=2;                     //Si hay mas de 2, solo leo 2
       for(int8_t e=0;e<est_max;e++){
-        if (entrada["Estados"][e]["valor"]==e) nombres[e]=String((const char *)entrada["Estados"][e]["texto"]);
+        if (_entrada["Estados"][e]["valor"]==e) nombres[e]=String((const char *)_entrada["Estados"][e]["texto"]);
         else nombres[e]="";
       }
     }
 
-    if(entrada.containsKey("Mensajes")){
-      int8_t men_max=entrada["Mensajes"].size();//maximo de mensajes en el JSON
+    if(_entrada.containsKey("Mensajes")){
+      int8_t men_max=_entrada["Mensajes"].size();//maximo de mensajes en el JSON
       if (men_max>2) men_max=2;                     //Si hay mas de 2, solo leo 2
       for(int8_t m=0;m<men_max;m++){
-        if (entrada["Mensajes"][m]["valor"]==m) mensajes[m]=String((const char *)entrada["Mensajes"][m]["texto"]);
+        if (_entrada["Mensajes"][m]["valor"]==m) mensajes[m]=String((const char *)_entrada["Mensajes"][m]["texto"]);
         else mensajes[m]="";
       }
     }
-
-    entradas[i].configuraEntrada(nombre,tipo,pin,estadoActivo,nombres,mensajes);
+    //Traza.mensaje("Entrada %i: nombre: %s, tipo: %s, pin: %i, estadoActivo: %i, nombre[0]: %s, nombre[1]: %s, mensaje[0]: %s, nombre[1]: %s\n",i,nombre.c_str(),tipo.c_str(),pin,estadoActivo,nombres[0].c_str(),nombres[1].c_str(),mensajes[0].c_str(),mensajes[1].c_str());
+    entradas.configuraEntrada(i,nombre,tipo,pin,estadoActivo,nombres,mensajes);
   }
 
-  if(debugGlobal) {
+  if(debugGlobal || true) {
     Traza.mensaje("*************************\nEntradas:"); 
-    for(int8_t i=0;i<MAX_ENTRADAS;i++) {
-      Traza.mensaje("\n%01i: %s | pin: %i | configurado= %i | tipo=%s | estado activo: %i\n",i,entradas[i].getNombre().c_str(),entradas[i].getPin(),entradas[i].getConfigurada(),entradas[i].getTipo().c_str(),entradas[i].getEstadoActivo());
+    for(uint8_t i=0;i<entradas.getNumEntradas();i++) {
+      Traza.mensaje("\n%01i: %s | pin: %i | tipo=%s | estado activo: %i\n",i,entrada[i].getNombre().c_str(),entrada[i].getPin(),entrada[i].getTipo().c_str(),entrada[i].getEstadoActivo());
       Traza.mensaje("Estados:\n");
-      for(int8_t m=0;m<2;m++){
-        Traza.mensaje("Estado[%02i]: %s\n",m,entradas[i].getNombreEstado(m).c_str());     
+      for(uint8_t m=0;m<2;m++){
+        Traza.mensaje("Estado[%02i]: %s\n",m,entrada[i].getNombreEstado(m).c_str());     
       }      
       Traza.mensaje("Mensajes:\n");
-      for(int8_t m=0;m<2;m++) {
-        Traza.mensaje("Mensaje[%02i]: %s\n",m,entradas[i].getMensajeEstado(m).c_str());     
+      for(uint8_t m=0;m<2;m++) {
+        Traza.mensaje("Mensaje[%02i]: %s\n",m,entrada[i].getMensajeEstado(m).c_str());     
       }        
     }
     Traza.mensaje("*************************\n");  
@@ -140,34 +140,19 @@ boolean parseaConfiguracionEntradas(String contenido){
 }
 
 /**********************************************************ENTRADAS******************************************************************/  
+void Entradas::configuraEntrada(uint8_t id, String _nombre, String _tipo, int8_t _pin, int8_t _estadoActivo, String _nombres[2], String _mensajes[2]){    
+  entrada[id].configuraEntrada(_nombre,  _tipo,  _pin,  _estadoActivo,  _nombres,  _mensajes);
+}
+
 /*************************************************/
 /*                                               */
 /*       Lee el estado de las entradas           */
 /*                                               */
 /*************************************************/
-void consultaEntradas(bool debug)
+void Entradas::consulta(bool debug)
   {
   //Actualizo las entradas  
-  for(int8_t i=0;i<MAX_ENTRADAS;i++)
-    {
-    if(entradas[i].getConfigurada()) entradas[i].setEstadoFisico();
-    }
-  }
-
-/********************************************************/
-/*                                                      */
-/*  Devuelve el numero de entradas configuradas         */
-/*                                                      */
-/********************************************************/ 
-int entradasConfiguradas(void)
-  {
-  int resultado=0;
-  
-  for(int8_t i=0;i<MAX_ENTRADAS;i++)
-    {
-    if(entradas[i].getConfigurada()) resultado++;
-    }
-  return resultado;
+  for(uint8_t i=0;i<entradas.getNumEntradas();i++) entrada[i].setEstadoFisico();
   }
 /********************************************* Fin entradas *******************************************************************/
   
@@ -184,7 +169,7 @@ int entradasConfiguradas(void)
   }
                                                            */
 /***********************************************************/   
-String generaJsonEstadoEntradas(boolean filtro)
+String Entradas::generaJsonEstado(boolean filtro)
   {
   String salida="";
 
@@ -195,28 +180,24 @@ String generaJsonEstadoEntradas(boolean filtro)
   JsonObject& root = jsonBuffer.createObject();
   
   JsonArray& Entradas = root.createNestedArray("entradas");
-  for(int8_t id=0;id<MAX_ENTRADAS;id++)
+  for(int8_t id=0;id<entradas.getNumEntradas();id++)
     {
-    if(entradas[id].getConfigurada() || !filtro) 
-      { 
-      JsonObject& Entradas_0 = Entradas.createNestedObject(); 
-      Entradas_0["id"] = id;
-      Entradas_0["nombre"] = entradas[id].getNombre();
-      Entradas_0["estado"] = entradas[id].getEstado();
-      Entradas_0["nombreEstado"] = entradas[id].getNombreEstado(entradas[id].getEstado());
+    JsonObject& Entradas_0 = Entradas.createNestedObject(); 
+    Entradas_0["id"] = id;
+    Entradas_0["nombre"] = entrada[id].getNombre();
+    Entradas_0["estado"] = entrada[id].getEstado();
+    Entradas_0["nombreEstado"] = entrada[id].getNombreEstado(entrada[id].getEstado());
 
-      if(!filtro) {
-        Entradas_0["configurada"] = entradas[id].getConfigurada();
-        Entradas_0["tipo"] = entradas[id].getTipo();
-        Entradas_0["pin"] = entradas[id].getPin();
-        Entradas_0["estadoActivo"] = entradas[id].getEstadoActivo();
-        Entradas_0["estadoFisico"] = entradas[id].getEstadoFisico();
-        Entradas_0["mensajeEstado"] = entradas[id].getMensajeEstado(entradas[id].getEstado());
-        }
+    if(!filtro) {
+      Entradas_0["tipo"] = entrada[id].getTipo();
+      Entradas_0["pin"] = entrada[id].getPin();
+      Entradas_0["estadoActivo"] = entrada[id].getEstadoActivo();
+      Entradas_0["estadoFisico"] = entrada[id].getEstadoFisico();
+      Entradas_0["mensajeEstado"] = entrada[id].getMensajeEstado(entrada[id].getEstado());
       }
     }
 
   root.printTo(salida);
   return salida;  
   }
-String generaJsonEstadoEntradas(void){return generaJsonEstadoEntradas(true);}
+String Entradas::generaJsonEstado(void){return generaJsonEstado(true);}

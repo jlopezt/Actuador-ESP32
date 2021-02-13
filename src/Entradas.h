@@ -16,58 +16,32 @@
 #include <entrada.h>
 /***************************** Includes *****************************/
 
-//definicion de los tipos de datos para las entradas
-extern entrada* entradas;
+class Entradas{
+  private:    
+    Entrada* entrada;//definicion de los tipos de datos para las entradas
+    uint8_t numeroEntradas;
 
-/************************************** Funciones de configuracion ****************************************/
-/*********************************************/
-/* Inicializa los valores de los registros de*/
-/* las entradas y recupera la configuracion  */
-/*********************************************/
-void inicializaEntradas(void);
+  public:
+    //Constructor
+    Entradas(void);
 
-/*********************************************/
-/* Lee el fichero de configuracion de las    */
-/* entradas o genera conf por defecto        */
-/*********************************************/
-boolean recuperaDatosEntradas(int debug);
+    //Configuracion
+    void inicializa(void);// Inicializa los valores de los registros de las entradas y recupera la configuracion
+    boolean recuperaDatosEntradas(int debug);// Lee el fichero de configuracion de las entradas o genera conf por defecto
+    boolean parseaConfiguracionEntradas(String contenido);//* Parsea el json leido del fichero de configuracio de las entradas
+    void configuraEntrada(uint8_t id, String _nombre, String _tipo, int8_t _pin, int8_t _estadoActivo, String _nombres[2], String _mensajes[2]);
 
-/*********************************************/
-/* Parsea el json leido del fichero de       */
-/* configuracio de las entradas              */
-/*********************************************/
-boolean parseaConfiguracionEntradas(String contenido);
+    //get
+    int getNumEntradas(void){return numeroEntradas;}//Devuelve el numero de entradas configuradas
+    Entrada getEntrada(uint8_t id){return entrada[id];}
 
-/**********************************************************ENTRADAS******************************************************************/  
-/*************************************************/
-/*                                               */
-/*       Lee el estado de las entradas           */
-/*                                               */
-/*************************************************/
-void consultaEntradas(bool debug);
+    //set
+    void consulta(bool debug);//Lee el estado de las entradas
 
-/********************************************************/
-/*                                                      */
-/*  Devuelve el numero de entradas configuradas         */
-/*                                                      */
-/********************************************************/ 
-int entradasConfiguradas(void);
-/********************************************* Fin entradas *******************************************************************/
-  
-/****************************************** Funciones de estado ***************************************************************/
-/***********************************************************/
-/*                                                         */
-/*   Devuelve el estado de las entradas en formato json    */
-/*   devuelve un json con el formato:                      */
-/* {
-    "Entradas": [  
-      {"id":  "0", "nombre": "P. abierta", "valor": "1" },
-      {"id":  "1", "nombre": "P. cerrada", "valor": "0" }
-    ]
-  }
-                                                           */
-/***********************************************************/   
-String generaJsonEstadoEntradas(boolean filtro);
-String generaJsonEstadoEntradas(void);
+    //estado en json
+    String generaJsonEstado(boolean filtro);//Devuelve el estado de las entradas en formato json
+    String generaJsonEstado(void);
+};
 
+extern Entradas entradas;
 #endif
