@@ -232,7 +232,7 @@ void respondeGenericoMQTT(char* topic, byte* payload, unsigned int length)
     else if(root.get<String>("estado")=="on") estado=1;           
     else if(root.get<String>("estado")=="pulso") estado=2;     
      
-    if(salidas[id].setSalida(estado)==-1) Traza.mensaje("Se intento actuar sobre una salida que no esta en modo manual\n");
+    if(salidas.setSalida(id,estado)==-1) Traza.mensaje("Se intento actuar sobre una salida que no esta en modo manual\n");
     }
   else Traza.mensaje("Mensaje no esperado: %s\n",mensaje);
   /**********************Fin JSON***********************/    
@@ -404,7 +404,7 @@ void enviaDatos(boolean debug)
   //******************************************SALIDAS******************************************
   if(publicarSalidas==1)
     {
-    payload=generaJsonEstadoSalidas();//genero el json de las salidas
+    payload=salidas.generaJsonEstado();//genero el json de las salidas
     //Lo envio al bus    
     if(enviarMQTT(ID_MQTT+"/"+"salidas", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
     else if(debug)Traza.mensaje("¡¡Error al enviar json al broker!!\n");

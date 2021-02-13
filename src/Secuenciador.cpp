@@ -54,13 +54,13 @@ void inicializaSecuenciador()
       {
       if(planConfigurado(i)==CONFIGURADO)
         {  
-        if (!salidas[planes[i].rele].getConfigurada() || salidas[planes[i].rele].getModo()!=MODO_SECUENCIADOR)
+        if (salidas.getSalida(planes[i].rele).getModo()!=MODO_SECUENCIADOR)
           {
-          Traza.mensaje("La salida asociada al plan %i no esta configurada\n", planes[i].rele);
+          Traza.mensaje("La salida asociada al plan %i no esta configurada en modo secuenciador\n", planes[i].rele);
           planes[i].configurado=NO_CONFIGURADO;
           }
         //Esta bien configurado  
-        else salidas[planes[i].rele].asociarSecuenciador(i); //Asocio el rele al plan
+        else salidas.getSalida(planes[i].rele).asociarSecuenciador(i); //Asocio el rele al plan
         }
       else Traza.mensaje("Plan %i no configurado\n",i);        
       }
@@ -149,8 +149,8 @@ void actualizaSecuenciador(bool debug)
 
       if(debug) Traza.mensaje("Hora: %02i:%02i\nMascara: %i | intervalo: %i\n",hora(),minuto(),mascara,planes[i].horas[hora()]);
 
-      if(planes[i].horas[hora()] & mascara) salidas[planes[i].rele].conmuta(ESTADO_ACTIVO);
-      else salidas[planes[i].rele].conmuta(ESTADO_DESACTIVO);
+      if(planes[i].horas[hora()] & mascara) salidas.conmuta(planes[i].rele,ESTADO_ACTIVO);
+      else salidas.conmuta(planes[i].rele,ESTADO_DESACTIVO);
       }  
     }
   }

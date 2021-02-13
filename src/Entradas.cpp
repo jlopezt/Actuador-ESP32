@@ -27,7 +27,7 @@ Entradas::Entradas(void){numeroEntradas=0;}
 /*********************************************/
 void Entradas::inicializa(void){  
   //leo la configuracion del fichero
-  if(!recuperaDatosEntradas(debugGlobal)) Traza.mensaje("Configuracion de los reles por defecto\n");
+  if(!recuperaDatos(debugGlobal)) Traza.mensaje("Configuracion de los reles por defecto\n");
   else{ 
     //parte fisica
     for(int8_t i=0;i<entradas.getNumEntradas();i++){
@@ -46,7 +46,7 @@ void Entradas::inicializa(void){
 /* Lee el fichero de configuracion de las    */
 /* entradas o genera conf por defecto        */
 /*********************************************/
-boolean Entradas::recuperaDatosEntradas(int debug){
+boolean Entradas::recuperaDatos(int debug){
   String cad="";
 
   if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
@@ -58,20 +58,20 @@ boolean Entradas::recuperaDatosEntradas(int debug){
     //salvo la config por defecto
     //if(salvaFichero(ENTRADAS_CONFIG_FILE, ENTRADAS_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion de Entradas creado por defecto\n");
   }
-  return parseaConfiguracionEntradas(cad);
+  return parseaConfiguracion(cad);
 }
 
 /*********************************************/
 /* Parsea el json leido del fichero de       */
 /* configuracio de las entradas              */
 /*********************************************/
-boolean Entradas::parseaConfiguracionEntradas(String contenido){
+boolean Entradas::parseaConfiguracion(String contenido){
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
 
-  String salida;
-  json.printTo(salida);//pinto el json que he creado
-  Traza.mensaje("json leido:\n#%s#\n",salida.c_str());
+  String cad;
+  json.printTo(cad);//pinto el json que he creado
+  Traza.mensaje("json leido:\n#%s#\n",cad.c_str());
   
   if (!json.success()) return false;
 
@@ -117,7 +117,7 @@ boolean Entradas::parseaConfiguracionEntradas(String contenido){
       }
     }
     //Traza.mensaje("Entrada %i: nombre: %s, tipo: %s, pin: %i, estadoActivo: %i, nombre[0]: %s, nombre[1]: %s, mensaje[0]: %s, nombre[1]: %s\n",i,nombre.c_str(),tipo.c_str(),pin,estadoActivo,nombres[0].c_str(),nombres[1].c_str(),mensajes[0].c_str(),mensajes[1].c_str());
-    entradas.configuraEntrada(i,nombre,tipo,pin,estadoActivo,nombres,mensajes);
+    configura(i,nombre,tipo,pin,estadoActivo,nombres,mensajes);
   }
 
   if(debugGlobal || true) {
@@ -140,7 +140,7 @@ boolean Entradas::parseaConfiguracionEntradas(String contenido){
 }
 
 /**********************************************************ENTRADAS******************************************************************/  
-void Entradas::configuraEntrada(uint8_t id, String _nombre, String _tipo, int8_t _pin, int8_t _estadoActivo, String _nombres[2], String _mensajes[2]){    
+void Entradas::configura(uint8_t id, String _nombre, String _tipo, int8_t _pin, int8_t _estadoActivo, String _nombres[2], String _mensajes[2]){    
   entrada[id].configuraEntrada(_nombre,  _tipo,  _pin,  _estadoActivo,  _nombres,  _mensajes);
 }
 
@@ -171,7 +171,7 @@ void Entradas::consulta(bool debug)
 /***********************************************************/   
 String Entradas::generaJsonEstado(boolean filtro)
   {
-  String salida="";
+  String cad="";
 
   //const size_t bufferSize = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(3);
   const size_t bufferSize = JSON_ARRAY_SIZE(3) + JSON_OBJECT_SIZE(1) + 3*JSON_OBJECT_SIZE(10);
@@ -197,7 +197,7 @@ String Entradas::generaJsonEstado(boolean filtro)
       }
     }
 
-  root.printTo(salida);
-  return salida;  
+  root.printTo(cad);
+  return cad;  
   }
 String Entradas::generaJsonEstado(void){return generaJsonEstado(true);}

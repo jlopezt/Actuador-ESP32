@@ -78,24 +78,21 @@ String compruebaES(void)
 
   //SALIDAS
   cad += "Salidas\n";
-  uint8_t nSalidas=salidasConfiguradas() ;
+  uint8_t nSalidas=salidas.salidasConfiguradas() ;
   
   cad += "configuradas " + String(nSalidas) + " salidas\n";
   for(int8_t salida=0;salida<nSalidas;salida++)
     {
-    if(salidas[salida].getConfigurada())
-      {
-      if(salidas[salida].getNombre()=="") cad += "Salida " + String(salida) + " | Nombre no configurado\n";
-      if(salidas[salida].getModo()!=MODO_MANUAL && salidas[salida].getModo()!=MODO_SECUENCIADOR && salidas[salida].getModo()!=MODO_SEGUIMIENTO && salidas[salida].getModo()!=MODO_MAQUINA ) cad += "Salida " + String(salida) + " | Modo valor no valido\n";      
-      if(salidas[salida].getPin()<0 || salidas[salida].getPin()>MAX_PINES_ESP32) cad += "Salida " + String(salida) + " | pin no valido\n";  
-      if(salidas[salida].getAnchoPulso()<0) cad += "Salida " + String(salida) + " | ancho de pulso no valido\n";  
-      if(salidas[salida].getControlador()>0 && salidas[salida].getModo()!=MODO_SECUENCIADOR && salidas[salida].getModo()!=MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | controlador configurado en un modo incorrecto\n";  
-      if(salidas[salida].getModo()==MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
-      if(!planConfigurado(salidas[salida].getControlador()) && salidas[salida].getModo()==MODO_SECUENCIADOR) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
-      if(salidas[salida].getModo()==MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | configurada en modo seguimiento pero el controlador configurado no es una entrada valida\n";  
-      if(salidas[salida].getModo()==MODO_SECUENCIADOR && planConfigurado(salidas[salida].getControlador())!=CONFIGURADO) cad += "Salida " + String(salida) + " | configurada en modo secuenciador pero el controlador configurado no es un plan valido\n";  
-      if(salidas[salida].getEstadoInicial()!=ESTADO_DESACTIVO && salidas[salida].getEstadoInicial()!=ESTADO_ACTIVO) cad += "Salida " + String(salida) + " | inicio no valido\n";
-      }
+    if(salidas.getSalida(salida).getNombre()=="") cad += "Salida " + String(salida) + " | Nombre no configurado\n";
+    if(salidas.getSalida(salida).getModo()!=MODO_MANUAL && salidas.getSalida(salida).getModo()!=MODO_SECUENCIADOR && salidas.getSalida(salida).getModo()!=MODO_SEGUIMIENTO && salidas.getSalida(salida).getModo()!=MODO_MAQUINA ) cad += "Salida " + String(salida) + " | Modo valor no valido\n";      
+    if(salidas.getSalida(salida).getPin()<0 || salidas.getSalida(salida).getPin()>MAX_PINES_ESP32) cad += "Salida " + String(salida) + " | pin no valido\n";  
+    if(salidas.getSalida(salida).getAnchoPulso()<0) cad += "Salida " + String(salida) + " | ancho de pulso no valido\n";  
+    if(salidas.getSalida(salida).getControlador()>0 && salidas.getSalida(salida).getModo()!=MODO_SECUENCIADOR && salidas.getSalida(salida).getModo()!=MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | controlador configurado en un modo incorrecto\n";  
+    if(salidas.getSalida(salida).getModo()==MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
+    if(!planConfigurado(salidas.getSalida(salida).getControlador()) && salidas.getSalida(salida).getModo()==MODO_SECUENCIADOR) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
+    if(salidas.getSalida(salida).getModo()==MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | configurada en modo seguimiento pero el controlador configurado no es una entrada valida\n";  
+    if(salidas.getSalida(salida).getModo()==MODO_SECUENCIADOR && planConfigurado(salidas.getSalida(salida).getControlador())!=CONFIGURADO) cad += "Salida " + String(salida) + " | configurada en modo secuenciador pero el controlador configurado no es un plan valido\n";  
+    if(salidas.getSalida(salida).getEstadoInicial()!=ESTADO_DESACTIVO && salidas.getSalida(salida).getEstadoInicial()!=ESTADO_ACTIVO) cad += "Salida " + String(salida) + " | inicio no valido\n";
     }
 
   return cad;
@@ -112,7 +109,7 @@ String compruebaSecuenciador(void)
     {
     if(planConfigurado(plan))
       {
-      if(salidas[getSalidaPlan(plan)].getModo()!=MODO_SECUENCIADOR) cad += "Secuenciador " + String(plan) + " | la salida asociada al secuenciador no tiene el modo correcto\n";  
+      if(salidas.getSalida(getSalidaPlan(plan)).getModo()!=MODO_SECUENCIADOR) cad += "Secuenciador " + String(plan) + " | la salida asociada al secuenciador no tiene el modo correcto\n";  
       }
     }
   return cad;
@@ -139,11 +136,10 @@ String compruebaMaquinaEstados(void)
   cad += "configuradas " + String(nSalidas) + " salidas\n";
   for(uint8_t salida=0;salida<nSalidas;salida++)
     {
-    if(maquinaEstados.getMapeoSalida(salida)>MAX_SALIDAS) cad += "Salida " + String(salida) + " | el numero de salida es mayor a MAX_SALIDAS\n";  
-    if(!salidas[salida].getConfigurada()) cad += "Salida " + String(salida) + " | salida no configurada\n";  
+    if(maquinaEstados.getMapeoSalida(salida)>salidas.getNumSalidas()) cad += "Salida " + String(salida) + " | el numero de salida es mayor que el numero de salidas configuradas\n";  
     else
       {
-      if(salidas[maquinaEstados.getMapeoSalida(salida)].getModo()!=MODO_MAQUINA) cad += "Salida " + String(salida) + " | la salida asociada no tiene el modo correcto\n";  
+      if(salidas.getSalida(maquinaEstados.getMapeoSalida(salida)).getModo()!=MODO_MAQUINA) cad += "Salida " + String(salida) + " | la salida asociada no tiene el modo correcto\n";  
       }
     }
 

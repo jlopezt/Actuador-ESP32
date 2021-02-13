@@ -176,24 +176,24 @@ void func_comando_nivelActivo(int iParametro, char* sParametro, float fParametro
 
 void func_comando_activa(int iParametro, char* sParametro, float fParametro)//"activa")
   {
-  salidas[iParametro].conmuta(ESTADO_ACTIVO);  
+  salidas.conmuta(iParametro,ESTADO_ACTIVO);  
   Traza.mensaje("\nRele %i activado\n",iParametro);
   }  
 
 void func_comando_desactiva(int iParametro, char* sParametro, float fParametro)//"desactiva")
   {
-  salidas[iParametro].conmuta(ESTADO_DESACTIVO);  
+  salidas.conmuta(iParametro,ESTADO_DESACTIVO);  
   Traza.mensaje("\nRele %i desactivado\n",iParametro);  
   }  
 
 void func_comando_estadoSalida(int iParametro, char* sParametro, float fParametro)
   { 
   Traza.mensaje("\nEl estado logico de la salida %i es ",iParametro);  
-  if (salidas[iParametro].getEstado()==ESTADO_ACTIVO)Traza.mensaje("activada");
-  else if (salidas[iParametro].getEstado()==ESTADO_PULSO)Traza.mensaje("pulso");
+  if (salidas.getSalida(iParametro).getEstado()==ESTADO_ACTIVO)Traza.mensaje("activada");
+  else if (salidas.getSalida(iParametro).getEstado()==ESTADO_PULSO)Traza.mensaje("pulso");
   else Traza.mensaje("desactivada");
 
-  Traza.mensaje("\nEl estado fisico de la salida %i es %i\nPines:\npin rele: %i\n",iParametro, digitalRead(salidas[iParametro].getPin()),salidas[iParametro].getPin());
+  Traza.mensaje("\nEl estado fisico de la salida %i es %i\nPines:\npin rele: %i\n",iParametro, digitalRead(salidas.getSalida(iParametro).getPin()),salidas.getSalida(iParametro).getPin());
   }  
     
 void func_comando_restart(int iParametro, char* sParametro, float fParametro)//"restart")
@@ -210,7 +210,7 @@ void func_comando_info(int iParametro, char* sParametro, float fParametro)//"inf
   Traza.mensaje("\n-----------------info logica-----------------\n");
   Traza.mensaje("IP: %s\n", String(getIP(debugGlobal)).c_str());
   Traza.mensaje("nivelActivo: %s\n", String(nivelActivo).c_str());  
-  for(int8_t i=0;i<MAX_SALIDAS;i++) Traza.mensaje("Rele %i | nombre: %s | estado: %i\n", i,salidas[i].getNombre().c_str(), salidas[i].getEstado());
+  for(int8_t i=0;i<salidas.getNumSalidas();i++) Traza.mensaje("Rele %i | nombre: %s | estado: %i\n", i,salidas.getSalida(i).getNombre().c_str(), salidas.getSalida(i).getEstado());
   Traza.mensaje("-----------------------------------------------\n");  
   
   Traza.mensaje("-------------------WiFi info-------------------\n");
@@ -322,7 +322,7 @@ void func_comando_ES(int iParametro, char* sParametro, float fParametro)//"debug
   Traza.mensaje("Entradas\n");
   for(int8_t i=0;i<entradas.getNumEntradas();i++) Traza.mensaje("%i: nombre: %s | estado: %i | tipo: %s | pin: %i\n",i,entradas.getEntrada(i).getNombre().c_str(),entradas.getEntrada(i).getEstado(),entradas.getEntrada(i).getTipo().c_str(),entradas.getEntrada(i).getPin());
   Traza.mensaje("Salidas\n");
-  for(int8_t i=0;i<MAX_SALIDAS;i++) Traza.mensaje("%i: nombre: %s | configurado: %i | estado: %i | inicio: %i | pin: %i | modo: %i | controlador: %i | ancho pulso: %i | fin pulso: %i\n",i,salidas[i].getNombre().c_str(),salidas[i].getConfigurada(),salidas[i].getEstado(),salidas[i].getEstadoInicial(),salidas[i].getPin(),salidas[i].getModo(),salidas[i].getControlador(),salidas[i].getAnchoPulso(),salidas[i].getFinPulso());  
+  for(int8_t i=0;i<salidas.getNumSalidas();i++) Traza.mensaje("%i: nombre: %s | estado: %i | inicio: %i | pin: %i | modo: %i | controlador: %i | ancho pulso: %i | fin pulso: %i\n",i,salidas.getSalida(i).getNombre().c_str(),salidas.getSalida(i).getEstado(),salidas.getSalida(i).getEstadoInicial(),salidas.getSalida(i).getPin(),salidas.getSalida(i).getModo(),salidas.getSalida(i).getControlador(),salidas.getSalida(i).getAnchoPulso(),salidas.getSalida(i).getFinPulso());  
   } 
 
 void func_comando_actSec(int iParametro, char* sParametro, float fParametro)//"debug")
@@ -350,7 +350,7 @@ void func_comando_MQTTConfig(int iParametro, char* sParametro, float fParametro)
 
 void func_comando_Salidas(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  Traza.mensaje("%s\n",generaJsonEstadoSalidas().c_str());
+  Traza.mensaje("%s\n",salidas.generaJsonEstado().c_str());
   }  
 
 void func_comando_Entradas(int iParametro, char* sParametro, float fParametro)//"debug")
@@ -378,23 +378,23 @@ void func_comando_compruebaConfiguracion(int iParametro, char* sParametro, float
 
 void func_comando_setPWM(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  int8_t salida=getSalidaActiva();
-  if(salida!=-1)  
+  int8_t id=salidas.getSalidaActiva();
+  if(id!=-1)  
     {
-    salidas[salida].setValorPWM(iParametro);
-    Serial.printf("valor: %i\n",salidas[salida].getValorPWM());
+    salidas.setValorPWM(id,iParametro);
+    Serial.printf("valor: %i\n",salidas.getSalida(id).getValorPWM());
     }
-  else Serial.printf("valor de salida no valido (%i)\n",salida);  
+  else Serial.printf("valor de salida no valido (%i)\n",id);  
   }  
 
 void func_comando_getPWM(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  Serial.printf("valor: %i\n",salidas[getSalidaActiva()].getValorPWM());
+  Serial.printf("valor: %i\n",salidas.getSalida(salidas.getSalidaActiva()).getValorPWM());
   }  
 
 void func_comando_setSalida(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  setSalidaActiva(iParametro);  
+  salidas.setSalidaActiva(iParametro);  
   }/***************************** FIN funciones para comandos ******************************************/ 
 
 void inicializaOrden(void)

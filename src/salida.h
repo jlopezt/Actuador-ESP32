@@ -42,9 +42,8 @@
 #include <Global.h>
 /***************************** Includes *****************************/
 
-class salida{
+class Salida{
     private:
-        int8_t configurada;       //0 si el rele no esta configurado, 1 si lo esta
         String nombre;            //nombre configurado para el rele
         int8_t tipo;              //Tipo dgital normal o LED(PWM)
         int8_t pin;               // Pin al que esta conectado el rele
@@ -68,7 +67,7 @@ class salida{
 
     public:
         //constructor
-        salida(void);
+        Salida(void);
 
         //Configuracion
         void configuraSalida(String _nombre, int8_t _tipo, int8_t _pin, int8_t _inicio, int16_t _valorPWM, int16_t _anchoPulso, int8_t _modo, int8_t _canal, int16_t _frecuencia, int8_t _resolucion, int8_t _controlador, String _nombres[2], String _mensajes[2]);
@@ -83,7 +82,6 @@ class salida{
         void actualiza(void);//void actualizaSalida(int8_t salida);
 
         //get configurar
-        boolean getConfigurada(void);//int releConfigurado(uint8_t id); //   Devuelve si el reles esta configurados
         String getNombre(void);//String nombreSalida(uint8_t id); //   Devuelve el nombre de la salida
         uint8_t getPin(void);//uint8_t pinSalida(uint8_t id); //   Devuelve el modo de la salida
         int8_t getTipo(void);//int8_t getTipo(int8_t id); //Devuelve el tipo de salida digital/PWM

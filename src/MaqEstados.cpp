@@ -47,7 +47,7 @@ MaquinaEstados::MaquinaEstados(void){
   for(uint8_t i=0;i<entradas.getNumEntradas();i++) mapeoEntradas[i]=NO_CONFIGURADO;
     
   //Salidas
-  for(uint8_t i=0;i<MAX_SALIDAS;i++) mapeoSalidas[i]=NO_CONFIGURADO;
+  for(uint8_t i=0;i<salidas.getNumSalidas();i++) mapeoSalidas[i]=NO_CONFIGURADO;
 }
 /************************************** Fin constructor ****************************************/
 
@@ -113,7 +113,7 @@ boolean MaquinaEstados::parseaConfiguracionMaqEstados(String contenido)
   
   /********************Salidas******************************/
   JsonArray& S = json["Salidas"];
-  numeroSalidas=(S.size()<MAX_SALIDAS?S.size():MAX_SALIDAS);
+  numeroSalidas=(S.size()<salidas.getNumSalidas()?S.size():salidas.getNumSalidas());
   for(uint8_t i=0;i<numeroSalidas;i++) mapeoSalidas[i]=S[i];   
 
   Traza.mensaje("Salidas asociadas a la maquina de estados: %i\n",numeroSalidas);
@@ -134,7 +134,7 @@ boolean MaquinaEstados::parseaConfiguracionMaqEstados(String contenido)
 
     JsonArray& Salidas = est["salidas"];
     int8_t num_salidas;
-    num_salidas=(Salidas.size()<MAX_SALIDAS?Salidas.size():MAX_SALIDAS);
+    num_salidas=(Salidas.size()<salidas.getNumSalidas()?Salidas.size():salidas.getNumSalidas());
     if(num_salidas!=numeroSalidas) 
       {
       Traza.mensaje("Numero de salidas incorrecto en estado %i. definidas %i, esperadas %i\n",i,num_salidas,numeroSalidas);
@@ -265,8 +265,7 @@ int8_t MaquinaEstados::actualizaSalidasMaquinaEstados(uint8_t estado)
     uint8_t _salida=mapeoSalidas[i];
     //Serial.printf("Salida ME: %i | salida sistema: %i | valor a configurar: %i\n",i,_salida,valor);
     
-    if(salidas[_salida].salidaMaquinaEstados(valor)==NO_CONFIGURADO) retorno=-1;
-    //if(salidas[mapeoSalidas[i]].salidaMaquinaEstados(estados[estado].getValorSalida(i))==NO_CONFIGURADO) retorno=-1;
+    if(salidas.salidaMaquinaEstados(_salida,valor)==NO_CONFIGURADO) retorno=-1;
     }
 
   return retorno;
@@ -292,7 +291,7 @@ uint8_t MaquinaEstados::getMapeoEntrada(uint8_t id)
 
 uint8_t MaquinaEstados::getMapeoSalida(uint8_t id) 
   {
-  if (id<0 || id>MAX_SALIDAS) return NO_CONFIGURADO;
+  if (id<0 || id>salidas.getNumSalidas()) return NO_CONFIGURADO;
   return mapeoSalidas[id];
   }
 
@@ -341,8 +340,8 @@ String MaquinaEstados::generaJsonEstadoMaquinaEstados(void)
   for(int8_t id=0;id<numeroSalidas;id++){
     JsonObject& Salidas_0 = Salidas.createNestedObject(); 
     Salidas_0["id"] = id;
-    Salidas_0["nombre"] = salidas[mapeoSalidas[id]].getNombre();
-    Salidas_0["estado"] = salidas[mapeoSalidas[id]].getEstado();
+    Salidas_0["nombre"] = salidas.getSalida(mapeoSalidas[id]).getNombre();
+    Salidas_0["estado"] = salidas.getSalida(mapeoSalidas[id]).getEstado();
   }
 
   root.printTo(salida);
@@ -371,7 +370,7 @@ int8_t Estado::getValorSalida(uint8_t salida) {return valorSalida[salida];}
 Transicion::Transicion(void){
   estadoInicial=NO_CONFIGURADO;
   estadoFinal=NO_CONFIGURADO;
-  for(uint8_t j=0;j<entradas.getNumEntradas();j++) valorEntrada[j]=NO_CONFIGURADO;
+  for(uint8_t j=0;j<MAX_ENTRADAS;j++) valorEntrada[j]=NO_CONFIGURADO;
 }
 
 void Transicion::setEstadoInicial(uint8_t _estado) {estadoInicial=_estado;}

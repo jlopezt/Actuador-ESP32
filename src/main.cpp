@@ -146,7 +146,7 @@ void setup()
 
   //Salidas
   Traza.mensaje("\n\nInit salidas ------------------------------------------------------------------------\n");
-  inicializaSalidas();
+  salidas.inicializa();
 
   //Secuenciador
   Traza.mensaje("\n\nInit secuenciador ---------------------------------------------------------------------\n");
@@ -193,7 +193,7 @@ void loop()
   if ((vuelta % FRECUENCIA_ENTRADAS)==0) entradas.consulta(debugGlobal); //comprueba las entradas
   if ((vuelta % FRECUENCIA_SECUENCIADOR)==0) actualizaSecuenciador(debugGlobal); //Actualiza la salida del secuenciador
   if ((vuelta % FRECUENCIA_MAQUINAESTADOS)==0) maquinaEstados.actualizaMaquinaEstados(debugGlobal); //Actualiza la maquina de estados
-  if ((vuelta % FRECUENCIA_SALIDAS)==0) actualizaSalidas(debugGlobal); //comprueba las salidas
+  if ((vuelta % FRECUENCIA_SALIDAS)==0) salidas.actualiza(debugGlobal); //comprueba las salidas
   //Prioridad 3: Interfaces externos de consulta    
   if ((vuelta % FRECUENCIA_SERVIDOR_FTP)==0) gestionaFTP(); //atiende el servidor ftp
   if ((vuelta % FRECUENCIA_SERVIDOR_WEBSOCKET)==0) atiendeWebSocket(debugGlobal); //atiende el servidor web

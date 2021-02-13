@@ -36,11 +36,6 @@
 								hilera.appendChild(celda);
 
 								celda = document.createElement("td");
-								celda.setAttribute("id","salida_configurada_"+indice);
-								celda.setAttribute("align","center");
-								hilera.appendChild(celda);
-
-								celda = document.createElement("td");
 								celda.setAttribute("id","salida_pin_"+indice);
 								celda.setAttribute("align","center");
 								hilera.appendChild(celda);
@@ -103,7 +98,6 @@
 							
 							document.getElementById("salida_id_" + indice).innerHTML=salida.id;
 							document.getElementById("salida_nombre_" + indice).innerHTML=salida.nombre;
-							document.getElementById("salida_configurada_" + indice).innerHTML=(salida.configurada==-1?"No":"Si");
 							document.getElementById("salida_pin_" + indice).innerHTML=salida.pin;
 							document.getElementById("salida_controlador_" + indice).innerHTML=(salida.controlador==-1?"-":salida.controlador);
 							document.getElementById("salida_inicio_" + indice).innerHTML=(salida.inicio=="0"?"Off":"On");
@@ -132,7 +126,6 @@
 				<TR>
 					<TH>id</TH>
 					<TH>Nombre</TH>
-					<TH>Configurada</TH>
 					<TH>Pin</TH>
 					<TH>Controlador</TH>
 					<TH>Inicio</TH>

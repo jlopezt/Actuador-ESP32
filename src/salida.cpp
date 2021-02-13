@@ -17,9 +17,8 @@
 /***************************** Includes *****************************/
 
 /**********************************************************Constructor******************************************************************/
-salida::salida(void){
+Salida::Salida(void){
     //inicializo la parte logica
-    configurada=false;//NO_CONFIGURADO;
     nombre="No configurado";
     estado=NO_CONFIGURADO;
     modo=NO_CONFIGURADO;
@@ -41,8 +40,7 @@ salida::salida(void){
 }
 /**********************************************************Fin constructor******************************************************************/    
 /**********************************************************Configuracion******************************************************************/    
-void salida::configuraSalida(String _nombre, int8_t _tipo, int8_t _pin, int8_t _inicio, int16_t _valorPWM, int16_t _anchoPulso, int8_t _modo, int8_t _canal, int16_t _frecuencia, int8_t _resolucion, int8_t _controlador, String _nombres[2], String _mensajes[2]){
-    configurada=true;//lo marco como configurado  
+void Salida::configuraSalida(String _nombre, int8_t _tipo, int8_t _pin, int8_t _inicio, int16_t _valorPWM, int16_t _anchoPulso, int8_t _modo, int8_t _canal, int16_t _frecuencia, int8_t _resolucion, int8_t _controlador, String _nombres[2], String _mensajes[2]){
     nombre=_nombre;
     tipo=_tipo;
     pin=_pin;
@@ -67,8 +65,7 @@ void salida::configuraSalida(String _nombre, int8_t _tipo, int8_t _pin, int8_t _
 }
 /**********************************************************Fin configuracion******************************************************************/    
 /**********************************************************SALIDA******************************************************************/    
-int8_t salida::actualizaPulso(void){
-  if(!configurada) return NO_CONFIGURADO; //No configurado
+int8_t Salida::actualizaPulso(void){
   if(estado!=ESTADO_PULSO) return NO_CONFIGURADO; //No configurado
     
   if(finPulso>anchoPulso){    //el contador de millis no desborda durante el pulso
@@ -96,7 +93,7 @@ int8_t salida::actualizaPulso(void){
 /* estado=2 modo secuenciador                         */
 /* estado=3 modo seguimiento de entrada (anchoPulso)  */
 /******************************************************/
-void salida::actualiza(void){
+void Salida::actualiza(void){
   switch (modo){
     case MODO_MANUAL://manual
       if(estado==ESTADO_PULSO) actualizaPulso();//si esta en modo pulso
@@ -123,27 +120,18 @@ void salida::actualiza(void){
 /*  Devuelve el estado  del rele indicado en id  */
 /*  puede ser 0 apagado, 1 encendido, 2 pulsando */
 /*************************************************/
-int8_t salida::getEstado(){
-  if(!configurada) return -1; //No configurado
-  
-  return estado;
-}
+int8_t Salida::getEstado(){return estado;}
 
 /********************************************************/
 /*  Devuelve el tipo de salida digital/PWM              */
 /********************************************************/
-int8_t salida::getTipo(void){
-  if(!configurada) return -1; //No configurado
-  
-  return tipo;
+int8_t Salida::getTipo(void){return tipo;
 }
 
 /********************************************************/
 /*  Devuelve el nombre del tipo de salida digital/PWM   */
 /********************************************************/
-String salida::getTipoNombre(){
-  if(!configurada) return "ERROR"; //No configurado
-
+String Salida::getTipoNombre(){
   String cad="";
   switch(tipo){
     case TIPO_DIGITAL:
@@ -167,9 +155,7 @@ String salida::getTipoNombre(){
 /*  Devuelve el valor de PWM,                           */
 /*  si la salida es de ese tipo                         */
 /********************************************************/
-int16_t salida::getValorPWM(void){
-  if(!configurada) return -1; //No configurado
-  
+int16_t Salida::getValorPWM(void){  
   if(tipo==TIPO_PWM) return valorPWM;
   else return NO_CONFIGURADO;
 }
@@ -177,9 +163,7 @@ int16_t salida::getValorPWM(void){
 /********************************************************/
 /*  establece el valor de la salida PWM                 */
 /********************************************************/
-int8_t salida::setValorPWM(int16_t valor){
-  if(!configurada) return -1; //No configurado
-
+int8_t Salida::setValorPWM(int16_t valor){
   if(tipo==TIPO_PWM){
     uint16_t PWMMax=1;//b0000000000000001
     PWMMax<<= RESOLUCION_PWM;
@@ -197,10 +181,7 @@ int8_t salida::setValorPWM(int16_t valor){
 /* LA ENTRADA ES EL ESTADO LOGICO. ADAPTO EL     */
 /*  ESTADO FISICO SEGUN nivelActivo              */
 /*************************************************/
-int8_t salida::conmuta(int8_t estado_final){
-  //validaciones previas
-  if(!configurada) return NO_CONFIGURADO; //El rele no esta configurado
-  
+int8_t Salida::conmuta(int8_t estado_final){
   //parte logica
   estado=estado_final;//Lo que llega es el estado logico. No hace falta mapeo
   
@@ -239,9 +220,8 @@ int8_t salida::conmuta(int8_t estado_final){
 /*   Genera un pulso en rele indicado en id         */
 /*   devuelve 1 si ok, -1 si ko                     */
 /****************************************************/
-int8_t salida::setPulso(void){
+int8_t Salida::setPulso(void){
   //validaciones previas
-  if(!configurada) return -1; //El rele no esta configurado
   if(modo!=MODO_MANUAL && modo!=MODO_SEGUIMIENTO) return NO_CONFIGURADO;
       
   //Pongo el rele en nivel Activo  
@@ -260,7 +240,7 @@ int8_t salida::setPulso(void){
 /*     Recubre las dos funciones anteriores para        */
 /*     actuar sobre un rele                             */
 /********************************************************/ 
-int8_t salida::setSalida(int8_t estado)
+int8_t Salida::setSalida(int8_t estado)
   {
   //Si esta en modo secuenciador o modo maquina no deberia actuar, solo si esta en modo manual o seguimiento
   if(modo!=MODO_MANUAL && modo!=MODO_SEGUIMIENTO) return -1;
@@ -285,7 +265,7 @@ int8_t salida::setSalida(int8_t estado)
 /*   Genera un pulso en rele indicado en id         */
 /*   devuelve 1 si ok, -1 si ko                     */
 /****************************************************/
-int8_t salida::salidaMaquinaEstados(int8_t estado)
+int8_t Salida::salidaMaquinaEstados(int8_t estado)
   {
   //validaciones previas
   if(modo!=MODO_MAQUINA) return NO_CONFIGURADO;
@@ -294,17 +274,9 @@ int8_t salida::salidaMaquinaEstados(int8_t estado)
   }
 
 /********************************************************/
-/*     Devuelve si el reles esta configurados           */
-/********************************************************/ 
-boolean salida::getConfigurada(void)
-  {   
-  return configurada;
-  } 
-  
-/********************************************************/
 /*     Asocia la salida a un plan de secuenciador       */
 /********************************************************/ 
-void salida::asociarSecuenciador(int8_t plan)
+void Salida::asociarSecuenciador(int8_t plan)
   {
     modo=MODO_SECUENCIADOR;
     controlador=plan; 
@@ -314,13 +286,13 @@ void salida::asociarSecuenciador(int8_t plan)
 /*     Fuerza el modo manual en una salida que esta en  */
 /*     en otro modo                                     */
 /********************************************************/ 
-void salida::setModoManual(void) {modo=MODO_MANUAL;}
+void Salida::setModoManual(void) {modo=MODO_MANUAL;}
 
 /********************************************************/
 /*     Fuerza el modo manual en una salida que esta en  */
 /*     en otro modo                                     */
 /********************************************************/ 
-void salida::setModoInicial(void)
+void Salida::setModoInicial(void)
   {
   modo=modo_inicial;
   conmuta(ESTADO_DESACTIVO);
@@ -329,32 +301,32 @@ void salida::setModoInicial(void)
 /********************************************************/
 /*     Devuelve el estado incial de la salida           */
 /********************************************************/ 
-int8_t salida::getEstadoInicial() {return inicio;}  
+int8_t Salida::getEstadoInicial() {return inicio;}  
 
 /********************************************************/
 /*     Devuelve el nombre de la salida                  */
 /********************************************************/ 
-String salida::getNombre() {return nombre;}   
+String Salida::getNombre() {return nombre;}   
 
 /********************************************************/
 /*     Devuelve el modo de la salida                    */
 /********************************************************/ 
-uint8_t salida::getPin() {return pin;}   
+uint8_t Salida::getPin() {return pin;}   
 
 /********************************************************/
 /*     Devuelve el ancho del pulso de la salida         */
 /********************************************************/ 
-uint16_t salida::getAnchoPulso(void) {return anchoPulso;}   
+uint16_t Salida::getAnchoPulso(void) {return anchoPulso;}   
 
 /********************************************************/
 /*     Devuelve el fin del pulso de la salida           */
 /********************************************************/ 
-unsigned long salida::getFinPulso(void) {return finPulso;}   
+unsigned long Salida::getFinPulso(void) {return finPulso;}   
 
 /********************************************************/
 /*  Devuelve el nombre del estado de una salida         */
 /********************************************************/ 
-String salida::getNombreEstado(uint8_t estado)
+String Salida::getNombreEstado(uint8_t estado)
   {
   if(estado>2) return "ERROR";
        
@@ -366,12 +338,12 @@ String salida::getNombreEstado(uint8_t estado)
 /********************************************************/
 /*  Devuelve el nombre del estado actual de una salida  */
 /********************************************************/ 
-String salida::getNombreEstadoActual(void) {return getNombreEstado(estado);}
+String Salida::getNombreEstadoActual(void) {return getNombreEstado(estado);}
 
 /********************************************************/
 /*  Devuelve el mensaje de una salida en un estado      */
 /********************************************************/ 
-String salida::getMensajeEstado(uint8_t estado)
+String Salida::getMensajeEstado(uint8_t estado)
   {
   //validaciones previas
   if(estado>2) return "ERROR";
@@ -382,13 +354,13 @@ String salida::getMensajeEstado(uint8_t estado)
 /********************************************************/
 /*  Devuelve el mensaje del estado actual una salida    */
 /********************************************************/ 
-String salida::getMensajeEstadoActual(void){return getMensajeEstado(estado);}
+String Salida::getMensajeEstadoActual(void){return getMensajeEstado(estado);}
 
 /********************************************************/
 /*     Devuelve el controlador de la salida si esta     */
 /*     asociada a un plan de secuenciador               */
 /********************************************************/ 
-int8_t salida::getControlador(void)
+int8_t Salida::getControlador(void)
   {
   //validaciones previas
   if(modo!=MODO_SECUENCIADOR && modo!=MODO_SEGUIMIENTO) return NO_CONFIGURADO;
@@ -399,12 +371,12 @@ int8_t salida::getControlador(void)
 /********************************************************/
 /*     Devuelve el modo de la salida                    */
 /********************************************************/ 
-uint8_t salida::getModo(void) {return modo;}   
+uint8_t Salida::getModo(void) {return modo;}   
 
 /********************************************************/
 /*     Devuelve el nombre del modo de la salida         */
 /********************************************************/ 
-String salida::getModoNombre(void)
+String Salida::getModoNombre(void)
   {
   String cad="";
   switch(modo)
@@ -431,10 +403,10 @@ String salida::getModoNombre(void)
 /********************************************************/
 /*     Devuelve el modo inicial de la salida            */
 /********************************************************/ 
-uint8_t salida::getModoInical(void) {return modo_inicial;}   
+uint8_t Salida::getModoInical(void) {return modo_inicial;}   
 /********************************************************** Fin salida ******************************************************************/  
 
 
-int8_t salida::getCanal(void){return canal;}
-int8_t salida::getFrecuencia(void){return frecuencia;}
-int16_t salida::getResolucion(void){return resolucion;}
+int8_t Salida::getCanal(void){return canal;}
+int8_t Salida::getFrecuencia(void){return frecuencia;}
+int16_t Salida::getResolucion(void){return resolucion;}
