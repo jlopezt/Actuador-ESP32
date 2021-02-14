@@ -38,6 +38,7 @@
 #include <RedWifi.h>
 #include <Ficheros.h>
 #include <MaqEstados.h>
+#include <Secuenciador.h>
 
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
@@ -55,6 +56,7 @@ String topicRoot; //raiz del topic a publicar. Util para separar mensajes de pro
 String ID_MQTT; //ID del modulo en su conexion al broker
 int8_t publicarEntradas; //Flag para determinar si se envia el json con los valores de las entradas
 int8_t publicarSalidas; //Flag para determinar si se envia el json con los valores de las salidas
+int8_t publicarSecuenciador; //Flag para determinar si se envia el json con los valores del secuenciador
 int8_t publicarMaquinaEstados; //Flag para determinar si se envia el json con los valores del estado de la maquina de estados
 
 WiFiClientSecure espClientSSL;
@@ -157,10 +159,11 @@ boolean parseaConfiguracionMQTT(String contenido)
     passwordMQTT=json.get<String>("passwordMQTT");
     topicRoot=json.get<String>("topicRoot");
     publicarEntradas=json.get<int8_t>("publicarEntradas"); 
-    publicarSalidas=json.get<int8_t>("publicarSalidas"); 
+    publicarSalidas=json.get<int8_t>("publicarSalidas");
+    publicarSecuenciador=json.get<int8_t>("publicarSecuenciador");
     publicarMaquinaEstados=json.get<int8_t>("publicarMaquinaEstados"); 
     
-    Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nBrokerDir: %s\nIP Puerto del broker: %i\ntimeReconnectMQTT: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\nPublicar maquina estados: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),BrokerDir.c_str(),puertoBroker,timeReconnectMQTT,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),publicarEntradas,publicarSalidas,publicarMaquinaEstados);
+    Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nBrokerDir: %s\nIP Puerto del broker: %i\ntimeReconnectMQTT: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\nPublicar secuenciador: %i\nPublicar maquina estados: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),BrokerDir.c_str(),puertoBroker,timeReconnectMQTT,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),publicarEntradas,publicarSalidas,publicarSecuenciador,publicarMaquinaEstados);
 //************************************************************************************************
     return true;
     }
@@ -183,6 +186,8 @@ void callbackMQTT(char* topic, byte* payload, unsigned int length)
   //topics descartados (los genera este dispositivo)
   if(cad==String(topicRoot + "/" + ID_MQTT + "/entradas")) return;
   if(cad==String(topicRoot + "/" + ID_MQTT + "/salidas")) return;
+  if(cad==String(topicRoot + "/" + ID_MQTT + "/secuenciador")) return;
+  if(cad==String(topicRoot + "/" + ID_MQTT + "/maquinaEstados")) return;
 
   //Para cada topic suscrito...
   //if(cad.equalsIgnoreCase(topicRoot + <topicSuscrito>)) <funcion de gestion>(topic,payload,length);  
@@ -410,15 +415,24 @@ void enviaDatos(boolean debug)
     else if(debug)Traza.mensaje("¡¡Error al enviar json al broker!!\n");
     }  
   else if(debug)Traza.mensaje("No publico salidas. Publicar salidas es %i\n",publicarSalidas);  
-  //******************************************SALIDAS******************************************
+  //******************************************Secuenciador******************************************
+  if(publicarSecuenciador==1)
+    {
+    payload=secuenciador.generaJsonEstado();//genero el json de estado de la maquina d eestados
+    //Lo envio al bus    
+    if(enviarMQTT(ID_MQTT+"/"+"secuenciador", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
+    else if(debug)Traza.mensaje("¡¡Error al enviar json al broker!!\n");
+    }  
+  else if(debug)Traza.mensaje("No publico secuenciador. Publicar secuenciador es %i\n",publicarSecuenciador);      
+  //******************************************Maquina de estados******************************************
   if(publicarMaquinaEstados==1)
     {
-    payload=maquinaEstados.generaJsonEstadoMaquinaEstados();//genero el json de estado de la maquina d eestados
+    payload=maquinaEstados.generaJsonEstado();//genero el json de estado de la maquina d eestados
     //Lo envio al bus    
     if(enviarMQTT(ID_MQTT+"/"+"maquinaEstados", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
     else if(debug)Traza.mensaje("¡¡Error al enviar json al broker!!\n");
     }  
-  else if(debug)Traza.mensaje("No publico salidas. Publicar salidas es %i\n",publicarSalidas);  
+  else if(debug)Traza.mensaje("No publico maquina de estados. Publicar maquina de estados es %i\n",publicarMaquinaEstados);  
     
   }
 

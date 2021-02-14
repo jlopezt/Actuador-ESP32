@@ -40,7 +40,7 @@ Salida::Salida(void){
 }
 /**********************************************************Fin constructor******************************************************************/    
 /**********************************************************Configuracion******************************************************************/    
-void Salida::configuraSalida(String _nombre, int8_t _tipo, int8_t _pin, int8_t _inicio, int16_t _valorPWM, int16_t _anchoPulso, int8_t _modo, int8_t _canal, int16_t _frecuencia, int8_t _resolucion, int8_t _controlador, String _nombres[2], String _mensajes[2]){
+void Salida::configura(String _nombre, int8_t _tipo, int8_t _pin, int8_t _inicio, int16_t _valorPWM, int16_t _anchoPulso, int8_t _modo, int8_t _canal, int16_t _frecuencia, int8_t _resolucion, int8_t _controlador, String _nombres[2], String _mensajes[2]){
     nombre=_nombre;
     tipo=_tipo;
     pin=_pin;
@@ -391,7 +391,7 @@ String Salida::getModoNombre(void)
       cad="Seguimiento";
       break;
     case MODO_MAQUINA:
-      cad="Maq. Estados";
+      cad="MaquinaEstados";
       break;    
     default:
       cad="Error";

@@ -195,7 +195,7 @@ boolean Salidas::parseaConfiguracion(String contenido){
 }
 
 void Salidas::configura(uint8_t id, String _nombre, int8_t _tipo, int8_t _pin, int8_t _inicio, int16_t _valorPWM, int16_t _anchoPulso, int8_t _modo, int8_t _canal, int16_t _frecuencia, int8_t _resolucion, int8_t _controlador, String _nombres[2], String _mensajes[2]){
-  salida[id].configuraSalida(_nombre, _tipo, _pin, _inicio, _valorPWM, _anchoPulso, _modo, _canal, _frecuencia, _resolucion, _controlador, _nombres, _mensajes);
+  salida[id].configura(_nombre, _tipo, _pin, _inicio, _valorPWM, _anchoPulso, _modo, _canal, _frecuencia, _resolucion, _controlador, _nombres, _mensajes);
 }
 
 /**********************************************************Fin configuracion******************************************************************/  
@@ -233,6 +233,13 @@ void Salidas::setModoManual(uint8_t id){
 }
 void Salidas::setModoInicial(uint8_t id){
   return salida[id].setModoInicial();
+}
+
+/**********************************************************/
+/*    modifica el modo y el controlador de la salida      */
+/**********************************************************/
+void Salidas::asociarSecuenciador(uint8_t salidaAsociada, uint8_t plan){  
+  salida[salidaAsociada].asociarSecuenciador(plan);
 }
 
 /********************************************************/

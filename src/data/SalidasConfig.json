@@ -18,7 +18,7 @@
       ]
     },
     {
-      "GPIO": 33, 
+      "GPIO": 35, 
       "nombre": "Maq.Estados",
       "tipo": 0,
       "inicio": "off",
@@ -33,6 +33,40 @@
         {"valor": 0, "texto": "Apagado"},
         {"valor": 1, "texto": "Encendido"}
         ]
-      }    
+      },
+      {
+        "GPIO": 34, 
+        "nombre": "plan 0",
+        "tipo": 0,
+        "inicio": "off",
+        "anchoPulso": 1000,
+        "modo": 1,
+        "controlador": 0,
+        "Estados": [
+          {"valor": 0, "texto": "Apagado"},
+          {"valor": 1, "texto": "Encendido"}
+          ],
+        "Mensajes": [
+          {"valor": 0, "texto": "Apagado"},
+          {"valor": 1, "texto": "Encendido"}
+          ]
+        },
+        {
+          "GPIO": 33, 
+          "nombre": "plan 1",
+          "tipo": 0,
+          "inicio": "off",
+          "anchoPulso": 1000,
+          "modo": 1,
+          "controlador": 0,
+          "Estados": [
+            {"valor": 0, "texto": "Apagado"},
+            {"valor": 1, "texto": "Encendido"}
+            ],
+          "Mensajes": [
+            {"valor": 0, "texto": "Apagado"},
+            {"valor": 1, "texto": "Encendido"}
+            ]
+          }
   ]
 }

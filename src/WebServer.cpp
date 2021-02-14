@@ -62,6 +62,7 @@ void handleEstadoMaquinaEstados(AsyncWebServerRequest *request);
 void handleDesactivaSecuenciador(AsyncWebServerRequest *request);
 void handleActivaSecuenciador(AsyncWebServerRequest *request);
 void handlePlanes(AsyncWebServerRequest *request);
+void handleEstadoSecuenciador(AsyncWebServerRequest *request);
 
 void handleParticiones(AsyncWebServerRequest *request);
 void handleSetNextBoot(AsyncWebServerRequest *request);
@@ -104,9 +105,10 @@ void inicializaWebServer(void)
   serverX.on("/pulsoSalida", HTTP_ANY, handlePulsoRele);  //Servicio de pulso de rele
 
   serverX.on("/planes", HTTP_ANY, handlePlanes);  //Servicio de representacion del plan del secuenciador
+  serverX.on("/estadoSecuenciador", HTTP_ANY, handleEstadoSecuenciador);  //Serivico de estado del secuenciador
   serverX.on("/activaSecuenciador", HTTP_ANY, handleActivaSecuenciador);  //Servicio para activar el secuenciador
   serverX.on("/desactivaSecuenciador", HTTP_ANY, handleDesactivaSecuenciador);  //Servicio para desactivar el secuenciador
-  
+
   serverX.on("/maquinaEstados", HTTP_ANY, handleMaquinaEstados);  //Servicio de representacion de las transiciones d ela maquina de estados
   serverX.on("/estadoMaquinaEstados", HTTP_ANY, handleEstadoMaquinaEstados);  //Servicio de representacion de las transiciones d ela maquina de estados
 
@@ -466,56 +468,63 @@ void handleMaquinaEstados(AsyncWebServerRequest *request)
 /* Genera el JSON de estado de la Maq. Estados */
 /***********************************************/
 void handleEstadoMaquinaEstados(AsyncWebServerRequest *request){
-    String cad=maquinaEstados.generaJsonEstadoMaquinaEstados();
+    String cad=maquinaEstados.generaJsonEstado();
 
     request->send(200, "text/json", cad);
 }
 /****************************FIN MAQUINA ESTADOS******************************************/
 /****************************SECUENCIADOR******************************************/
-/*********************************************/
-/*                                           */
-/*  Servicio de representacion de los        */
-/*  planes del secuenciador                  */
-/*                                           */
-/*********************************************/  
-void handlePlanes(AsyncWebServerRequest *request)
-  {
-  int8_t numPlanes=getNumPlanes();  
-  String cad="";
+/****************************************************************/
+/*                                                              */
+/*  Servicio de representacion de los planes del secuenciador   */
+/*                                                              */
+/****************************************************************/
+void handlePlanes(AsyncWebServerRequest *request){
+  int8_t numPlanes=secuenciador.getNumPlanes();  
+  String cad=miniCabecera;
 
   cad += "<h3>hay " + String(numPlanes) + " plan(es) activo(s).</h3>";
   
-  for(int8_t i=0;i<numPlanes;i++)
-    {
-    cad += pintaPlanHTML(i);
+  for(int8_t i=0;i<numPlanes;i++){
+    cad += secuenciador.pintaPlanHTML(i);
     cad += "<BR>";
-    }
+  }
   
   request->send(200, "text/html", cad); 
-  
-  }
+}
+
+/*********************************************************/
+/*                                                       */
+/*  Servicio de informacion delestado del secuenciador   */
+/*                                                       */
+/*********************************************************/
+//estadoSecuenciador
+void handleEstadoSecuenciador(AsyncWebServerRequest *request){
+    String cad=secuenciador.generaJsonEstado();
+
+    request->send(200, "text/json", cad);
+}
 
 /*********************************************/
 /*                                           */
 /*  Servicio para activar el secuenciador    */
 /*                                           */
 /*********************************************/  
-void handleActivaSecuenciador(AsyncWebServerRequest *request)
-  {
-  activarSecuenciador();
+void handleActivaSecuenciador(AsyncWebServerRequest *request){
+  secuenciador.activar();
   handleRoot(request);
-  }
+}
 
 /*********************************************/
 /*                                           */
 /*  Servicio para desactivar el secuenciador */
 /*                                           */
 /*********************************************/  
-void handleDesactivaSecuenciador(AsyncWebServerRequest *request)
-  {
-  desactivarSecuenciador();
+void handleDesactivaSecuenciador(AsyncWebServerRequest *request){
+  secuenciador.desactivar();
   handleRoot(request);
-  }
+}
+
 
 /****************************FIN SECUENCIADOR******************************************/
 /*********************************************/

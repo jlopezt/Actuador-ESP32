@@ -49,7 +49,7 @@
 #define MAX_SALIDAS       MAX_PINES-MAX_ENTRADAS //numero maximo de salidas
 
 //Secuenciador
-#define MAX_PLANES 2
+#define MAX_PLANES 5 //2
 
 //Funciones de led
 #define LED_BUILTIN                2 //GPIO del led de la placa en los ESP32   

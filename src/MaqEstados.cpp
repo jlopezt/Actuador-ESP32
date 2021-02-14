@@ -56,9 +56,9 @@ MaquinaEstados::MaquinaEstados(void){
 /* Inicializa los valores de la maquina      */
 /* de estados                                */
 /*********************************************/
-void MaquinaEstados::inicializaMaquinaEstados(void) {         
+void MaquinaEstados::inicializa(void) {         
   //leo la configuracion del fichero
-  if(!recuperaDatosMaquinaEstados(debugGlobal)) Traza.mensaje("Configuracion de la maquina de estados por defecto.\n");
+  if(!recuperaDatos(debugGlobal)) Traza.mensaje("Configuracion de la maquina de estados por defecto.\n");
   else {}  
 }
 
@@ -66,7 +66,7 @@ void MaquinaEstados::inicializaMaquinaEstados(void) {
 /* Lee el fichero de configuracion de la        */
 /* maquina de estados o genera conf por defecto */
 /************************************************/
-boolean MaquinaEstados::recuperaDatosMaquinaEstados(int debug){
+boolean MaquinaEstados::recuperaDatos(int debug){
   String cad="";
 
   if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
@@ -78,14 +78,14 @@ boolean MaquinaEstados::recuperaDatosMaquinaEstados(int debug){
     //salvo la config por defecto
     //if(salvaFichero(MAQUINAESTADOS_CONFIG_FILE, MAQUINAESTADOS_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion de la maquina de estados creado por defecto\n");
   }
-  return parseaConfiguracionMaqEstados(cad);
+  return parseaConfiguracion(cad);
 }
 
 /*********************************************/
 /* Parsea el json leido del fichero de       */
 /* configuracio de la maquina de estados     */
 /*********************************************/
-boolean MaquinaEstados::parseaConfiguracionMaqEstados(String contenido)
+boolean MaquinaEstados::parseaConfiguracion(String contenido)
   {
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
@@ -203,7 +203,7 @@ boolean MaquinaEstados::parseaConfiguracionMaqEstados(String contenido)
 /************************************************************************************/
 /* Analiza el estado de la maquina y evoluciona los estados y las salidas asociadas */
 /************************************************************************************/
-void MaquinaEstados::actualizaMaquinaEstados(int debug)
+void MaquinaEstados::actualiza(int debug)
   {
   boolean localDebug=debug || debugMaquinaEstados;
     
@@ -225,7 +225,7 @@ void MaquinaEstados::actualizaMaquinaEstados(int debug)
 
   if(localDebug) Traza.mensaje("Estado actual: (%i) %s\n",estadoActual,estados[estadoActual].getNombre().c_str());
   }
-void MaquinaEstados::actualizaMaquinaEstados(void){actualizaMaquinaEstados(false);}
+void MaquinaEstados::actualiza(void){actualiza(false);}
 
 /**********************************************************************/
 /* busco en las transiciones a que estado debe evolucionar la maquina */
@@ -317,9 +317,9 @@ boolean MaquinaEstados::getDebugMAquinaEstados(void){return debugMaquinaEstados;
   }
                                                            */
 /***********************************************************/   
-String MaquinaEstados::generaJsonEstadoMaquinaEstados(void)
+String MaquinaEstados::generaJsonEstado(void)
   {
-  String salida="";
+  String cad="";
 
   const size_t bufferSize = 2*JSON_ARRAY_SIZE(4) + 9*JSON_OBJECT_SIZE(3);
   DynamicJsonBuffer jsonBuffer(bufferSize);
@@ -344,8 +344,8 @@ String MaquinaEstados::generaJsonEstadoMaquinaEstados(void)
     Salidas_0["estado"] = salidas.getSalida(mapeoSalidas[id]).getEstado();
   }
 
-  root.printTo(salida);
-  return salida;  
+  root.printTo(cad);
+  return cad;  
   }
 /************************************** Funciones de estado *************************************************/  
 /*********************************************************FIN MAQUINA DE ESTADOS******************************************************************/    

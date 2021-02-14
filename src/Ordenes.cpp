@@ -327,21 +327,43 @@ void func_comando_ES(int iParametro, char* sParametro, float fParametro)//"debug
 
 void func_comando_actSec(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  activarSecuenciador();
+  secuenciador.activar();
   } 
 
 void func_comando_desSec(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  desactivarSecuenciador();
+  secuenciador.desactivar();
   } 
   
 void func_comando_estSec(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  if(estadoSecuenciador()) Traza.mensaje("Secuenciador activado\n");
+  if(secuenciador.estado()) Traza.mensaje("Secuenciador activado\n");
   else Traza.mensaje("Secuenciador desactivado\n");
 
-  Traza.mensaje("Hay %i planes definidos\n",getNumPlanes());
+  Traza.mensaje("Hay %i planes definidos\n",secuenciador.getNumPlanes());
   }   
+
+void func_comando_estPlan(int iParametro, char* sParametro, float fParametro){
+  if(sParametro==NULL) return;
+
+  int _hora=0;
+  int _minuto=0;
+  char* p=sParametro;
+  char delimitador[] = ":";
+
+  Traza.mensaje("Entrada: %s, ",sParametro);
+
+  char *token = strtok(p, delimitador);
+  if(token != NULL) _hora=atoi(token);
+  token = strtok(NULL, delimitador);
+  if(token != NULL) _minuto=atoi(token);
+
+  Traza.mensaje("hora %i, minuto %i\n", _hora, _minuto);
+  for(uint8_t _plan=0;_plan<secuenciador.getNumPlanes();_plan++){
+    int _respuesta=secuenciador.getEstadoPlan(_plan,_hora,_minuto);  
+    Traza.mensaje("---------->plan %i: estado: %i\n", _plan, _respuesta);
+  }
+}   
 
 void func_comando_MQTTConfig(int iParametro, char* sParametro, float fParametro)//"debug")
   {
@@ -494,6 +516,10 @@ void inicializaOrden(void)
   comandos[i].comando="estSec";
   comandos[i].descripcion="Estado del secuenciador";
   comandos[i++].p_func_comando=func_comando_estSec;    
+
+  comandos[i].comando="estPlan";
+  comandos[i].descripcion="Estado del plan en una hora y minuto";
+  comandos[i++].p_func_comando=func_comando_estPlan;    
 
   comandos[i].comando="MQTTConfig";
   comandos[i].descripcion="Configuración de MQTT";

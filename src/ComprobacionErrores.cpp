@@ -89,31 +89,30 @@ String compruebaES(void)
     if(salidas.getSalida(salida).getAnchoPulso()<0) cad += "Salida " + String(salida) + " | ancho de pulso no valido\n";  
     if(salidas.getSalida(salida).getControlador()>0 && salidas.getSalida(salida).getModo()!=MODO_SECUENCIADOR && salidas.getSalida(salida).getModo()!=MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | controlador configurado en un modo incorrecto\n";  
     if(salidas.getSalida(salida).getModo()==MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
-    if(!planConfigurado(salidas.getSalida(salida).getControlador()) && salidas.getSalida(salida).getModo()==MODO_SECUENCIADOR) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
+    if(salidas.getSalida(salida).getModo()==MODO_SECUENCIADOR) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
     if(salidas.getSalida(salida).getModo()==MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | configurada en modo seguimiento pero el controlador configurado no es una entrada valida\n";  
-    if(salidas.getSalida(salida).getModo()==MODO_SECUENCIADOR && planConfigurado(salidas.getSalida(salida).getControlador())!=CONFIGURADO) cad += "Salida " + String(salida) + " | configurada en modo secuenciador pero el controlador configurado no es un plan valido\n";  
+    if(salidas.getSalida(salida).getModo()==MODO_SECUENCIADOR) cad += "Salida " + String(salida) + " | configurada en modo secuenciador pero el controlador configurado no es un plan valido\n";  
     if(salidas.getSalida(salida).getEstadoInicial()!=ESTADO_DESACTIVO && salidas.getSalida(salida).getEstadoInicial()!=ESTADO_ACTIVO) cad += "Salida " + String(salida) + " | inicio no valido\n";
     }
 
   return cad;
   }
 
-String compruebaSecuenciador(void)
-  {
+String compruebaSecuenciador(void){
   String cad = "";  
-  uint8_t nPlanes=getNumPlanes();
+  int8_t nPlanes=secuenciador.getNumPlanes();
 
   cad += "Secuenciador\n";
   cad += "configurados " + String(nPlanes) + " planes de secuenciador\n";
-  for(uint8_t plan=0;plan<nPlanes;plan++)
-    {
-    if(planConfigurado(plan))
-      {
-      if(salidas.getSalida(getSalidaPlan(plan)).getModo()!=MODO_SECUENCIADOR) cad += "Secuenciador " + String(plan) + " | la salida asociada al secuenciador no tiene el modo correcto\n";  
-      }
+  Serial.printf("%s",cad.c_str());
+  for(uint8_t plan=0;plan<nPlanes;plan++){
+    if(secuenciador.getSalida(plan)>=salidas.getNumSalidas()) cad +=  "Plan " + secuenciador.getNombrePlan(plan) + " | la salida asociada al plan no esta configurada";  
+    else{
+      if(salidas.getSalida(secuenciador.getSalida(plan)).getModo()!=MODO_SECUENCIADOR) cad += "Plan " + secuenciador.getNombrePlan(plan) + " | la salida asociada al plan no tiene el modo correcto\n";  
     }
-  return cad;
   }
+  return cad;
+}
 
 String compruebaMaquinaEstados(void)
   {

@@ -87,7 +87,7 @@ void inicializaReloj(void)
   
   if (getLocalTime(&timeinfo, 10000))  // wait up to 10sec to sync
     {
-    Traza.mensaje("Time set: %i/%i/%i - %i:%i:%i (%A)\n",timeinfo.tm_mday,timeinfo.tm_mon,timeinfo.tm_year+1900,timeinfo.tm_hour,timeinfo.tm_min,timeinfo.tm_sec);
+    Traza.mensaje("Time set: %i/%i/%i - %i:%i:%i\n",timeinfo.tm_mday,timeinfo.tm_mon,timeinfo.tm_year+1900,timeinfo.tm_hour,timeinfo.tm_min,timeinfo.tm_sec);
     } 
   else 
     {

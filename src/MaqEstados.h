@@ -83,6 +83,9 @@ class MaquinaEstados{
         int8_t salidasActual[MAX_SALIDAS];
         boolean debugMaquinaEstados;
 
+        boolean recuperaDatos(int debug);// Lee el fichero de configuracion de la maquina de estados o genera conf por defecto
+        boolean parseaConfiguracion(String contenido);// Parsea el json leido del fichero de configuracio de la maquina de estados
+
     public:
         Estado* estados;
         Transicion* transiciones;
@@ -90,13 +93,11 @@ class MaquinaEstados{
         //contructor
         MaquinaEstados(void);
         /***************** Funciones de configuracion *****************/
-        void inicializaMaquinaEstados(void);// Inicializa los valores de la maquina de estados
-        boolean recuperaDatosMaquinaEstados(int debug);// Lee el fichero de configuracion de la maquina de estados o genera conf por defecto
-        boolean parseaConfiguracionMaqEstados(String contenido);// Parsea el json leido del fichero de configuracio de la maquina de estados
+        void inicializa(void);// Inicializa los valores de la maquina de estados
         /***************** Fin funciones de configuracion *****************/
         /***************** Funciones de ejecucion *****************/
-        void actualizaMaquinaEstados(int debug); // Analiza el estado de la maquina y evoluciona los estados y las salidas asociadas
-        void actualizaMaquinaEstados(void);
+        void actualiza(int debug); // Analiza el estado de la maquina y evoluciona los estados y las salidas asociadas
+        void actualiza(void);
         uint8_t mueveMaquina(uint8_t estado, int8_t entradasActual[], boolean debug);//busco en las transiciones a que estado debe evolucionar la maquina
         uint8_t mueveMaquina(uint8_t estado, int8_t entradasActual[]);
         int8_t actualizaSalidasMaquinaEstados(uint8_t estado);// Actualizo las salidas segun el estado actual
@@ -116,7 +117,7 @@ class MaquinaEstados{
         void setDebugMaquinaEstados(boolean debug);
         boolean getDebugMAquinaEstados(void);
 
-        String generaJsonEstadoMaquinaEstados(void);        
+        String generaJsonEstado(void);
         /***************** Fin funciones de consulta de datos *****************/
 };
 

@@ -23,7 +23,7 @@ function connect(){
         useSSL: true,
         //useSSL: false,
         cleanSession: true,
-        userName : "jlopezt",
+        userName : "domoticae",//"jlopezt",
         password : "88716",
         onSuccess: onConnect,
         onFailure: onFail
@@ -87,6 +87,9 @@ function actualizaDatos(topic,datos) {
             break;
         case "casaPre/PuertaGaraje/maquinaEstados":
             actualizaMaquinaEstados(datos);
-            break;            
+            break;
+        case "casaPre/PuertaGaraje/secuenciador":
+            actualizaSecuenciador(datos);
+            break;
     }
 }

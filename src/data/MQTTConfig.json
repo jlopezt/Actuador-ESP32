@@ -10,5 +10,6 @@
   "topicRoot": "casaPre", 
   "publicarEntradas": 1,
   "publicarSalidas": 1,
+  "publicarSecuenciador": 1,
   "publicarMaquinaEstados":1
 }
