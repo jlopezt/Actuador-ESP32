@@ -36,7 +36,7 @@ class Entradas{
     Entrada getEntrada(uint8_t id){return entrada[id];}
 
     //set
-    void consulta(bool debug);//Lee el estado de las entradas
+    void actualiza(bool debug);//Lee el estado de las entradas
 
     //estado en json
     String generaJsonEstado(boolean filtro);//Devuelve el estado de las entradas en formato json

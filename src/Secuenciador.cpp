@@ -42,7 +42,6 @@ boolean Secuenciador::recuperaDatos(boolean debug){
   if(!leeFichero(SECUENCIADOR_CONFIG_FILE, cad)){
     //Confgiguracion por defecto
     Traza.mensaje("No existe fichero de configuracion del secuenciador\n");
-    //cad="{ \"estadoInicial\": 0, \"Planes\":[ {\"id_plan\": 1, \"salida\": 1, \"intervalos\": [{\"id\":  0, \"valor\": 0},{\"id\":  1, \"valor\": 1}, {\"id\":  2, \"valor\": 0}, {\"id\":  3, \"valor\": 1}, {\"id\":  4, \"valor\": 0}, {\"id\":  5, \"valor\": 1}, {\"id\":  6, \"valor\": 0}, {\"id\":  7, \"valor\": 1}, {\"id\":  8, \"valor\": 0}, {\"id\":  9, \"valor\": 1}, {\"id\": 10, \"valor\": 0}, {\"id\": 11, \"valor\": 1},{\"id\":  12, \"valor\": 0},{\"id\":  13, \"valor\": 1}, {\"id\":  14, \"valor\": 0}, {\"id\":  15, \"valor\": 1}, {\"id\":  16, \"valor\": 0}, {\"id\":  17, \"valor\": 1}, {\"id\":  18, \"valor\": 0}, {\"id\":  19, \"valor\": 1}, {\"id\":  20, \"valor\": 0}, {\"id\":  21, \"valor\": 1}, {\"id\": 22, \"valor\": 0}, {\"id\": 23, \"valor\": 1} ] } ] }";
     cad="{\"estadoInicial\": 0,\"Planes\":[]}";
     //if(salvaFichero(SECUENCIADOR_CONFIG_FILE, SECUENCIADOR_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion del secuenciador creado por defecto\n");
   }
@@ -79,10 +78,10 @@ boolean Secuenciador::parseaConfiguracion(String contenido){
     int8_t _id;
     String _nombre="";
     int8_t _salidaAsociada=-1;        //salida a la que se asocia la secuencia
-    int    _horas[HORAS_EN_DIA];      //el valor es un campo de bit. los primeros 12 son los intervalos de 5 min de cada hora
-    for(uint8_t i=0;i<HORAS_EN_DIA;i++) _horas[i]=0;
+    uint32_t _intervalos[INTERVALOS_EN_HORA];      //el valor es un campo de bit. los primeros INTERVALOS_EN_HORA son los intervalos de cada hora
+    for(uint8_t i=0;i<HORAS_EN_DIA;i++) _intervalos[i]=0;
 
-    JsonObject& _plan = json["Planes"][i];
+    JsonObject& _plan = Planes[i];//json["Planes"][i];
     //leo los valores del json
     _id=i;
     if(_plan.containsKey("nombre")) _nombre=_plan.get<String>("nombre");
@@ -94,17 +93,17 @@ boolean Secuenciador::parseaConfiguracion(String contenido){
     }
     else{
       //Intevalos
-      for(int8_t j=0;j<HORAS_EN_DIA;j++) {
-        JsonObject& _intervalo = json["Planes"][i]["intervalos"][j];  
-        if(_intervalo.containsKey("valor")) _horas[j]=_intervalo.get<int>("valor");        
+      for(int8_t j=0;j<INTERVALOS_EN_HORA;j++) {
+        JsonObject& intervalo = _plan["intervalos"][j];//json["Planes"][i]["horas"][j];  
+        if(intervalo.containsKey("valor")) _intervalos[j]=intervalo.get<int>("valor");        
       }
     
       //Traza.mensaje("Plan %i: id: %i, nombre: %s, salida: %i\n", i, _id, _nombre.c_str(), _salidaAsociada);
-      //for(int8_t j=0;j<HORAS_EN_DIA;j++) Traza.mensaje("hora[%i]: %i\n", j, _horas[j]);
-      planes[i].configura(_id, _nombre, _salidaAsociada, _horas);
+      //for(int8_t j=0;j<INTERVALOS_EN_HORA;j++) Traza.mensaje("intervalo[%i]: %i\n", j, _intervalos[j]);
+      planes[i].configura(_id, _nombre, _salidaAsociada, _intervalos);
 
       Traza.mensaje("Plan %s (%i):\n\tSalida: %i\n", planes[i].getNombre(), i, planes[i].getSalida()); 
-      for(int8_t j=0;j<HORAS_EN_DIA;j++) Traza.mensaje("\thora %02i: valor: %01i\n",j,planes[i].getHoras(j));    
+      for(int8_t j=0;j<INTERVALOS_EN_HORA;j++) Traza.mensaje("\tintervalo %02i: valor: %01i\n",j,planes[i].getIntervalo(j));    
     }
   }
 //************************************************************************************************
@@ -118,9 +117,15 @@ boolean Secuenciador::parseaConfiguracion(String contenido){
 /*estar en ese peridodo de y actualiza la salida correspondiente  */
 /******************************************************************/
 void Secuenciador::actualiza(bool debug){
-  if(!estado()) return;
+  if(!activado) return;
     
   for(int8_t i=0;i<getNumPlanes();i++){
+    /*
+    Traza.mensaje("Inicio plan %i------------------------------------------------\n",i);
+    if(planes[i].getEstado()!=0) Traza.mensaje("Es 1\n");
+    else Traza.mensaje("Es 0\n");
+    Traza.mensaje("Fin----------------------------------------------------------\n");
+    */
     if(planes[i].getEstado()!=salidas.getSalida(planes[i].getSalida()).getEstado()) salidas.conmuta(planes[i].getSalida(),planes[i].getEstado());
   }
 }
@@ -156,7 +161,7 @@ void Secuenciador::desactivar(void){activado=false;}
 /*********************************************************/
 /*          Devuelve el estado del secuenciador          */
 /*********************************************************/
-boolean Secuenciador::estado(void){return activado;}  
+boolean Secuenciador::getEstado(void){return activado;}  
 
 /*********************************************************/
 /*      Genera codigo HTML para representar el plan      */
@@ -198,19 +203,19 @@ Plan::Plan(void){
   id=-1;
   salidaAsociada=NO_CONFIGURADO;
   nombre="";
-  for(int8_t j=0;j<12;j++) horas[j]=0;
+  for(int8_t j=0;j<INTERVALOS_EN_HORA;j++) intervalos[j]=0;
 }
 /************************* Fin constructor ***********************/
 
 /**************************************************/
 /* Configura el plan con lo valores recibidos     */
 /**************************************************/
-void Plan::configura(int8_t _id, String _nombre, int8_t _salidaAsociada, int _horas[HORAS_EN_DIA]){
+void Plan::configura(int8_t _id, String _nombre, int8_t _salidaAsociada, uint32_t _intervalos[INTERVALOS_EN_HORA]){
   id=_id,
   nombre=_nombre;
   salidaAsociada=_salidaAsociada;
   
-  for(uint8_t j=0;j<HORAS_EN_DIA;j++) horas[j]=_horas[j];
+  for(uint8_t j=0;j<INTERVALOS_EN_HORA;j++) intervalos[j]=_intervalos[j];
 
   //configuro la salida asociada en modo secuenciador y la asocio al plan
   salidas.asociarSecuenciador(salidaAsociada,id);
@@ -224,20 +229,19 @@ int8_t Plan::getSalida(void){return salidaAsociada;}
 /*****************************************************/
 /* Devuelve el valor de horas de ese plan a esa hora */
 /*****************************************************/
-int Plan::getHoras(int8_t hora){return horas[hora];}
+uint32_t Plan::getIntervalo(int8_t intervalo){return intervalos[intervalo];}
 
 /*********************************************************/
 /* Devuelve el estado configurado para una hora y minuto */
 /* valor devuelto: ESTADO_DESACTIVO o ESTADO_ACTIVO      */
 /*********************************************************/
-int Plan::getEstado(uint8_t hora, uint8_t minuto){
-  int _valor=horas[hora];
-  int _intervalo=minuto / 5; //calulo el bit que contiene el intervalo del minuto indicado
+int Plan::getEstado(uint8_t hora, uint8_t intervalo){ 
+  uint32_t _mascara=1;
+  _mascara<<=hora;
 
-  int _mascara=pow(2,_intervalo);
-  //Traza.mensaje("Hora: %i | minuto: %i | intervalo: %i | mascara: %i | retorno: %i\n",hora,minuto,_intervalo,_mascara,_valor & _mascara);
-
-  if(_valor & _mascara) return ESTADO_ACTIVO;
+  Traza.mensaje("Plan %i | Hora: %i | intervalo: %i | mascara: %i | valor: %i | retorno: %i\n",id,hora,intervalo,_mascara,intervalos[intervalo],(intervalos[intervalo] & _mascara?1:0));
+  
+  if(intervalos[intervalo] & _mascara) return ESTADO_ACTIVO;
   else return ESTADO_DESACTIVO;
 }
 int Plan::getEstado(void){return getEstado(hora(),minuto());}
@@ -259,20 +263,15 @@ String Plan::pintaPlanHTML(void)
   cad += "</tr>";
 
   //Cada fila es un intervalo, cada columna un hora
-  int mascara=1;  
-  
-  for(int8_t intervalo=0;intervalo<12;intervalo++)
+  for(int8_t intervalo=0;intervalo<INTERVALOS_EN_HORA/12;intervalo++)
     {
     //Traza.mensaje("intervalo: %i | cad: %i\n",intervalo,cad.length());      
     cad += "<TR class=\"modo2\">";
-    cad += "<th>" + String(intervalo) + ": (min " + String(intervalo*5) + " a " + String(intervalo*5+4) + ")</th>";    
-    for(int8_t i=0;i<HORAS_EN_DIA;i++) cad += "<td style=\"text-align:center;\">" + (horas[i] & mascara?String(1):String(0)) + "</td>";
+    cad += "<th>min. " + String(intervalo) + "</th>";    
+    for(int8_t hora=0;hora<HORAS_EN_DIA;hora++) cad += "<td style=\"text-align:center;\">" + String(getEstado(hora,intervalo)) + "</td>";
     cad += "</tr>";
-    
-    mascara<<=1;
     }  
-    
+
   cad+="</table>";
-    
   return cad;  
   }

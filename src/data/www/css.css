@@ -8,6 +8,21 @@ form {
     margin-bottom: 0px;
 }
 
+h3 {
+  font-size: 18px;
+  text-align: center;
+  padding: 5px;
+  background-color: #83aec0;
+  background-repeat: repeat-x;
+  color: #FFFFFF;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  border-right-style: solid;
+  border-bottom-style: solid;
+  border-right-color: #558FA6;
+  border-bottom-color: #558FA6;  
+}
+
 .tabla th,caption {
     padding: 5px;
     font-size: 16px;

@@ -31,7 +31,7 @@ Entrada::Entrada(void){
 /***************************** Fin contructores ****************************/
 
 /***************************** Configuracion ****************************/
-void Entrada::configuraEntrada(String _nombre, String _tipo, int8_t _pin, int8_t _estadoActivo, String _nombres[2], String _mensajes[2]){    
+void Entrada::configura(String _nombre, String _tipo, int8_t _pin, int8_t _estadoActivo, String _nombres[2], String _mensajes[2]){    
     //inicializo la parte logica
     nombre=_nombre;
     estado=CONFIGURADO;   
@@ -47,24 +47,12 @@ void Entrada::configuraEntrada(String _nombre, String _tipo, int8_t _pin, int8_t
 /***************************** Fin configuracion ****************************/
 
 /****************************** get estado *****************************/
-/*************************************************/
-/*                                               */
-/*Devuelve el estado 0|1 del rele indicado en id */
-/*                                               */
-/*************************************************/
-int8_t Entrada::getEstado(void){return (estado);}
-
-/*************************************************/
-/*                                               */
-/* Devuelve el estado 0|1 de la entrada tal cual */
-/* se ha leido, sin cruzar con nada              */
-/*                                               */
-/*************************************************/
-int8_t Entrada::getEstadoFisico(void){return estadoFisico;}
+int8_t Entrada::getEstado(void){return (estado);}//Devuelve el estado 0|1 del rele indicado en id 
+int8_t Entrada::getEstadoFisico(void){return estadoFisico;}//Devuelve el estado 0|1 de la entrada tal cual se ha leido, sin cruzar con nada
 /****************************** Fin get estado *****************************/
 
 /****************************** set estado *****************************/
-void Entrada::setEstadoFisico(void){
+void Entrada::setEstado(void){
     int8_t valor_inicial = estado;
 
     estadoFisico=digitalRead(pin);
@@ -77,38 +65,12 @@ void Entrada::setEstadoFisico(void){
 /****************************** Fin set estado *****************************/        
 
 /****************************** get configuracion *****************************/
+String Entrada::getNombre(void) {return nombre;} //Devuelve el nombre del rele con el id especificado
+uint8_t Entrada::getPin(void) {return pin;}   //Devuelve el pin de la entrada
+String Entrada::getTipo(void) {return tipo;}//Devuelve el tipo de la entrada
+int8_t Entrada::getEstadoActivo(void){return estadoActivo;}//Devuelve el estado activo 0|1 de la entrada
 /********************************************************/
-/*                                                      */
-/*  Devuelve el nombre del rele con el id especificado  */
-/*                                                      */
-/********************************************************/
-String Entrada::getNombre(void) {return nombre;} 
-
-/********************************************************/
-/*                                                      */
-/*     Devuelve el pin de la entrada                    */
-/*                                                      */
-/********************************************************/ 
-uint8_t Entrada::getPin(void) {return pin;}   
-
-/********************************************************/
-/*                                                      */
-/*     Devuelve el tipo de la entrada                   */
-/*                                                      */
-/********************************************************/ 
-String Entrada::getTipo(void) {return tipo;}   
-
-/*************************************************/
-/*                                               */
-/* Devuelve el estado activo 0|1 de la entrada   */
-/*                                               */
-/*************************************************/
-int8_t Entrada::getEstadoActivo(void){return estadoActivo;}
-
-/********************************************************/
-/*                                                      */
 /*  Devuelve el nombre del estado de una entrada        */
-/*                                                      */
 /********************************************************/ 
 String Entrada::getNombreEstado(uint8_t estado){
   //validaciones previas
@@ -118,9 +80,7 @@ String Entrada::getNombreEstado(uint8_t estado){
 }   
 
 /********************************************************/
-/*                                                      */
 /*  Devuelve el mensaje de una entrada en un estado     */
-/*                                                      */
 /********************************************************/ 
 String Entrada::getMensajeEstado(uint8_t estado){
   //validaciones previas
@@ -129,13 +89,11 @@ String Entrada::getMensajeEstado(uint8_t estado){
   return mensajes[estado];
 }
 /****************************** Fin get configuracion *****************************/
+
 /****************************** Otras *****************************/
-/*************************************************/
-/*                                               */
-/* Envia un mensaje MQTT para que se publique un */
-/* audio en un GHN                               */
-/*                                               */
-/*************************************************/
+/***************************************************************/
+/*Envia un mensaje MQTT para que se publique un audio en un GHN*/
+/***************************************************************/
 void Entrada::enviaMensaje(int8_t estado){
   String mensaje="";
 

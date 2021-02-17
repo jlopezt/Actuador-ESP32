@@ -59,10 +59,12 @@ void handleActivaRele(AsyncWebServerRequest *request);
 void handleMaquinaEstados(AsyncWebServerRequest *request);
 void handleEstadoMaquinaEstados(AsyncWebServerRequest *request);
 
+void handleSecuenciador(AsyncWebServerRequest *request);
 void handleDesactivaSecuenciador(AsyncWebServerRequest *request);
 void handleActivaSecuenciador(AsyncWebServerRequest *request);
 void handlePlanes(AsyncWebServerRequest *request);
 void handleEstadoSecuenciador(AsyncWebServerRequest *request);
+void handleConfigSecuenciador(AsyncWebServerRequest *request);
 
 void handleParticiones(AsyncWebServerRequest *request);
 void handleSetNextBoot(AsyncWebServerRequest *request);
@@ -104,7 +106,9 @@ void inicializaWebServer(void)
   serverX.on("/recuperaSalidaManual", HTTP_ANY, handleRecuperaManual);  //Servicio para formar ua salida a modo manual  
   serverX.on("/pulsoSalida", HTTP_ANY, handlePulsoRele);  //Servicio de pulso de rele
 
+  serverX.on("/secuenciador", HTTP_GET, handleSecuenciador); //Servicio de estdo de reles
   serverX.on("/planes", HTTP_ANY, handlePlanes);  //Servicio de representacion del plan del secuenciador
+  serverX.on("/configSecuenciador", HTTP_GET, handleConfigSecuenciador); //Servicio de estdo de reles
   serverX.on("/estadoSecuenciador", HTTP_ANY, handleEstadoSecuenciador);  //Serivico de estado del secuenciador
   serverX.on("/activaSecuenciador", HTTP_ANY, handleActivaSecuenciador);  //Servicio para activar el secuenciador
   serverX.on("/desactivaSecuenciador", HTTP_ANY, handleDesactivaSecuenciador);  //Servicio para desactivar el secuenciador
@@ -476,6 +480,13 @@ void handleEstadoMaquinaEstados(AsyncWebServerRequest *request){
 /****************************SECUENCIADOR******************************************/
 /****************************************************************/
 /*                                                              */
+/*   Servicio de representacion de los datos del secuenciador   */
+/*                                                              */
+/****************************************************************/
+void handleSecuenciador(AsyncWebServerRequest *request){request->redirect("secuenciador.html");}
+
+/****************************************************************/
+/*                                                              */
 /*  Servicio de representacion de los planes del secuenciador   */
 /*                                                              */
 /****************************************************************/
@@ -505,6 +516,15 @@ void handleEstadoSecuenciador(AsyncWebServerRequest *request){
     request->send(200, "text/json", cad);
 }
 
+/*********************************************************/
+/*                                                       */
+/*  Servicio de informacion de la configuracion          */
+/*  del secuenciador                                     */
+/*                                                       */
+/*********************************************************/
+void handleConfigSecuenciador(AsyncWebServerRequest *request){
+     request->send(SPIFFS, "/SecuenciadorConfig.json", "text/json");
+}
 /*********************************************/
 /*                                           */
 /*  Servicio para activar el secuenciador    */

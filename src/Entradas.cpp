@@ -141,7 +141,7 @@ boolean Entradas::parseaConfiguracion(String contenido){
 
 /**********************************************************ENTRADAS******************************************************************/  
 void Entradas::configura(uint8_t id, String _nombre, String _tipo, int8_t _pin, int8_t _estadoActivo, String _nombres[2], String _mensajes[2]){    
-  entrada[id].configuraEntrada(_nombre,  _tipo,  _pin,  _estadoActivo,  _nombres,  _mensajes);
+  entrada[id].configura(_nombre,  _tipo,  _pin,  _estadoActivo,  _nombres,  _mensajes);
 }
 
 /*************************************************/
@@ -149,10 +149,10 @@ void Entradas::configura(uint8_t id, String _nombre, String _tipo, int8_t _pin, 
 /*       Lee el estado de las entradas           */
 /*                                               */
 /*************************************************/
-void Entradas::consulta(bool debug)
+void Entradas::actualiza(bool debug)
   {
   //Actualizo las entradas  
-  for(uint8_t i=0;i<entradas.getNumEntradas();i++) entrada[i].setEstadoFisico();
+  for(uint8_t i=0;i<entradas.getNumEntradas();i++) entrada[i].setEstado();
   }
 /********************************************* Fin entradas *******************************************************************/
   

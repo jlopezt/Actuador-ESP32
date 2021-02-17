@@ -46,7 +46,7 @@ class Entrada{
         Entrada(void);
 
         //Configuracion
-        void configuraEntrada(String _nombre, String _tipo, int8_t _pin, int8_t _estadoActivo, String _nombres[2], String _mensajes[2]);
+        void configura(String _nombre, String _tipo, int8_t _pin, int8_t _estadoActivo, String _nombres[2], String _mensajes[2]);
 
         //funciones GET
         String getNombre(void);//String nombreEntrada(void); //Devuelve el nombre del rele con el id especificado  
@@ -60,7 +60,7 @@ class Entrada{
         int8_t getEstadoFisico(void);//int8_t estadoFisicoEntrada(void); //Devuelve el estado 0|1 de la entrada tal cual se ha leido, sin cruzar con nada              
 
         //funciones SET
-        void setEstadoFisico(void); //Almacena el estado 0|1 de la entrada tal cual se ha leido, sin cruzar con nada                
+        void setEstado(void); //Almacena el estado 0|1 de la entrada tal cual se ha leido, sin cruzar con nada                
 
         //otras
         void enviaMensaje(int8_t estado);// //Envia un mensaje MQTT para que se publique un audio en un GHN                               

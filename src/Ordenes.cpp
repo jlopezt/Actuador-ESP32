@@ -337,7 +337,7 @@ void func_comando_desSec(int iParametro, char* sParametro, float fParametro)//"d
   
 void func_comando_estSec(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  if(secuenciador.estado()) Traza.mensaje("Secuenciador activado\n");
+  if(secuenciador.getEstado()) Traza.mensaje("Secuenciador activado\n");
   else Traza.mensaje("Secuenciador desactivado\n");
 
   Traza.mensaje("Hay %i planes definidos\n",secuenciador.getNumPlanes());

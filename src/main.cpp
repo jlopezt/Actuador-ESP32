@@ -14,7 +14,7 @@
 #define FRECUENCIA_OTA             5 //cada cuantas vueltas de loop atiende las acciones
 #define FRECUENCIA_ENTRADAS        5 //cada cuantas vueltas de loop atiende las entradas
 #define FRECUENCIA_SALIDAS         5 //cada cuantas vueltas de loop atiende las salidas
-#define FRECUENCIA_SECUENCIADOR  100 //cada cuantas vueltas de loop atiende al secuenciador
+#define FRECUENCIA_SECUENCIADOR   10 //cada cuantas vueltas de loop atiende al secuenciador
 #define FRECUENCIA_MAQUINAESTADOS 10 //cada cuantas vueltas de loop atiende a la maquina de estados
 #define FRECUENCIA_SERVIDOR_FTP           3 //cada cuantas vueltas de loop atiende el servidor ftp
 #define FRECUENCIA_SERVIDOR_WEBSOCKET     1 //cada cuantas vueltas de loop atiende el servidor web
@@ -190,7 +190,7 @@ void loop()
   //Prioridad 0: OTA es prioritario.
   if ((vuelta % FRECUENCIA_OTA)==0) gestionaOTA(); //Gestion de actualizacion OTA
   //Prioridad 2: Funciones de control.
-  if ((vuelta % FRECUENCIA_ENTRADAS)==0) entradas.consulta(debugGlobal); //comprueba las entradas
+  if ((vuelta % FRECUENCIA_ENTRADAS)==0) entradas.actualiza(debugGlobal); //Actualiza las entradas
   if ((vuelta % FRECUENCIA_SECUENCIADOR)==0) secuenciador.actualiza(debugGlobal); //Actualiza la salida del secuenciador
   if ((vuelta % FRECUENCIA_MAQUINAESTADOS)==0) maquinaEstados.actualiza(debugGlobal); //Actualiza la maquina de estados
   if ((vuelta % FRECUENCIA_SALIDAS)==0) salidas.actualiza(debugGlobal); //comprueba las salidas
