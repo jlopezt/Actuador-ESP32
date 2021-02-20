@@ -9,7 +9,7 @@
 #define _SECUENCIADOR_
 
 #define HORAS_EN_DIA 24
-#define INTERVALOS_EN_HORA 60
+#define MAX_INTERVALOS_EN_HORA 60
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/
@@ -21,8 +21,7 @@ class Plan{
         int8_t id;
         String nombre;
         int8_t salidaAsociada;        //salida a la que se asocia la secuencia
-        //int    horas[HORAS_EN_DIA]; //el valor es un campo de bit. los primeros INTERVALOS_EN_HORA son los intervalos de cada hora
-        uint32_t intervalos[INTERVALOS_EN_HORA]; //el valor es un campo de bit. los primeros INTERVALOS_EN_HORA son los intervalos de cada hora
+        uint32_t intervalos[MAX_INTERVALOS_EN_HORA]; //el valor es un campo de bit. los primeros MAX_INTERVALOS_EN_HORA son los intervalos de cada hora
 
     public:
         //contructor
@@ -36,7 +35,7 @@ class Plan{
         int getEstado(void);
 
         //set
-        void configura(int8_t _id, String _nombre, int8_t _salida, uint32_t _intervalos[INTERVALOS_EN_HORA]);
+        void configura(int8_t _id, String _nombre, int8_t _salida, uint32_t _intervalos[MAX_INTERVALOS_EN_HORA]);
         void setNombre(String _nombre){nombre=_nombre;}
 
         //estado
@@ -48,6 +47,8 @@ class Secuenciador{
         Plan* planes;
         boolean activado; //plag para activar o desactivar el secuenciador
         uint8_t numeroPlanes;
+        uint8_t numeroIntervalos;  //numero de intervalos en los que se divide una hora. Es igual al numero maximo de intervalos definidos en el fichero (<= MAX_INTERVALOS_EN_HORA)
+        uint16_t anchoIntervalo;
 
         boolean recuperaDatos(boolean debug);
         boolean parseaConfiguracion(String contenido);
@@ -61,6 +62,8 @@ class Secuenciador{
 
         //get
         int8_t getNumPlanes(void);//Devuelve el nuemro de planes definido
+        uint8_t getNumeroIntervalos(void);
+        uint16_t getAnchoIntervalo(void);
         int8_t getSalida(uint8_t plan);
         boolean getEstado(void);//Devuelve el estado del secuenciador
         String getNombrePlan(uint8_t plan){return planes[plan].getNombre();}

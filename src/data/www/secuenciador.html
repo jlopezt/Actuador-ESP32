@@ -3,111 +3,21 @@
         <meta charset="UTF-8">
 		<TITLE>Domoticae</TITLE>
 		<link rel="stylesheet" type="text/css" href="css.css">
-		<script type="text/javascript">
-			function inicializa(){
-				var xhSecuenciador = new XMLHttpRequest();
-                xhSecuenciador.onreadystatechange = function(){
-					if (xhSecuenciador.readyState == 4){
-						if(xhSecuenciador.status == 200) {
-                            console.log("JSON: " + xhSecuenciador.responseText)
-                            var res = JSON.parse(xhSecuenciador.responseText);
-
-                            var planes=res.Planes;
-                            console.log("numero planes: " + planes.length);
-                            if (planes.length<=0) return;
-
-                            var intervalos=res.Planes[0].intervalos;
-                            console.log("numero intervalos: " + intervalos.length);
-
-                            //La guardo para todas las demas tablas
-                            var cabecera0 = document.getElementById("cabecera_0");
-                            
-                            //genero el titulo
-                            document.getElementById("titulo").innerHTML="Hay " + planes.length + " definido(s)"
-
-                            //para cada plan, relleno su tabla
-                            planes.forEach(function(plan,nPlan,array) {
-                                console.log("Plan: " + nPlan);
-
-/*******************************HAY QUE CREAR LA TABLA SI NO EXSTE!!!****************************************/
-                                var tabla=document.getElementById("tabla_plan_" + nPlan);
-                                if(tabla==null){
-                                    var br=document.createElement("br");
-                                    document.getElementById("body").appendChild(br);
-
-                                    var tabla=document.createElement("table");
-                                    tabla.setAttribute("id","tabla_plan_" + nPlan);
-                                    tabla.setAttribute("width","90%");
-                                    tabla.setAttribute("border","0");
-                                    tabla.setAttribute("cellpadding","0");
-                                    tabla.setAttribute("cellspacing","0");
-                                    tabla.setAttribute("class","tabla");
-                                    document.getElementById("body").appendChild(tabla);
-
-                                    var caption=document.createElement("caption");
-                                    caption.setAttribute("id","caption_" + nPlan)
-                                    //caption.innerHTML="Plan " + plan.nombre + " salida: " + plan.salida;
-                                    tabla.appendChild(caption);
-
-                                    var tbody = document.createElement("tbody");
-                                    tbody.setAttribute("id","body_tabla_plan_" + nPlan);
-                                    tabla.appendChild(tbody);
-
-                                    var cabecera = cabecera0.cloneNode(true);
-                                    tbody.appendChild(cabecera);
-                                }
-/***********************************************************************/
-/*******************************Creo las filas siempre****************************************/
-                                //cambio la caption de la tabla
-                                var _caption=document.getElementById("caption_" + nPlan);
-                                _caption.innerHTML="Plan " + plan.nombre + " salida: " + plan.salida;                                
-
-                                //Creo las filas que necesite, tantas como intervalos. La cero la tengo
-                                for(fila=0;fila<intervalos.length;fila++){
-                                    var nuevaFila=document.createElement("tr");
-                                    nuevaFila.setAttribute("id", "intervalo_" + fila);
-                                    nuevaFila.setAttribute("class", "modo2");
-                                    document.getElementById("body_tabla_plan_" + nPlan).appendChild(nuevaFila);
-
-                                    var nuevaCelda=document.createElement("th");
-                                    nuevaCelda.innerHTML="min. " + fila;
-                                    nuevaFila.appendChild(nuevaCelda);
-                                    
-                                    for(_hora=0;_hora<24;_hora++){
-                                        nuevaCelda=document.createElement("td");
-                                        nuevaCelda.setAttribute("id", "plan_" + nPlan + "_hora_" + _hora + "_" + fila);
-                                        nuevaCelda.setAttribute("style","text-align:center");
-                                        nuevaFila.appendChild(nuevaCelda);
-                                    }
-                                }
-/***********************************************************************/
-
-                                //Con la tabla creada, la lleno de izquierda a derecha
-                                intervalos=plan.intervalos;
-                                intervalos.forEach(function(intervalo,nIntervalo,array){
-                                    mascara=1;                                             
-                                    for(_hora=0;_hora<24;_hora++){//hora_<hora>_<intervalo>
-                                        /*
-                                        console.log("hora: " + _hora + " minuto: " + nIntervalo);
-                                        console.log("valor: " + intervalo.valor + " mascara: " + mascara);
-                                        estado=(intervalo.valor &  mascara?1:0);
-                                        console.log("estado = " + estado);
-                                        */
-                                        document.getElementById("plan_" + nPlan + "_hora_" + _hora + "_" + nIntervalo).innerHTML=(intervalo.valor &  mascara?1:0);
-                                        mascara*=2;
-                                    }
-                                });
-                            });
-						}
-					}
-				};
-				xhSecuenciador.open("GET", "configSecuenciador", true);
-				xhSecuenciador.send(null);					
-			};
-		</script>
+		<script type="text/javascript" src="./secuenciador.js"></script>
 	</HEAD>
 	<BODY id="body" onload="inicializa();">
-		<h3 id="titulo" width="90%" aling></h3>
+        <TABLE border="0" width="50%" cellpadding="0" cellspacing="0" width="300" class="tabla">
+            <CAPTION>Secuenciador</CAPTION>
+            <TR>
+                <TH width="100">Numero de intervalos: </TH>
+                <TD id="numeroIntervalos" width="200" class="modo2"></TD>
+            </TR>
+            <TR>
+                <TH width="100">Numero de planes: </TH>
+                <TD id="numeroPlanes" width="200" class="modo2"></TD>
+            </TR>            
+        </TABLE>
+        <br>
 		<!-- tantas tablas como planes -->
 		<table id="tabla_plan_0" width="90%" border="0" cellpadding="0" cellspacing="0" class="tabla">
     	    <caption id="caption_0">Plan primero</caption>

@@ -365,6 +365,10 @@ void func_comando_estPlan(int iParametro, char* sParametro, float fParametro){
   }
 }   
 
+void func_comando_numInt(int iParametro, char* sParametro, float fParametro) {
+  Traza.mensaje("Numero de intervalos: %i\n",secuenciador.getNumeroIntervalos());
+}
+
 void func_comando_MQTTConfig(int iParametro, char* sParametro, float fParametro)//"debug")
   {
   Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nBroker Dir: %s\nIP Puerto del broker: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\nWill topic: %s\nWill msg: %s\nCelan session: %i\n",getIDMQTT().c_str(),getIPBroker().toString().c_str(),getBrokerDir().c_str(),getPuertoBroker(),getUsuarioMQTT().c_str(),getPasswordMQTT().c_str(),getTopicRoot().c_str(),getPublicarEntradas(),getPublicarSalidas(),getTopicRoot()+"/"+getWillTopic().c_str(),getWillMsg().c_str(), getCleanSession());
@@ -520,6 +524,10 @@ void inicializaOrden(void)
   comandos[i].comando="estPlan";
   comandos[i].descripcion="Estado del plan en una hora y minuto";
   comandos[i++].p_func_comando=func_comando_estPlan;    
+
+  comandos[i].comando="numInt";
+  comandos[i].descripcion="Numero de intervalos en una hora del secuenciador";
+  comandos[i++].p_func_comando=func_comando_numInt;    
 
   comandos[i].comando="MQTTConfig";
   comandos[i].descripcion="Configuración de MQTT";
