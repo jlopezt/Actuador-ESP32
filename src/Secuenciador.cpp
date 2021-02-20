@@ -23,7 +23,6 @@ Secuenciador secuenciador;
 Secuenciador::Secuenciador(void){
   activado=false;
   numeroPlanes=0;  
-  numeroIntervalos=0;
 }
 /************************* Fin constructor ***********************/
 
@@ -75,16 +74,6 @@ boolean Secuenciador::parseaConfiguracion(String contenido){
 
   secuenciador.planes = new Plan[numeroPlanes];
   
-  //Calculo el maximo del numero de intervalo de cada plan
-  numeroIntervalos=MAX_INTERVALOS_EN_HORA;
-  for(int8_t i=0;i<numeroPlanes;i++) {
-    if(Planes[i]["intervalos"].size()<numeroIntervalos) numeroIntervalos=Planes[i]["intervalos"].size();
-  }
-  Traza.mensaje("Numero de intervalos: %i\n", numeroIntervalos);
-  
-  anchoIntervalo=MILISEGUNDOS_EN_HORA/numeroIntervalos;
-  Traza.mensaje("Ancho  de los intervalos: %i ms\n", anchoIntervalo);
-
   for(int8_t i=0;i<numeroPlanes;i++){ 
     int8_t _id;
     String _nombre="";
@@ -93,6 +82,12 @@ boolean Secuenciador::parseaConfiguracion(String contenido){
     for(uint8_t i=0;i<MAX_INTERVALOS_EN_HORA;i++) _intervalos[i]=0;
 
     JsonObject& _plan = Planes[i];//json["Planes"][i];
+
+    //Calculo el maximo del numero de intervalo de cada plan
+    uint8_t _numeroIntervalos=MAX_INTERVALOS_EN_HORA;
+    if(_plan["intervalos"].size()<_numeroIntervalos) _numeroIntervalos=_plan["intervalos"].size();
+    Traza.mensaje("Numero de intervalos: %i\n", _numeroIntervalos);
+
     //leo los valores del json
     _id=i;
     if(_plan.containsKey("nombre")) _nombre=_plan.get<String>("nombre");
@@ -104,18 +99,18 @@ boolean Secuenciador::parseaConfiguracion(String contenido){
     }
     else{
       //Intevalos
-      for(int8_t j=0;j<numeroIntervalos;j++) {
+      for(int8_t j=0;j<_numeroIntervalos;j++) {
         JsonObject& intervalo = _plan["intervalos"][j];//json["Planes"][i]["horas"][j];  
         if(intervalo.containsKey("valor")) _intervalos[j]=intervalo.get<int>("valor");  
       }
     
-      Traza.mensaje("Plan %i: id: %i, nombre: %s, salida: %i, numero intervalos: %i\n", i, _id, _nombre.c_str(), _salidaAsociada, _plan["intervalos"].size());
-      for(int8_t j=0;j<MAX_INTERVALOS_EN_HORA;j++) Traza.mensaje("intervalo[%i]: %l\n", j, _intervalos[j]);
+      //Traza.mensaje("Plan %i: id: %i, nombre: %s, salida: %i, numero intervalos: %i\n", i, _id, _nombre.c_str(), _salidaAsociada, _plan["intervalos"].size());
+      //for(int8_t j=0;j<MAX_INTERVALOS_EN_HORA;j++) Traza.mensaje("intervalo[%i]: %l\n", j, _intervalos[j]);
 
-      planes[i].configura(_id, _nombre, _salidaAsociada, _intervalos);
+      planes[i].configura(_id, _nombre, _salidaAsociada, _numeroIntervalos, _intervalos);
 
-      Traza.mensaje("Plan %s (%i):\n\tSalida: %i\tIntervalos: %i\n", planes[i].getNombre(), i, planes[i].getSalida(), numeroIntervalos); 
-      for(int8_t j=0;j<numeroIntervalos;j++) Traza.mensaje("\tintervalo %i: valor: %l\n",j,planes[i].getIntervalo(j));    
+      Traza.mensaje("Plan %s (%i):\n\tSalida: %i\tIntervalos: %i\n", planes[i].getNombre(), i, planes[i].getSalida(), planes[i].getNumeroIntervalos()); 
+      for(int8_t j=0;j<planes[i].getNumeroIntervalos();j++) Traza.mensaje("\tintervalo %i: valor: %l\n",j,planes[i].getIntervalo(j));    
     }
   }
 //************************************************************************************************
@@ -176,18 +171,6 @@ void Secuenciador::desactivar(void){activado=false;}
 boolean Secuenciador::getEstado(void){return activado;}  
 
 /*********************************************************/
-/* Devuelve el numero de intervalos configurados en el   */
-/* fichero JSON para ese plan                            */
-/* maximo de todos los planes (<=MAX_INTERVALOS_EN_HORA) */
-/*********************************************************/
-uint8_t Secuenciador::getNumeroIntervalos(void){return numeroIntervalos;}
-
-/*********************************************************/
-/* Devuelve el ancho en milisegundos de cada intervalo   */
-/*********************************************************/
-uint16_t Secuenciador::getAnchoIntervalo(void){return anchoIntervalo};
-
-/*********************************************************/
 /*      Genera codigo HTML para representar el plan      */
 /*********************************************************/
 String Secuenciador::pintaPlanHTML(uint8_t plan){return planes[plan].pintaPlanHTML();}
@@ -205,8 +188,6 @@ String Secuenciador::generaJsonEstado(void){
   
   if(activado) root["estado"] = 1;
   else root["estado"]=0;
-
-  root["numeroIntervalos"]=numeroIntervalos;
 
   JsonArray& _planes = root.createNestedArray("planes");
   for(int8_t id=0;id<numeroPlanes;id++){
@@ -229,6 +210,7 @@ Plan::Plan(void){
   id=-1;
   nombre="";
   salidaAsociada=NO_CONFIGURADO;
+  numeroIntervalos=0;
   for(int8_t j=0;j<MAX_INTERVALOS_EN_HORA;j++) intervalos[j]=0;
 }
 /************************* Fin constructor ***********************/
@@ -236,16 +218,24 @@ Plan::Plan(void){
 /**************************************************/
 /* Configura el plan con lo valores recibidos     */
 /**************************************************/
-void Plan::configura(int8_t _id, String _nombre, int8_t _salidaAsociada, uint32_t _intervalos[MAX_INTERVALOS_EN_HORA]){
+void Plan::configura(int8_t _id, String _nombre, int8_t _salidaAsociada, uint8_t _numeroIntervalos, uint32_t _intervalos[MAX_INTERVALOS_EN_HORA]){
   id=_id,
   nombre=_nombre;
   salidaAsociada=_salidaAsociada;
+  numeroIntervalos=_numeroIntervalos;
   
-  for(uint8_t j=0;j<MAX_INTERVALOS_EN_HORA;j++) intervalos[j]=_intervalos[j];
+  for(uint8_t j=0;j<numeroIntervalos;j++) intervalos[j]=_intervalos[j];//Lo liminto a numeroIntervalos en lugar de a MAX_INTERVALOS_EN_HORA, esta inicializado a 0
 
   //configuro la salida asociada en modo secuenciador y la asocio al plan
   salidas.asociarSecuenciador(salidaAsociada,id);
 }
+
+/*********************************************************/
+/* Devuelve el numero de intervalos configurados en el   */
+/* fichero JSON para ese plan                            */
+/* maximo de todos los planes (<=MAX_INTERVALOS_EN_HORA) */
+/*********************************************************/
+uint8_t Plan::getNumeroIntervalos(void){return numeroIntervalos;}
 
 /**************************************************/
 /* Devuelve el numero de salida asociada a un plan*/
@@ -270,7 +260,10 @@ int Plan::getEstado(uint8_t hora, uint8_t intervalo){
   if(intervalos[intervalo] & _mascara) return ESTADO_ACTIVO;
   else return ESTADO_DESACTIVO;
 }
-int Plan::getEstado(void){return getEstado(hora(),minuto());}
+int Plan::getEstado(void){
+  Traza.mensaje("Plan %i | Hora: %i | minuto: %i | intervalo: %i\n",id,hora(),minuto(),minuto()*numeroIntervalos/MAX_INTERVALOS_EN_HORA);
+  return getEstado(hora(),minuto()*numeroIntervalos/MAX_INTERVALOS_EN_HORA);
+}
 
 /********************************************************/
 /*     Genera codigo HTML para representar el plan      */

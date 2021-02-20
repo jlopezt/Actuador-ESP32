@@ -13,14 +13,6 @@ function inicializa(){
                 document.getElementById("numeroPlanes").innerHTML=planes.length;
                 if (planes.length<=0) return;
 
-                var numeroIntervalos=MAX_INTERVALOS_EN_HORA;
-                planes.forEach(function(plan,nPlan,array){
-                    if(plan.intervalos.length<numeroIntervalos) numeroIntervalos=plan.intervalos.length;
-                });
-                if(numeroIntervalos>MAX_INTERVALOS_EN_HORA)numeroIntervalos=MAX_INTERVALOS_EN_HORA;                
-                console.log("numero intervalos: " + numeroIntervalos);
-                document.getElementById("numeroIntervalos").innerHTML=numeroIntervalos;
-
                 //La guardo para todas las demas tablas
                 var cabecera0 = document.getElementById("cabecera_0");
                 
@@ -56,6 +48,9 @@ function inicializa(){
                         tbody.appendChild(cabecera);
                     }
 /***********************************************************************/
+                    var numeroIntervalos=MAX_INTERVALOS_EN_HORA;
+                    if(plan.intervalos.length<numeroIntervalos) numeroIntervalos=plan.intervalos.length;
+                    console.log("numero intervalos: " + numeroIntervalos);
 /*******************************Creo las filas siempre****************************************/
                     //cambio la caption de la tabla
                     var _caption=document.getElementById("caption_" + nPlan);
