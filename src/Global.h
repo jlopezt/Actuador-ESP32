@@ -10,7 +10,7 @@
 
 //Defines generales
 #define NOMBRE_FAMILIA   "Actuador/Secuenciador (E/S)"
-#define VERSION          "esp32 - ver 6.5.0"//(ESP32 1.0.4|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)"
+#define VERSION          "esp32 - ver 6.6.0"//(ESP32 1.0.4|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)"
 
 #define TRUE              1
 #define FALSE             0

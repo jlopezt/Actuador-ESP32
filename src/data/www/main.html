@@ -120,18 +120,22 @@
       function cambiaDiv() {
         console.log("Entrando");
         if (document.getElementById("atras").className == "oculto") {
-          console.log("Atras: " + document.getElementById("atras").className + " mostrando atras");
+          console.log("Atras: esta oculto, lo voy a mostrar");
           document.getElementById("atras").className = "visible";
-        } else {
-          console.log("Atras: " + document.getElementById("atras").className + " ocultando atras");
-          document.getElementById("atras").className = "oculto";
-        }
-
-        if (document.getElementById("delante").className == "visible") {
-          console.log("Delante: " + document.getElementById("delante").className + " Ocultando delante");
+          document.getElementById("menuFicheros").className = "visible";
+          document.getElementById("menuInfo").className = "visible";
+          document.getElementById("menuParticiones").className = "visible";
+          document.getElementById("menuRestart").className = "visible";
+          console.log("Delante: esta " + document.getElementById("delante").className + ", lo oculto");
           document.getElementById("delante").className = "oculto";
         } else {
-          console.log("Delante: " + document.getElementById("delante").className + " mostrando delante");
+          console.log("Atras: esta visible, ocultando atras");
+          document.getElementById("atras").className = "oculto";
+          document.getElementById("menuFicheros").className = "oculto";
+          document.getElementById("menuInfo").className = "oculto";
+          document.getElementById("menuParticiones").className = "oculto";
+          document.getElementById("menuRestart").className = "oculto";
+          console.log("Delante: esta " + document.getElementById("delante").className + ", lo muestro");
           document.getElementById("delante").className = "visible";
         }
       }
@@ -157,9 +161,10 @@
         xh.send(null);        
         
         //cargo el iframe con al info inicial
-        cambiaIFrame("root");
+        cambiaIFrame("iframe_a","root");
 
         //relleno el frame oculto
+        //NADA
 
         //Ajusto la altura del iframe        
         var margen = window.getComputedStyle(document.body,null).getPropertyValue("margin-top");
@@ -179,10 +184,8 @@
         document.getElementById("nombre_3").innerHTML=nombre.substr(nombre.length-2);
       }
 
-      function cambiaIFrame(pagina){
-        //cargo el iframe con la pagina indicada
-        var c=document.getElementById("iframe_a");
-        console.log(c.getAttribute("src"));
+      function cambiaIFrame(destino,pagina){
+        var c=document.getElementById(destino);
         c.setAttribute("src",pagina);
       }
     </script>
@@ -201,28 +204,28 @@
       <div class="izquierda">
         <nav id="nav">
           <ul>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('root')">Inicio</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('entradas')">Entradas</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('salidas')">Salidas</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('secuenciador')">Secuenciador</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('maquinaEstados')">Maq. estados</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('ficheros')">Ficheros</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('info')">Info</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('particiones')">Particiones</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('restart')">Reiniciar</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_a','root')">Inicio</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_a','entradas')">Entradas</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_a','salidas')">Salidas</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_a','secuenciador')">Secuenciador</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_a','maquinaEstados')">Maq. estados</li>
           </ul>
         </nav>
       </div>
       <div class="derecha">
         <nav>
           <ul>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_b','ficheros')" class="oculto" id="menuFicheros">Ficheros</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_b','info')" class="oculto" id="menuInfo">Info</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_b','particiones')" class="oculto" id="menuParticiones">Particiones</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_b','restart')" class="oculto" id="menuRestart">Reiniciar</li>
             <li style="color:#888;" onMouseOver="this.style.cursor='pointer'" onClick="cambiaDiv()">Cambiar</li>
           </ul>
         </nav>
       </div>
       <article id="article">
         <div id="atras" class="oculto">          
-          <!--<iframe id="iframe_b" name="iframe_b" style="height:100%;width:100%;border:none;" src="http://www.orange.es"></iframe>-->         
+          <iframe id="iframe_b" name="iframe_b" style="height:100%;width:100%;border:none;"></iframe>
         </div>
         <div id="delante" class="visible">
           <iframe id="iframe_a" name="iframe_a" style="height:100%;width:100%;border:none;"></iframe>
