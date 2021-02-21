@@ -183,6 +183,14 @@ function actualizaSecuenciador(datos) {
     //Secuenciador
     var planes=res.planes;
     console.log("numero planes: " + planes.length);
+    
+    //Boton de activacion/desactivacion
+    if(res.estado==0){
+        document.getElementById("secuenciadorCaption").innerHTML  = "Secuenciadores <form action='activaSecuenciador'><input STYLE='color: #000000; text-align: center; background-color: #FFFF00; width: 80px' type='submit' value='activar'></form>";
+    }
+    else{
+    document.getElementById("secuenciadorCaption").innerHTML  = "Secuenciadores <form action='desactivaSecuenciador'><input STYLE='color: #000000; text-align: center; background-color: #DDDDDD; width: 80px' type='submit' value='desactivar'></form>";
+    }
 
     planes.forEach(function(plan,indice,array) {
         var hilera = document.getElementById("plan_"+indice);
