@@ -48,16 +48,13 @@ function inicializa(){
                         tbody.appendChild(cabecera);
                     }
 /***********************************************************************/
-                    var numeroIntervalos=MAX_INTERVALOS_EN_HORA;
-                    if(plan.intervalos.length<numeroIntervalos) numeroIntervalos=plan.intervalos.length;
-                    console.log("numero intervalos: " + numeroIntervalos);
 /*******************************Creo las filas siempre****************************************/
                     //cambio la caption de la tabla
                     var _caption=document.getElementById("caption_" + nPlan);
                     _caption.innerHTML="Plan " + plan.nombre + " salida: " + plan.salida;                                
 
-                    //Creo las filas que necesite, tantas como intervalos. La cero la tengo
-                    for(fila=0;fila<numeroIntervalos;fila++){
+                    //Creo las filas que necesite, tantas como intervalos.
+                    for(fila=0;fila<MAX_INTERVALOS_EN_HORA;fila++){
                         var nuevaFila=document.createElement("tr");
                         nuevaFila.setAttribute("id", "intervalo_" + fila);
                         nuevaFila.setAttribute("class", "modo2");
@@ -80,7 +77,7 @@ function inicializa(){
                     intervalos=plan.intervalos;
                     intervalos.forEach(function(intervalo,nIntervalo,array){
                         mascara=1;     
-                        if(nIntervalo<numeroIntervalos){
+                        if(nIntervalo<MAX_INTERVALOS_EN_HORA){
                             for(_hora=0;_hora<24;_hora++){//hora_<hora>_<intervalo>
                                 /*
                                 console.log("hora: " + _hora + " minuto: " + nIntervalo);

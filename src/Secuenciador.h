@@ -9,7 +9,7 @@
 #define _SECUENCIADOR_
 
 #define HORAS_EN_DIA 24
-#define MAX_INTERVALOS_EN_HORA 60
+#define INTERVALOS_EN_HORA 60
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/
@@ -21,8 +21,7 @@ class Plan{
         int8_t id;
         String nombre;
         int8_t salidaAsociada;        //salida a la que se asocia la secuencia
-        uint8_t numeroIntervalos;  //numero de intervalos en los que se divide una hora. Es igual al numero maximo de intervalos definidos en el fichero (<= MAX_INTERVALOS_EN_HORA)
-        uint32_t intervalos[MAX_INTERVALOS_EN_HORA]; //el valor es un campo de bit. los primeros MAX_INTERVALOS_EN_HORA son los intervalos de cada hora
+        uint32_t intervalos[INTERVALOS_EN_HORA]; //el valor es un campo de bit. los primeros INTERVALOS_EN_HORA son los intervalos de cada hora
 
     public:
         //contructor
@@ -34,14 +33,10 @@ class Plan{
         String getNombre(void){return nombre;}
         int getEstado(uint8_t hora, uint8_t minuto);
         int getEstado(void);
-        uint8_t getNumeroIntervalos(void);
 
         //set
-        void configura(int8_t _id, String _nombre, int8_t _salida, uint8_t numeroIntervalos, uint32_t _intervalos[MAX_INTERVALOS_EN_HORA]);
+        void configura(int8_t _id, String _nombre, int8_t _salida, uint32_t _intervalos[INTERVALOS_EN_HORA]);
         void setNombre(String _nombre){nombre=_nombre;}
-
-        //estado
-        String pintaPlanHTML(void);//Genera codigo HTML para representar el plan        
 };
 
 class Secuenciador{
@@ -81,7 +76,6 @@ class Secuenciador{
 
         //estado
         String generaJsonEstado(void);
-        String pintaPlanHTML(uint8_t plan);//Genera codigo HTML para representar el plan
 };
 
 extern Secuenciador secuenciador;
