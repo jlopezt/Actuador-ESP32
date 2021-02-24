@@ -62,7 +62,6 @@ void handleEstadoMaquinaEstados(AsyncWebServerRequest *request);
 void handleSecuenciador(AsyncWebServerRequest *request);
 void handleDesactivaSecuenciador(AsyncWebServerRequest *request);
 void handleActivaSecuenciador(AsyncWebServerRequest *request);
-void handlePlanes(AsyncWebServerRequest *request);
 void handleEstadoSecuenciador(AsyncWebServerRequest *request);
 void handleConfigSecuenciador(AsyncWebServerRequest *request);
 
@@ -107,7 +106,6 @@ void inicializaWebServer(void)
   serverX.on("/pulsoSalida", HTTP_ANY, handlePulsoRele);  //Servicio de pulso de rele
 
   serverX.on("/secuenciador", HTTP_GET, handleSecuenciador); //Servicio de estdo de reles
-  serverX.on("/planes", HTTP_ANY, handlePlanes);  //Servicio de representacion del plan del secuenciador
   serverX.on("/configSecuenciador", HTTP_GET, handleConfigSecuenciador); //Servicio de estdo de reles
   serverX.on("/estadoSecuenciador", HTTP_ANY, handleEstadoSecuenciador);  //Serivico de estado del secuenciador
   serverX.on("/activaSecuenciador", HTTP_ANY, handleActivaSecuenciador);  //Servicio para activar el secuenciador
@@ -484,25 +482,6 @@ void handleEstadoMaquinaEstados(AsyncWebServerRequest *request){
 /*                                                              */
 /****************************************************************/
 void handleSecuenciador(AsyncWebServerRequest *request){request->redirect("secuenciador.html");}
-
-/****************************************************************/
-/*                                                              */
-/*  Servicio de representacion de los planes del secuenciador   */
-/*                                                              */
-/****************************************************************/
-void handlePlanes(AsyncWebServerRequest *request){
-  int8_t numPlanes=secuenciador.getNumPlanes();  
-  String cad=miniCabecera;
-
-  cad += "<h3>hay " + String(numPlanes) + " plan(es) activo(s).</h3>";
-  
-  for(int8_t i=0;i<numPlanes;i++){
-    cad += secuenciador.pintaPlanHTML(i);
-    cad += "<BR>";
-  }
-  
-  request->send(200, "text/html", cad); 
-}
 
 /*********************************************************/
 /*                                                       */
