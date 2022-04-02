@@ -16,7 +16,7 @@
 void gestionaOTA(void);
 void inicializaOTA(boolean debug);
 
-String pintaParticionHTML(void);
+String listaParticiones(void);
 String getParticionProximoUpdate(void);
 String getParticionEjecucion(void);
 String getParticionProximoArranque(void);

@@ -190,13 +190,13 @@ uint8_t compruebaConfiguracion(uint8_t nivelTraza)
   boolean salvar=false;
   String cad="";
 
-  Traza.mensaje("Init Verificar errores configuracion---------------------------------------------------\n");
-  Traza.mensaje("     ficheros--------------------------------------------------------------------------\n");
+  Serial.printf("Init Verificar errores configuracion---------------------------------------------------\n");
+  Serial.printf("     ficheros--------------------------------------------------------------------------\n");
   salvar=compruebaFicheros();
-  Traza.mensaje("     GHN-------------------------------------------------------------------------------\n");
+  Serial.printf("     GHN-------------------------------------------------------------------------------\n");
   cad=compruebaGHN();
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
-  Traza.mensaje("     Wifi------------------------------------------------------------------------------\n");
+  Serial.printf("     Wifi------------------------------------------------------------------------------\n");
   cad=compruebaWifi(); 
   if(salvar) anadeFichero(FICHERO_ERRORES, cad);
   Traza.mensaje("     WebServer-------------------------------------------------------------------------\n");

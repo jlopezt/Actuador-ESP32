@@ -158,7 +158,8 @@ function actualizaSalidas(datos) {
             else {
                 estado.style.backgroundColor=ACTIVO;
                 
-                accion.innerHTML  = "<form action='desactivaSalida'><input  type='hidden' id='id' name='id' value='0'><input STYLE='color: #000000; text-align: center; background-color: #DDDDDD; width: 80px' type='submit' value='desactivar'></form>";
+                //accion.innerHTML  = "<form action='desactivaSalida'><input  type='hidden' id='id' name='id' value='0'><input STYLE='color: #000000; text-align: center; background-color: #DDDDDD; width: 80px' type='submit' value='desactivar'></form>";
+                accion.innerHTML  = "<form action='desactivaSalida'><input  type='hidden' id='desactiva_" + indice + "' name='id' value='" + indice + "'><input STYLE='color: #000000; text-align: center; background-color: #DDDDDD; width: 80px' type='submit' value='desactivar'></form>";
             }
         }
         else{

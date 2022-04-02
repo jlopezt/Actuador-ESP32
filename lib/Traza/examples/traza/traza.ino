@@ -31,7 +31,7 @@ void loop(void)
   char nombre[]="Carmela";
   
   //Serial.printf("Hola %s, llevamos ---->%0.2i milisegundos\n", nombre, millis());
-  //Traza.mensaje("vuelta %i | hola, escribiendo en IP %s, puerto %i\n", vuelta++, WiFi.localIP().toString().c_str(), PUERTO_DEBUG);
+  //Serial.printf("vuelta %i | hola, escribiendo en IP %s, puerto %i\n", vuelta++, WiFi.localIP().toString().c_str(), PUERTO_DEBUG);
   Serial.printf("vuelta %i | hola, escribiendo en IP %s, puerto %i\n", vuelta++, WiFi.localIP().toString().c_str(), PUERTO_DEBUG);
   delay(100);
   }

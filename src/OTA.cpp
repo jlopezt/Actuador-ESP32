@@ -146,71 +146,11 @@ esp_partition_iterator_t esp_partition_next(esp_partition_iterator_t iterator);
 void esp_partition_iterator_release(esp_partition_iterator_t iterator);
 */
 
-String pintaParticionHTML(void)
-  {
-  const esp_partition_t *particion;  
-  String cad="";
-  
-  esp_partition_iterator_t iterador=esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, NULL); //omito el nombre para sacar todas
-
-  cad += "<TABLE border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"tabla\">\n";
-  cad += "<CAPTION>Particiones de memoria</CAPTION>\n";
-  cad += "<TR>";
-  cad += "<TH>Nombre</TH><TH>Tipo</TH><TH>Subtipo</TH><TH>Direccion</TH><TH>Tamaño</TH><TH>Encriptado</TH>";
-  cad += "</TR>";
-
-  while(iterador!=NULL)
-    {
-    particion=esp_partition_get(iterador);
-
-    cad += "<TR class=\"modo2\">";
-    
-    cad +="<TD><a href=\"setNextBoot?p=" + String(particion->label) + "\" target=\"_self\">" + String(particion->label) + "</a></TD>"; 
-
-    cad +="<TD>";
-    if(particion->type==0) cad+="app"; 
-    else if(particion->type==0) cad+="data"; 
-    else cad+="otros";   
-    cad +="</TD>";    
-    
-    cad +="<TD>";
-    if (particion->subtype==0) cad += "factory";
-    else if(particion->subtype>=10 && particion->subtype<=26) cad += String("ota_") + String(particion->subtype);
-    else if(particion->subtype==ESP_PARTITION_SUBTYPE_DATA_NVS_KEYS) cad += "nvs";   
-    else if (particion->subtype==ESP_PARTITION_SUBTYPE_DATA_SPIFFS) cad += "SPIFFS";
-    else cad+="otros";
-    cad +="</TD>";
-      
-    cad +="<TD>" + String(particion->address) + "</TD>";
-    cad +="<TD>" + String(particion->size) + "</TD>";
-    cad +="<TD>" + (particion->encrypted?String("Si"):String("No")) + "</TD>";  
-
-    cad +="</TR>";
-    
-    iterador=esp_partition_next(iterador);
-    }
-
-  cad +="</TABLE>";
-
-  cad +="<BR>";
-  cad += "<p style=\"color: black;\">";
-  cad += getParticionEjecucion();
-  cad += "<BR>" + getParticionProximoArranque();
-  cad += "<BR>" + getParticionProximoUpdate();
-  cad +="</p><BR>";
-
-  //cad += "<p><a href=\"/restart\" style=\"text-decoration:none; color: black;\">reinciar</a></p>";
-  cad += "<form action=\"/restart\"><input type=\"submit\" value=\"Reiniciar\"></form>";  
-  esp_partition_iterator_release(iterador);  
-
-  return(cad);
-  }
-
 String getParticionProximoUpdate(void)
   {
   const esp_partition_t *particion=esp_ota_get_next_update_partition(NULL);
 
-  String cad="Particion proximo update:\n";
+  String cad="";//"Particion proximo update:\n";
   cad +=particion->label;
   
   return cad;
@@ -220,7 +160,7 @@ String getParticionEjecucion(void)
   {
   const esp_partition_t *particion=esp_ota_get_running_partition();
 
-  String cad="Particion en ejecucion:\n";
+  String cad="";//"Particion en ejecucion:\n";
   cad +=particion->label;
   
   return cad;
@@ -229,7 +169,7 @@ String getParticionEjecucion(void)
 String getParticionProximoArranque(void)
   {
   const esp_partition_t *particion=esp_ota_get_boot_partition();
-  String cad="Particion del proximo arranque:\n";
+  String cad="";//"Particion del proximo arranque:\n";
   cad +=particion->label;
   
   return cad;
@@ -245,3 +185,47 @@ boolean setParticionProximoArranque(String nombre)
   return false;
   }
 
+String listaParticiones(void)
+  {
+  String salida="";
+  const esp_partition_t *particion;  
+  
+  esp_partition_iterator_t iterador=esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, NULL); //omito el nombre para sacar todas
+
+  const size_t capacity = 1*JSON_ARRAY_SIZE(15) + JSON_OBJECT_SIZE(25);
+  DynamicJsonBuffer jsonBuffer(capacity);
+
+  JsonObject& json = jsonBuffer.createObject();
+  
+  json["particionEjecucion"] = getParticionEjecucion();
+  json["particionProximoArranque"] = getParticionProximoArranque();
+  json["particionProximoUpdate"] = getParticionProximoUpdate();
+
+  JsonArray& particiones = json.createNestedArray("particiones");
+
+  while(iterador!=NULL)
+    {
+    particion=esp_partition_get(iterador);
+
+    JsonObject& particionNueva = particiones.createNestedObject();
+    particionNueva["nombre"] = String(particion->label);      
+    //tipo
+    if(particion->type==0) particionNueva["tipo"] = "app"; 
+    else if(particion->type==0) particionNueva["tipo"] = "data"; 
+    else particionNueva["tipo"] = "otros";   
+    //subtipo
+    if (particion->subtype==0) particionNueva["subtipo"] = "factory";
+    else if(particion->subtype>=10 && particion->subtype<=26) particionNueva["subtipo"] =  String("ota_") + String(particion->subtype);
+    else if(particion->subtype==ESP_PARTITION_SUBTYPE_DATA_NVS_KEYS) particionNueva["subtipo"] = "nvs";   
+    else if (particion->subtype==ESP_PARTITION_SUBTYPE_DATA_SPIFFS) particionNueva["subtipo"] = "SPIFFS";
+    else particionNueva["subtipo"] = "otros";
+    particionNueva["direccion"] = String(particion->address);    
+    particionNueva["tamano"] =String(particion->size);    
+    particionNueva["encriptado"] = (particion->encrypted?String("Si"):String("No"));
+  
+    iterador=esp_partition_next(iterador);
+    }
+
+  json.printTo(salida);
+  return (salida);
+  }

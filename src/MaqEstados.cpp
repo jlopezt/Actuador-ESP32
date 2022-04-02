@@ -321,12 +321,14 @@ String MaquinaEstados::generaJsonEstado(void)
   {
   String cad="";
 
-  const size_t bufferSize = 2*JSON_ARRAY_SIZE(4) + 9*JSON_OBJECT_SIZE(3);
+  const size_t bufferSize = 2*JSON_ARRAY_SIZE(4) + 9*JSON_OBJECT_SIZE(3) + 42*JSON_ARRAY_SIZE(4) + JSON_ARRAY_SIZE(42) + JSON_OBJECT_SIZE(1) + 42*JSON_OBJECT_SIZE(3);
   DynamicJsonBuffer jsonBuffer(bufferSize);
   
   JsonObject& root = jsonBuffer.createObject();
   
   root["estado"] = maquinaEstados.getNombreEstadoActual();
+  root["numeroEntradas"] = maquinaEstados.getNumEntradas();
+  root["numeroSalidas"] = maquinaEstados.getNumSalidas();
 
   JsonArray& Entradas = root.createNestedArray("entradas");
   for(int8_t id=0;id<numeroEntradas;id++){
@@ -334,6 +336,7 @@ String MaquinaEstados::generaJsonEstado(void)
     Entradas_0["id"] = id;
     Entradas_0["nombre"] = entradas.getEntrada(mapeoEntradas[id]).getNombre();
     Entradas_0["estado"] = entradas.getEntrada(mapeoEntradas[id]).getEstado();
+    Entradas_0["entradaGlobal"] = mapeoEntradas[id];
   }
 
   JsonArray& Salidas = root.createNestedArray("salidas");
@@ -342,6 +345,19 @@ String MaquinaEstados::generaJsonEstado(void)
     Salidas_0["id"] = id;
     Salidas_0["nombre"] = salidas.getSalida(mapeoSalidas[id]).getNombre();
     Salidas_0["estado"] = salidas.getSalida(mapeoSalidas[id]).getEstado();
+    Salidas_0["salidaGlobal"] = mapeoSalidas[id];
+    }
+
+  JsonArray& listaTransiciones = root.createNestedArray("transiciones");
+  for(uint8_t regla=0;regla<numeroTransiciones;regla++) //las reglas se evaluan por orden
+    {
+    JsonObject& transicionNueva = listaTransiciones.createNestedObject();
+   
+    transicionNueva["inicial"] = maquinaEstados.estados[maquinaEstados.transiciones[regla].getEstadoInicial()].getNombre();
+    transicionNueva["final"] = maquinaEstados.estados[maquinaEstados.transiciones[regla].getEstadoFinal()].getNombre();
+    JsonArray& valorEntradas = transicionNueva.createNestedArray("entradas");
+
+    for(uint8_t entradaME=0;entradaME<numeroEntradas;entradaME++) valorEntradas.add(transiciones[regla].getValorEntrada(entradaME));
   }
 
   root.printTo(cad);

@@ -48,12 +48,7 @@
 #include <WebServer.h>
 #include <ComprobacionErrores.h>
 
-//#include <Traza.h>
-//#include <ArduinoOTA.h>
-//#include <ArduinoJson.h>
 #include <rom/rtc.h>
-//#include <FtpServer.h>
-//#include <WebSocketsServer.h>
 /***************************** Includes *****************************/
 
 boolean inicializaConfiguracion(boolean debug);
@@ -63,7 +58,7 @@ void configuraWatchdog(void);
 void alimentaWatchdog(void);
 
 /***************************** variables globales *****************************/
-String nombre_dispositivo;//(NOMBRE_FAMILIA);//Nombre del dispositivo, por defecto el de la familia
+String nombre_dispositivo;//Nombre del dispositivo, por defecto el de la familia
 int debugGlobal=0; //por defecto desabilitado
 int nivelActivo;//Indica si el rele se activa con HIGH o LOW
 
@@ -317,6 +312,62 @@ String generaJsonConfiguracionNivelActivo(String configActual, int nivelAct)
 
   return salida;  
   } 
+
+/**********************************************************************/
+/*       Vuelca a un json informacion general del dispositivo         */
+/**********************************************************************/  
+String generaJsonInfo(void)
+  {
+  String salida="";
+
+  const size_t capacity = 1*JSON_ARRAY_SIZE(15) + JSON_OBJECT_SIZE(25);
+  DynamicJsonBuffer jsonBuffer(capacity);
+
+  JsonObject& json = jsonBuffer.createObject();
+    
+  JsonObject& basica = json.createNestedObject("basica");
+  //uptime
+  char tempcad[20]="";
+  sprintf(tempcad,"%lu", (unsigned long)(esp_timer_get_time()/(unsigned long)1000000)); //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años  
+  basica["uptime"] = String(tempcad);      
+  basica["hora"] = getHora();
+  basica["fecha"] = getFecha();
+  basica["nivelActivo"] = String(nivelActivo);
+
+  JsonArray& listaSalidas = json.createNestedArray("infoSalidas");
+ 
+  for(int8_t i=0;i<salidas.getNumSalidas();i++)
+    {
+    JsonObject& salidaNueva = listaSalidas.createNestedObject();
+
+    salidaNueva["id"] = String(i);
+    salidaNueva["nombre"] = salidas.getSalida(i).getNombre();
+    salidaNueva["estado"] = salidas.getSalida(i).getEstado();
+    }
+  
+  JsonObject& wifi = json.createNestedObject("wifi");  
+  wifi["ssid"] = nombreSSID();     
+  wifi["ip"] =  WiFi.localIP().toString();
+  wifi["potencia"] = String(WiFi.RSSI());
+
+  JsonObject& mqtt = json.createNestedObject("MQTT");  
+  mqtt["ipBRoker"] = getIPBroker().toString();     
+  mqtt["puertoBroker"] =  getPuertoBroker();
+  mqtt["usuario"] = getUsuarioMQTT();
+  mqtt["pasword"] = getPasswordMQTT();
+  mqtt["topicRoot"] = getTopicRoot();
+
+  JsonObject& hardware = json.createNestedObject("hardware");  
+  hardware["FreeHeap"] = String(ESP.getFreeHeap());    
+  hardware["ChipId"] =  String(ESP.getChipRevision());
+  hardware["SdkVersion"] = String(ESP.getSdkVersion());
+  hardware["CpuFreqMHz"] = String(ESP.getCpuFreqMHz());
+  hardware["FlashChipSize"] = String(ESP.getFlashChipSize());
+  hardware["FlashChipSpeed"] = String(ESP.getFlashChipSpeed());
+
+  json.printTo(salida);
+  return (salida);
+  }
 /********************************** Utilidades **************************************/
 /***************************************WatchDog**************************************************/
 /***************************************************************/

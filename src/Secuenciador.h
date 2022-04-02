@@ -9,7 +9,14 @@
 #define _SECUENCIADOR_
 
 #define HORAS_EN_DIA 24
+/******************* INTERVALOS_EN_HORA *******************/
+/* Numero de intervalos en una hora. Debe ser un multiplo */
+/* o un divisor de 60                                     */
+/* Si es un multiplo de 60, habra n intervalos por minuto */
+/* Si es un divisor de 60, n minutos por intervalo        */ 
+/* Si es 60, un intervalo equivale a un minuto            */
 #define INTERVALOS_EN_HORA 60
+/******************* INTERVALOS_EN_HORA *******************/
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/

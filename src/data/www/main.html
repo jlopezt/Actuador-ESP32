@@ -5,6 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" type="text/css" href="css.css" media="screen" />
+    <link href='main.css' rel='stylesheet' type='text/css'>
+    <!--
     <style>
       * {
         box-sizing: border-box;
@@ -116,28 +118,31 @@
         }
       }
     </style>
+    -->
     <script>
       function cambiaDiv() {
         console.log("Entrando");
         if (document.getElementById("atras").className == "oculto") {
-          console.log("Atras: esta oculto, lo voy a mostrar");
+          console.log("Atras: " + document.getElementById("atras").className + " mostrando atras");
           document.getElementById("atras").className = "visible";
-          document.getElementById("menuFicheros").className = "visible";
-          document.getElementById("menuInfo").className = "visible";
-          document.getElementById("menuParticiones").className = "visible";
-          document.getElementById("menuRestart").className = "visible";
-          console.log("Delante: esta " + document.getElementById("delante").className + ", lo oculto");
-          document.getElementById("delante").className = "oculto";
+          document.getElementById("servicio").className = "visible";          
         } else {
-          console.log("Atras: esta visible, ocultando atras");
+          console.log("Atras: " + document.getElementById("atras").className + " ocultando atras");
           document.getElementById("atras").className = "oculto";
-          document.getElementById("menuFicheros").className = "oculto";
-          document.getElementById("menuInfo").className = "oculto";
-          document.getElementById("menuParticiones").className = "oculto";
-          document.getElementById("menuRestart").className = "oculto";
-          console.log("Delante: esta " + document.getElementById("delante").className + ", lo muestro");
-          document.getElementById("delante").className = "visible";
+          document.getElementById("servicio").className = "oculto";
         }
+
+        if (document.getElementById("delante").className == "visible") {
+          cambiaIFrame("",'iframe_a');
+          console.log("Delante: " + document.getElementById("delante").className + " Ocultando delante");
+          document.getElementById("delante").className = "oculto";
+          document.getElementById("nav").className = "oculto";
+        } else {
+          cambiaIFrame("root.html",'iframe_a');
+          console.log("Delante: " + document.getElementById("delante").className + " mostrando delante");
+          document.getElementById("delante").className = "visible";
+          document.getElementById("nav").className = "visible";          
+        }        
       }
 
       function inicializa(){
@@ -147,13 +152,23 @@
             if(xh.status == 200) {
               console.log("JSON: " + JSON)
               var res = JSON.parse(xh.responseText);
-              //nombre
-              console.log("Nombre: "+res.nombre);
-              cambiaNombre(res.nombre);
-              //document.getElementById("nombreDispositivo").innerText=res.nombre;
-              //consigna
-              console.log("Version: "+res.version);
-              document.getElementById("version").innerText=res.version;
+              //nombre familia
+              if (typeof res.nombreFamilia !== 'undefined'){
+                console.log("Nombre familia: "+res.nombreFamilia);
+                cambiaNombreFamilia(res.nombreFamilia);
+              }
+              //nombre dispositivo
+              if (typeof res.nombreDispositivo !== 'undefined'){
+                console.log("Nombre dispositivo: "+res.nombreDispositivo);
+                cambia("nombreDispositivo",res.nombreDispositivo);
+                //document.getElementById("nombreDispositivo").innerText=res.nombreDispositivo;
+              }
+              //version
+              if (typeof res.version !== 'undefined'){
+                console.log("Version: "+res.version);
+                cambia("version",res.version);
+                //document.getElementById("version").innerText=res.version;
+              }              
             }
           }
         };
@@ -161,10 +176,8 @@
         xh.send(null);        
         
         //cargo el iframe con al info inicial
-        cambiaIFrame("iframe_a","root");
-
-        //relleno el frame oculto
-        //NADA
+        cambiaIFrame("root",'iframe_a');
+        cambiaIFrame("ficheros",'iframe_b');
 
         //Ajusto la altura del iframe        
         var margen = window.getComputedStyle(document.body,null).getPropertyValue("margin-top");
@@ -178,13 +191,17 @@
         document.getElementById("article").style.height=alto+"px";     
       }
       
-      function cambiaNombre(nombre){
+      function cambia(elemento,valor){
+        document.getElementById(elemento).innerHTML=valor;
+      }
+
+      function cambiaNombreFamilia(nombre){
         document.getElementById("nombre_1").innerHTML=nombre.substr(0,nombre.length-3);
         document.getElementById("nombre_2").innerHTML=nombre.substr(nombre.length-3,1);
         document.getElementById("nombre_3").innerHTML=nombre.substr(nombre.length-2);
       }
 
-      function cambiaIFrame(destino,pagina){
+      function cambiaIFrame(pagina,destino){
         var c=document.getElementById(destino);
         c.setAttribute("src",pagina);
       }
@@ -192,7 +209,7 @@
   </head>
   <body onload="inicializa();">
     <header style="overflow: auto;" id="header">
-      <div class="izquierda" id="nombreDispositivo">
+      <div class="izquierda" id="nombreFamilia">
         <span id="nombre_1"></span><span id="nombre_2" style="color:red"></span><span id="nombre_3"></span>
       </div>
       <div class="derecha" style="font-size: 20px;">
@@ -202,27 +219,33 @@
 
     <section>
       <div class="izquierda">
-        <nav id="nav">
+        <nav id="nav"  class="visible">
           <ul>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_a','root')">Inicio</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_a','entradas')">Entradas</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_a','salidas')">Salidas</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_a','secuenciador')">Secuenciador</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_a','maquinaEstados')">Maq. estados</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('root','iframe_a')">Inicio</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('entradas','iframe_a')">Entradas</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('salidas','iframe_a')">Salidas</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('secuenciador','iframe_a')">Secuenciador</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('maquinaEstados','iframe_a')">Maq. estados</li>
+          </ul>
+        </nav>
+      </div>
+      <div class="izquierda">
+        <nav id="servicio"  class="oculto">
+          <ul>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('ficheros','iframe_b')">Ficheros</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('info','iframe_b')">Info</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('particiones','iframe_b')">Particiones</li>
+            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('initRestart','iframe_b')">Reiniciar</li>            
           </ul>
         </nav>
       </div>
       <div class="derecha">
         <nav>
           <ul>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_b','ficheros')" class="oculto" id="menuFicheros">Ficheros</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_b','info')" class="oculto" id="menuInfo">Info</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_b','particiones')" class="oculto" id="menuParticiones">Particiones</li>
-            <li onMouseOver="this.style.cursor='pointer'" onClick="cambiaIFrame('iframe_b','restart')" class="oculto" id="menuRestart">Reiniciar</li>
             <li style="color:#888;" onMouseOver="this.style.cursor='pointer'" onClick="cambiaDiv()">Cambiar</li>
           </ul>
         </nav>
-      </div>
+      </div>      
       <article id="article">
         <div id="atras" class="oculto">          
           <iframe id="iframe_b" name="iframe_b" style="height:100%;width:100%;border:none;"></iframe>
@@ -232,10 +255,11 @@
         </div>
       </article>
     </section>
-
     <footer id="footer">
+      <div class="izquierda" id="nombreDispositivo"></div>
+      <div class="izquierda" id="separador">&nbsp;-&nbsp;</div>
       <div class="izquierda" id="version"></div>
-      <div class="derecha"><a href="https://domoticae.lopeztola.com" target="_self" style="text-decoration:none; color:white;">domoticae-2020</a></div>
+      <div class="derecha"><a href="https://domoticae.lopeztola.com" target="_self" style="text-decoration:none; color:white;">domoticae-2022</a></div>
     </footer>
   </body>
 </html>

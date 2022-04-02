@@ -5,7 +5,7 @@
 /*****************************************/
 
 /***************************** Defines *****************************/
-
+#define MAX_PLANES 5
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/
@@ -234,7 +234,7 @@ int Plan::getEstado(uint8_t hora, uint8_t intervalo){
   uint32_t _mascara=1;
   _mascara<<=hora;
 
-  Traza.mensaje("Plan %i | Hora: %i | intervalo: %i | mascara: %i | valor: %i | retorno: %i\n",id,hora,intervalo,_mascara,intervalos[intervalo],(intervalos[intervalo] & _mascara?1:0));
+  //**//Traza.mensaje("Plan %i | Hora: %i | intervalo: %i | mascara: %i | valor: %i | retorno: %i\n",id,hora,intervalo,_mascara,intervalos[intervalo],(intervalos[intervalo] & _mascara?1:0));
   
   if(intervalos[intervalo] & _mascara) return ESTADO_ACTIVO;
   else return ESTADO_DESACTIVO;

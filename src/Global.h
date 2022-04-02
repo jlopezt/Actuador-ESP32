@@ -9,8 +9,8 @@
 #define _GLOBAL_
 
 //Defines generales
-#define NOMBRE_FAMILIA   "Actuador/Secuenciador (E/S)"
-#define VERSION          "esp32 - ver 6.6.1"//(ESP32 1.0.4|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)"
+#define NOMBRE_FAMILIA   "Actuador" //"Actuador/Secuenciador (E/S)"
+#define VERSION          "esp32 - ver 7.0.0"//(ESP32 1.0.4|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)"
 
 #define TRUE              1
 #define FALSE             0
@@ -48,9 +48,6 @@
 #define MAX_ENTRADAS      10 //numero maximo de reles soportado
 #define MAX_SALIDAS       MAX_PINES-MAX_ENTRADAS //numero maximo de salidas
 
-//Secuenciador
-#define MAX_PLANES 5 //2
-
 //Funciones de led
 #define LED_BUILTIN                2 //GPIO del led de la placa en los ESP32   
 /***************************** Defines *****************************/
@@ -58,12 +55,11 @@
 /***************************** Includes *****************************/
 #include <Arduino.h>
 #include <Traza.h>
-//#include <Ficheros.h>
 #include <ArduinoJson.h>
 /***************************** Includes *****************************/
 
 /***************************** Variables *****************************/
-extern String nombre_dispositivo;//(NOMBRE_FAMILIA);//Nombre del dispositivo, por defecto el de la familia
+extern String nombre_dispositivo;//Nombre del dispositivo, por defecto el de la familia
 extern int debugGlobal; //por defecto desabilitado
 extern int nivelActivo;
 /***************************** Variables *****************************/
@@ -76,6 +72,7 @@ void parpadeaLed(uint8_t veces, uint16_t espera=100);
 void parpadeaLed(uint8_t veces, uint16_t espera);
 
 String generaJsonConfiguracionNivelActivo(String configActual, int nivelAct);
+String generaJsonInfo(void);
 /************************* Utilidades ***************************/
 
 #endif

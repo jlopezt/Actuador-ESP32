@@ -7,7 +7,7 @@
             console.log(queryString);
             
             const urlParams = new URLSearchParams(queryString);
-            var dir="";            
+            var dir="/";            
             if(urlParams.has("dir")){
                 dir = urlParams.get('dir');
                 console.log(dir);
@@ -117,7 +117,7 @@
                     hilera.appendChild(celda);
                 }
 
-                document.getElementById("fichero_nombre_" + indice).innerHTML="<a class='enlaceBoton' href='/manageFichero?nombre=" + padre + fichero.nombre + "'>" + fichero.nombre + "</a>";
+                document.getElementById("fichero_nombre_" + indice).innerHTML="<a class='enlaceBoton' href='/editaFichero?nombre=" + padre + fichero.nombre + "'>" + fichero.nombre + "</a>";
                 document.getElementById("fichero_tamano_" + indice).innerHTML=fichero.tamano;
                 document.getElementById("fichero_fecha_" + indice).innerHTML=fichero.fechaEdicion;
                 document.getElementById("fichero_borrar_" + indice).innerHTML="<form action='borraFichero' target='_self'><input type='hidden' name='nombre' value='" + padre + fichero.nombre + "'><input type='submit' value='borrar'></form>";
