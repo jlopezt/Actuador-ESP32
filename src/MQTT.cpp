@@ -33,6 +33,7 @@
 
 /***************************** Includes *****************************/
 #include <MQTT.h>
+#include <Sensores.h>
 #include <Entradas.h>
 #include <Salidas.h>
 #include <RedWifi.h>
@@ -54,6 +55,7 @@ String usuarioMQTT; //usuario par ala conxion al broker
 String passwordMQTT; //password parala conexion al broker
 String topicRoot; //raiz del topic a publicar. Util para separar mensajes de produccion y prepropduccion
 String ID_MQTT; //ID del modulo en su conexion al broker
+int8_t publicarMedidas; //Flag para determinar si se envia el json con los valores de las medidas
 int8_t publicarEntradas; //Flag para determinar si se envia el json con los valores de las entradas
 int8_t publicarSalidas; //Flag para determinar si se envia el json con los valores de las salidas
 int8_t publicarSecuenciador; //Flag para determinar si se envia el json con los valores del secuenciador
@@ -121,6 +123,7 @@ boolean recuperaDatosMQTT(boolean debug)
   usuarioMQTT="";
   passwordMQTT="";
   topicRoot="";
+  publicarMedidas=1;
   publicarEntradas=1; 
   publicarSalidas=1;    
   publicarMaquinaEstados=1;
@@ -129,7 +132,7 @@ boolean recuperaDatosMQTT(boolean debug)
     {
     //Algo salio mal, Confgiguracion por defecto
     Traza.mensaje("No existe fichero de configuracion MQTT o esta corrupto\n");
-    cad="{\"IPBroker\": \"0.0.0.0\", \"BrokerDir\": \"\"; \"puerto\": 1883, \"timeReconnectMQTT\": 500, \"usuarioMQTT\": \"usuario\", \"passwordMQTT\": \"password\",  \"ID_MQTT\": \"" + String(NOMBRE_FAMILIA) + "\",  \"topicRoot\":  \"" + NOMBRE_FAMILIA + "\", \"publicarEntradas\": 0, \"publicarSalidas\": 0}";
+    cad="{\"IPBroker\": \"0.0.0.0\", \"BrokerDir\": \"\"; \"puerto\": 1883, \"timeReconnectMQTT\": 500, \"usuarioMQTT\": \"usuario\", \"passwordMQTT\": \"password\",  \"ID_MQTT\": \"" + String(NOMBRE_FAMILIA) + "\",  \"topicRoot\":  \"" + NOMBRE_FAMILIA + "\", \"publicarMedidas\": 0, \"publicarEntradas\": 0, \"publicarSalidas\": 0}";
     //if (salvaFichero(MQTT_CONFIG_FILE, MQTT_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion MQTT creado por defecto\n");    
     }
 
@@ -158,12 +161,13 @@ boolean parseaConfiguracionMQTT(String contenido)
     usuarioMQTT=json.get<String>("usuarioMQTT");
     passwordMQTT=json.get<String>("passwordMQTT");
     topicRoot=json.get<String>("topicRoot");
+    publicarMedidas=json.get<int8_t>("publicarMedidas"); 
     publicarEntradas=json.get<int8_t>("publicarEntradas"); 
     publicarSalidas=json.get<int8_t>("publicarSalidas");
     publicarSecuenciador=json.get<int8_t>("publicarSecuenciador");
     publicarMaquinaEstados=json.get<int8_t>("publicarMaquinaEstados"); 
     
-    Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nBrokerDir: %s\nIP Puerto del broker: %i\ntimeReconnectMQTT: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar entradas: %i\nPublicar salidas: %i\nPublicar secuenciador: %i\nPublicar maquina estados: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),BrokerDir.c_str(),puertoBroker,timeReconnectMQTT,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),publicarEntradas,publicarSalidas,publicarSecuenciador,publicarMaquinaEstados);
+    Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nBrokerDir: %s\nIP Puerto del broker: %i\ntimeReconnectMQTT: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nPublicar Medidas: %i\nPublicar entradas: %i\nPublicar salidas: %i\nPublicar secuenciador: %i\nPublicar maquina estados: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),BrokerDir.c_str(),puertoBroker,timeReconnectMQTT,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),publicarMedidas,publicarEntradas,publicarSalidas,publicarSecuenciador,publicarMaquinaEstados);
 //************************************************************************************************
     return true;
     }
@@ -397,6 +401,15 @@ void enviaDatos(boolean debug)
   {
   String payload;
 
+  //**************************************MEDIDAS******************************************
+  if(publicarMedidas==1)
+    {
+    payload=sensores.generaJsonEstado();//genero el json de las entradas
+    //Lo envio al bus    
+    if(enviarMQTT(ID_MQTT+"/"+"medidas", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
+    else if(debug)Traza.mensaje("¡¡Error al enviar json al broker!!\n");
+    }
+  else if(debug)Traza.mensaje("No publico medidas. Publicar medidas es %i\n",publicarMedidas);
   //**************************************ENTRADAS******************************************
   if(publicarEntradas==1)
     {
@@ -449,6 +462,7 @@ String getUsuarioMQTT(void){return usuarioMQTT;}
 String getPasswordMQTT(void){return passwordMQTT;}
 String getTopicRoot(void){return topicRoot;}
 String getIDMQTT(void){return ID_MQTT;}
+int8_t getPublicarMedidas(void){return publicarMedidas;}
 int8_t getPublicarEntradas(void){return publicarEntradas;}
 int8_t getPublicarSalidas(void){return publicarSalidas;}
 String getWillTopic(void){return WILL_TOPIC;}

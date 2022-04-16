@@ -6,15 +6,16 @@
 /**********************************************************************************/
 
 /***************************** Defines *****************************/
-#define LONG_COMANDO 40
+#define LONG_COMANDO   40
 #define LONG_PARAMETRO 30
-#define LONG_ORDEN 22 //Comando (espacio) Parametros (fin de cadena)
-#define MAX_COMANDOS   35
+#define LONG_ORDEN     22 //Comando (espacio) Parametros (fin de cadena)
+#define MAX_COMANDOS   40
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/
 #include <Global.h>
 #include <Ordenes.h>
+#include <Sensores.h>
 #include <Entradas.h>
 #include <Salidas.h>
 #include <RedWifi.h>
@@ -417,7 +418,23 @@ void func_comando_getPWM(int iParametro, char* sParametro, float fParametro)//"d
 void func_comando_setSalida(int iParametro, char* sParametro, float fParametro)//"debug")
   {
   salidas.setSalidaActiva(iParametro);  
-  }/***************************** FIN funciones para comandos ******************************************/ 
+  }
+
+void func_comando_sensores(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  Serial.printf("Valores de los sensores:\n%s\n",sensores.generaJsonEstado().c_str());  
+  }
+
+void func_comando_scannerOW(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  sensores.scannerOneWire();
+  }
+  
+void func_comando_scannerI2C(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  sensores.scannerI2C();
+  }  
+/***************************** FIN funciones para comandos ******************************************/ 
 
 void inicializaOrden(void)
   { 
@@ -556,6 +573,18 @@ void inicializaOrden(void)
   comandos[i].comando="setSalida";
   comandos[i].descripcion="Selecciona la salida a configurar PWM";
   comandos[i++].p_func_comando=func_comando_setSalida;
+
+  comandos[i].comando="sensores";
+  comandos[i].descripcion="Recipera los valores medidos por los sensores";
+  comandos[i++].p_func_comando=func_comando_sensores;
+
+  comandos[i].comando="ScannerOW";
+  comandos[i].descripcion="Scanner del bus OneWire";
+  comandos[i++].p_func_comando=func_comando_scannerOW;
+
+  comandos[i].comando="ScannerI2C";
+  comandos[i].descripcion="Scanner del bus I2C";
+  comandos[i++].p_func_comando=func_comando_scannerI2C;
 
   //resto
   for(;i<MAX_COMANDOS;)

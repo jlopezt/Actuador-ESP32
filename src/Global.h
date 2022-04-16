@@ -10,7 +10,7 @@
 
 //Defines generales
 #define NOMBRE_FAMILIA   "Actuador" //"Actuador/Secuenciador (E/S)"
-#define VERSION          "esp32 - ver 7.0.0"//(ESP32 1.0.4|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)"
+#define VERSION          "esp32 - ver 7.1.0"//(ESP32 1.0.4|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)"
 
 #define TRUE              1
 #define FALSE             0
@@ -42,6 +42,8 @@
 #define MAQUINAESTADOS_CONFIG_BAK_FILE   "/MaqEstadosConfig.json.bak"
 #define FTP_CONFIG_FILE                  "/FTPConfig.json"
 #define FTP_CONFIG_BAK_FILE              "/FTPConfig.json.bak"
+#define SENSORES_CONFIG_FILE             "/Sensores.json"
+#define SENSORES_CONFIG_BAK_FILE         "/Sensores.json.bak"
 
 //Entradas y Salidas
 #define MAX_PINES         20 //numero de pines disponibles para entradas y salidas

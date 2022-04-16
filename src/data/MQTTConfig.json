@@ -8,6 +8,7 @@
   "passwordMQTT": "88716", 
   "ID_MQTT": "PuertaGaraje", 
   "topicRoot": "casaPre", 
+  "publicarMedidas": 1,
   "publicarEntradas": 1,
   "publicarSalidas": 1,
   "publicarSecuenciador": 1,

@@ -1,0 +1,10 @@
+{
+    "Sensores":[
+        {"nombre":"DS18B20_1","tipo": "DS18B20","parametros":{"direccion":"28:6D:36:75:D0:01:3C:66"}},
+        {"nombre":"DS18B20_2","tipo": "DS18B20","parametros":{"direccion":"aa aa aa aa aa aa aa aa"}},
+        {"nombre":"DS18B20_3","tipo": "DS18B20","parametros":{"direccion":"aa aa aa aa aa aa aa aa"}},
+        {"nombre":"HDC1050_1","tipo": "HDC1080","parametros":{"direccionI2C":"0x40"}},
+        {"nombre":"DHT_1","tipo": "DHT22","parametros":{"pin":"32"}},
+        {"nombre":"DHT_2","tipo": "DHT22","parametros":{"pin":"33"}}
+    ]
+}
