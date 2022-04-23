@@ -108,6 +108,23 @@ String SensorDS18B20::generaJsonEstado(JsonObject& root){
   return salida;
 }
 
+String SensorDS18B20::generaJsonConfiguracion(JsonObject& root){
+  root["nombre"]=getNombre();
+  root["tipo"]="DS18B20";
+  root["direccion"]=getDirecciontoString();  
+
+  String salida="";
+  root.printTo(salida);
+  return salida;
+}
+
+String SensorDS18B20::getDirecciontoString(void){
+  char temp[24]="";
+  sprintf(temp,"%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",direccion[0],direccion[1],direccion[2],direccion[3],direccion[4],direccion[5],direccion[6],direccion[7]);
+  //Serial.printf("direccion: %s\n",temp);
+  return String(temp);
+}
+
 uint8_t HextoInt(uint8_t c){
     if(c>=97 && c<=122) return c-97+10;//minusculas
     if(c>=65 && c<90) return c-65+10;//mayusculas
@@ -185,6 +202,16 @@ String SensorDHT::generaJsonEstado(JsonObject& root){
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
+
+String SensorDHT::generaJsonConfiguracion(JsonObject& root){
+  root["nombre"]=getNombre();
+  root["tipo"]="DHT22";
+  root["pin"]=pin;  
+
+  String salida="";
+  root.printTo(salida);
+  return salida;
+}
 /***********************************FIN DHT*********************************************/
 
 /***********************************HDC1080*********************************************/
@@ -253,6 +280,17 @@ String SensorHDC1080::generaJsonEstado(JsonObject& root){
   String salida="";
   root.printTo(salida);
   //Serial.printf("%s\n",salida.c_str());
+  return salida;
+}
+
+String SensorHDC1080::generaJsonConfiguracion(JsonObject& root){
+  root["nombre"]=getNombre();
+  root["tipo"]="HDC1080";
+  //root["direccion"]=direccionI2C;  
+  root["direccion"]="0x" + String(direccionI2C,HEX);
+
+  String salida="";
+  root.printTo(salida);
   return salida;
 }
 /***********************************FIN HDC1080*********************************************/
@@ -326,6 +364,17 @@ String SensorBMP280::generaJsonEstado(JsonObject& root){
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
+
+String SensorBMP280::generaJsonConfiguracion(JsonObject& root){
+  root["nombre"]=getNombre();
+  root["tipo"]="BMP280";
+  //root["direccion"]=direccionI2C;  
+  root["direccion"]="0x" + String(direccionI2C,HEX);
+
+  String salida="";
+  root.printTo(salida);
+  return salida;
+}
 /***********************************FIN BMP280*********************************************/
 
 /***********************************BME280*********************************************/
@@ -346,7 +395,7 @@ boolean SensorBME280::parseaConfiguracion(String contenido)  {
   JsonObject& root = jsonBuffer.parseObject(contenido.c_str());
   //json.printTo(Serial);
   if (!root.success()){
-      Serial.printf("error al parsear parametros de DS18B20\n");
+      Serial.printf("error al parsear parametros de BME280\n");
       return false;
     }
 
@@ -404,6 +453,17 @@ String SensorBME280::generaJsonEstado(JsonObject& root){
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
+
+String SensorBME280::generaJsonConfiguracion(JsonObject& root){
+  root["nombre"]=getNombre();
+  root["tipo"]="BME280";
+  //root["direccion"]=direccionI2C;  
+  root["direccion"]="0x" + String(direccionI2C,HEX);
+
+  String salida="";
+  root.printTo(salida);
+  return salida;
+}
 /***********************************FIN HDC1080*********************************************/
 
 /***********************************BH1750*********************************************/
@@ -414,12 +474,35 @@ void SensorBH1750::inicializa(String _nombre, uint8_t _tipo, String parametros){
   setTipo(_tipo);
 
   if (parseaConfiguracion(parametros)) {
-    bh1750=(BH1750*) new BH1750();
+    bh1750=(BH1750*) new BH1750(direccionI2C);
     if(bh1750!=NULL) bh1750->begin(BH1750::CONTINUOUS_LOW_RES_MODE);    
     }
   }
 
-boolean SensorBH1750::parseaConfiguracion(String contenido)  {Serial.printf("Nada que hacer en BH1758\n");return true;}
+boolean SensorBH1750::parseaConfiguracion(String contenido){
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject& root = jsonBuffer.parseObject(contenido.c_str());
+  //json.printTo(Serial);
+  if (!root.success()){
+      Serial.printf("error al parsear parametros de BH1750\n");
+      return false;
+    }
+
+  Serial.println("parsed json");
+//******************************Parte especifica del json a leer********************************
+  if(!root.containsKey("direccionI2C")) {Serial.printf("No hay direccionI2C en BH1750\n");return false;}
+  
+  String _direccionI2CString=root.get<String>("direccionI2C");
+
+  uint8_t _direccionI2C=convierteDireccionI2C(_direccionI2CString);
+  setDireccionI2C(_direccionI2C);
+
+  Serial.printf("Configuracion del BH1750 leida:\nParamteros: %s\ndireccion (int): %i\n",contenido.c_str(),_direccionI2C);
+//************************************************************************************************
+  return true;  
+
+  //Serial.printf("Nada que hacer en BH1758\n");return true;
+  }
 
 void SensorBH1750::lee(void){
     // Lee el valor desde el sensor
@@ -448,6 +531,16 @@ String SensorBH1750::generaJsonEstado(JsonObject& root){
   String salida="";
   root.printTo(salida);
   //Serial.printf("%s\n",salida.c_str());
+  return salida;
+}
+
+String SensorBH1750::generaJsonConfiguracion(JsonObject& root){
+  root["nombre"]=getNombre();
+  root["tipo"]="BH1750";
+  root["direccion"]="0x" + String(direccionI2C,HEX);
+
+  String salida="";
+  root.printTo(salida);
   return salida;
 }
 /***********************************FIN BH1750*********************************************/
@@ -481,6 +574,15 @@ String SensorGL5539::generaJsonEstado(JsonObject& root){
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
+
+String SensorGL5539::generaJsonConfiguracion(JsonObject& root){
+  root["nombre"]=getNombre();
+  root["tipo"]="GL5539";
+
+  String salida="";
+  root.printTo(salida);
+  return salida;
+}
 /***********************************FIN GL5539*********************************************/
 
 /***********************************HumedadSuelo*********************************************/
@@ -508,12 +610,21 @@ String SensorHumedadSuelo::generaJsonEstado(JsonObject& root){
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
+
+String SensorHumedadSuelo::generaJsonConfiguracion(JsonObject& root){
+  root["nombre"]=getNombre();
+  root["tipo"]="SOILMOISTURECAPACITIVEV2";
+
+  String salida="";
+  root.printTo(salida);
+  return salida;
+}
 /***********************************FIN HumedadSuelo*********************************************/
 
 /***********************************Funciones comunes*********************************************/
 uint8_t convierteDireccionI2C(String entrada){
   uint8_t salida=0;
-
+  
   if(entrada.charAt(0)=='0' && entrada.charAt(1)=='x'){    
     for(uint8_t i=2;i<entrada.length();i++){
       salida *= 16;
@@ -521,7 +632,7 @@ uint8_t convierteDireccionI2C(String entrada){
     }
   }
   else salida=(uint8_t)entrada.toInt();
-
+  
   return salida;
 }
 

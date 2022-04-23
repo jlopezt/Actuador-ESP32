@@ -16,7 +16,7 @@
 #include <Global.h>
 #include <SNTP.h>
 
-#include <TimeLib.h>  // download from: http://www.arduino.cc/playground/Code/Time
+//#include <TimeLib.h>  // download from: http://www.arduino.cc/playground/Code/Time
 #include <time.h>
 /***************************** Includes *****************************/
 

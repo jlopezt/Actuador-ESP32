@@ -13,6 +13,7 @@
 /***************************** Includes *****************************/
 #include <Global.h>
 #include <WebServer.h>
+#include <Sensores.h>
 #include <Entradas.h>
 #include <Salidas.h>
 #include <Secuenciador.h>
@@ -31,22 +32,21 @@
 #include <SPIFFS.h>
 /***************************** Includes *****************************/
 
-//Variables globales
+/***************************** Variables globales *****************************/
 AsyncWebServer serverX(PUERTO_WEBSERVER);
 
 //Cadenas HTML precargadas
 String miniCabecera="<html><head></head><body><link rel='stylesheet' type='text/css' href='css.css'>\n";
 String miniPie="</body></html>";
 
-//void handleMain(AsyncWebServerRequest *request);
-//void handleRoot(AsyncWebServerRequest *request);
 void handleNombre(AsyncWebServerRequest *request);
 
-//void handleEntradas(AsyncWebServerRequest *request);
+void handleEstadoMedidas(AsyncWebServerRequest *request);
+void handleConfigSensores(AsyncWebServerRequest *request);
+
 void handleEstadoEntradas(AsyncWebServerRequest *request);
 void handleConfigEntradas(AsyncWebServerRequest *request);
 
-//void handleSalidas(AsyncWebServerRequest *request);
 void handleEstadoSalidas(AsyncWebServerRequest *request);
 void handleConfigSalidas(AsyncWebServerRequest *request);
 
@@ -56,10 +56,8 @@ void handleFuerzaManual(AsyncWebServerRequest *request);
 void handleDesactivaRele(AsyncWebServerRequest *request);
 void handleActivaRele(AsyncWebServerRequest *request);
 
-//void handleMaquinaEstados(AsyncWebServerRequest *request);
 void handleEstadoMaquinaEstados(AsyncWebServerRequest *request);
 
-//void handleSecuenciador(AsyncWebServerRequest *request);
 void handleDesactivaSecuenciador(AsyncWebServerRequest *request);
 void handleActivaSecuenciador(AsyncWebServerRequest *request);
 void handleEstadoSecuenciador(AsyncWebServerRequest *request);
@@ -70,9 +68,7 @@ void handleSetNextBoot(AsyncWebServerRequest *request);
 void handleInfo(AsyncWebServerRequest *request);
 void handleRestart(AsyncWebServerRequest *request);
 
-//void handleFicheros(AsyncWebServerRequest *request);
 void handleListaFicheros(AsyncWebServerRequest *request);
-//void handleEditaFichero(AsyncWebServerRequest *request);
 void handleLeeFichero(AsyncWebServerRequest *request);
 void handleBorraFichero(AsyncWebServerRequest *request);
 void handleCreaFichero(AsyncWebServerRequest *request);
@@ -85,41 +81,37 @@ size_t loadData(File f, uint8_t *buffer, size_t maxLen, size_t index);
 String getContentType(String filename);
 
 void handleSpeechPath(AsyncWebServerRequest *request);
+/*************************** Fin variables globales ***************************/
 
 /*********************************** Inicializacion y configuracion *****************************************************************/
 void inicializaWebServer(void)
   {
   /*******Configuracion del Servicio Web***********/  
   //Inicializo los serivcios, decalra las URIs a las que va a responder
-
-  //serverX.on("/", HTTP_GET, handleMain); //Responde con la identificacion del modulo    
-  //serverX.on("/root", HTTP_GET, handleRoot); //devuelve un JSON con las medidas, reles y modo para actualizar la pagina de datos
-  serverX.on("/estadoEntradas", HTTP_GET, handleEstadoEntradas); //Responde con la identificacion del modulo
-  serverX.on("/estadoSalidas", HTTP_GET, handleEstadoSalidas); //Responde con la identificacion del modulo
   serverX.on("/nombre", HTTP_GET, handleNombre); //devuelve un JSON con las medidas, reles y modo para actualizar la pagina de datos
-  //serverX.on("/salidas", HTTP_GET, handleSalidas); //Servicio de estdo de reles
-  serverX.on("/configSalidas", HTTP_GET, handleConfigSalidas); //Servicio de estdo de reles
-  //serverX.on("/entradas", HTTP_GET, handleEntradas); //Servicio de estdo de reles    
+
+  serverX.on("/estadoMedidas", HTTP_GET, handleEstadoMedidas); //Responde con la identificacion del modulo
+  serverX.on("/configSensores", HTTP_GET, handleConfigSensores); //Servicio de estdo de reles
+
+  serverX.on("/estadoEntradas", HTTP_GET, handleEstadoEntradas); //Responde con la identificacion del modulo  
   serverX.on("/configEntradas", HTTP_GET, handleConfigEntradas); //Servicio de estdo de reles
-  
+
+  serverX.on("/estadoSalidas", HTTP_GET, handleEstadoSalidas); //Responde con la identificacion del modulo
+  serverX.on("/configSalidas", HTTP_GET, handleConfigSalidas); //Servicio de estdo de reles 
   serverX.on("/activaSalida", HTTP_ANY, handleActivaRele); //Servicio de activacion de rele
   serverX.on("/desactivaSalida", HTTP_ANY, handleDesactivaRele);  //Servicio de desactivacion de rele
   serverX.on("/fuerzaSalidaManual", HTTP_ANY, handleFuerzaManual);  //Servicio para formar ua salida a modo manual
   serverX.on("/recuperaSalidaManual", HTTP_ANY, handleRecuperaManual);  //Servicio para formar ua salida a modo manual  
   serverX.on("/pulsoSalida", HTTP_ANY, handlePulsoRele);  //Servicio de pulso de rele
 
-  //serverX.on("/secuenciador", HTTP_GET, handleSecuenciador); //Servicio de estdo de reles
   serverX.on("/configSecuenciador", HTTP_GET, handleConfigSecuenciador); //Servicio de estdo de reles
   serverX.on("/estadoSecuenciador", HTTP_ANY, handleEstadoSecuenciador);  //Serivico de estado del secuenciador
   serverX.on("/activaSecuenciador", HTTP_ANY, handleActivaSecuenciador);  //Servicio para activar el secuenciador
   serverX.on("/desactivaSecuenciador", HTTP_ANY, handleDesactivaSecuenciador);  //Servicio para desactivar el secuenciador
 
-  //serverX.on("/maquinaEstados", HTTP_ANY, handleMaquinaEstados);  //Servicio de representacion de las transiciones de la maquina de estados
   serverX.on("/estadoMaquinaEstados", HTTP_ANY, handleEstadoMaquinaEstados);  //Servicio de representacion del estado de la maquina de estados
 
-  //serverX.on("/ficheros", HTTP_ANY, handleFicheros);  //URI de leer fichero    
   serverX.on("/listaFicheros", HTTP_ANY, handleListaFicheros);  //URI de leer fichero  
-  //serverX.on("/editaFichero", HTTP_ANY, handleEditaFichero);  //Devuelve la pagina estatica editaFichero.html
   serverX.on("/creaFichero", HTTP_ANY, handleCreaFichero);  //URI de crear fichero
   serverX.on("/borraFichero", HTTP_ANY, handleBorraFichero);  //URI de borrar fichero
   serverX.on("/leeFichero", HTTP_ANY, handleLeeFichero);  //URI de leer fichero
@@ -131,7 +123,7 @@ void inicializaWebServer(void)
   serverX.on("/info", HTTP_ANY, handleInfo);  //URI de test
  
   //upload de ficheros
-  serverX.on("/upload", HTTP_GET, [](AsyncWebServerRequest *request) {request->redirect("upload.html");});
+  serverX.on("/upload", HTTP_GET, [](AsyncWebServerRequest *request) {request->redirect("/www/upload.html");});
   serverX.on("/upload", HTTP_POST, [](AsyncWebServerRequest *request) {
         request->send(200);
       }, handleUpload);
@@ -151,9 +143,6 @@ void inicializaWebServer(void)
 /********************************* FIn inicializacion y configuracion ***************************************************************/
 
 /************************* Gestores de las diferentes URL coniguradas ******************************/
-//void handleMain(AsyncWebServerRequest *request) {request->redirect("main.html");}//Redirect to our html web page 
-//void handleRoot(AsyncWebServerRequest *request) {request->redirect("root.html");}//Redirect to our html web page 
-
 /*******************************UTILIDADES*****************************************************/
 /*************************************************/
 /*                                               */
@@ -175,32 +164,6 @@ void handleNombre(AsyncWebServerRequest *request)
   root.printTo(cad);
   request->send(200,"text/json",cad);
   }
-
-/*************************************************/
-/*                                               */
-/*  Servicio de consulta de estado de            */
-/*  las entradas y devuelve un formato json      */
-/*                                               */
-/*************************************************/  
-void handleEstadoEntradas(AsyncWebServerRequest *request)
-  {
-  String cad=entradas.generaJsonEstado();
-  
-  request->send(200, "text/json", cad); 
-  }  
-
-/*************************************************/
-/*                                               */
-/*  Servicio de consulta de estado de            */
-/*  las Salidas , devuelve un formato json       */
-/*                                               */
-/*************************************************/  
-void handleEstadoSalidas(AsyncWebServerRequest *request)
-  {
-  String cad=salidas.generaJsonEstado();
-  
-  request->send(200, "text/json", cad); 
-  }  
 
 /*********************************************/
 /*                                           */
@@ -239,8 +202,70 @@ void handleSetNextBoot(AsyncWebServerRequest *request)
 
   request->send(501,"text/plain", "Error");
   }
+
+/*********************************************/
+/*                                           */
+/*  Lee info del chipset mediante            */
+/*  peticion HTTP                            */ 
+/*                                           */
+/*********************************************/  
+void handleInfo(AsyncWebServerRequest *request){
+  String cad=generaJsonInfo();
+  request->send(200, "text/json", cad);
+}
 /*******************************FIN UTILIDADES*****************************************************/
-/*******************************ACTIVACION/DESACITVACION ENTRADAS/SALIDAS*****************************************************/
+/*******************************ACTIVACION/DESACITVACION MEDIDAS, ENTRADAS Y SALIDAS*****************************************************/
+/*************************************************/
+/*                                               */
+/*  Servicio de consulta de estado de            */
+/*  las entradas y devuelve un formato json      */
+/*                                               */
+/*************************************************/  
+void handleEstadoMedidas(AsyncWebServerRequest *request)
+  {
+  String cad=sensores.generaJsonEstado();
+  
+  request->send(200, "text/json", cad); 
+  }  
+
+/*************************************************/
+/*                                               */
+/*  Servicio de consulta de estado de            */
+/*  las entradas y devuelve un formato json      */
+/*                                               */
+/*************************************************/  
+void handleEstadoEntradas(AsyncWebServerRequest *request)
+  {
+  String cad=entradas.generaJsonEstado();
+  
+  request->send(200, "text/json", cad); 
+  }  
+
+/*************************************************/
+/*                                               */
+/*  Servicio de consulta de estado de            */
+/*  las Salidas , devuelve un formato json       */
+/*                                               */
+/*************************************************/  
+void handleEstadoSalidas(AsyncWebServerRequest *request)
+  {
+  String cad=salidas.generaJsonEstado();
+  
+  request->send(200, "text/json", cad); 
+  }  
+
+/*****************************************************/
+/*                                                   */
+/*  Servicio de consulta de estado de los sensores   */
+/*  devuelve un formato json                         */
+/*                                                   */
+/*****************************************************/  
+void handleConfigSensores(AsyncWebServerRequest *request){
+  String cad=sensores.generaJsonConfiguracion(false);
+  request->send(200, "text/json", cad);
+  //request->redirect("Sensores.json");
+  }
+
 /***************************************************/
 /*                                                 */
 /*  Servicio de consulta de estado de las salidas  */ 
@@ -252,8 +277,7 @@ void handleConfigSalidas(AsyncWebServerRequest *request)
   String cad=salidas.generaJsonEstado(false);
   request->send(200, "text/json", cad);
   }
-//void handleSalidas(AsyncWebServerRequest *request) {request->redirect("salidas.html");}
-  
+ 
 /*****************************************************/
 /*                                                   */
 /*  Servicio de consulta de estado de las entradas   */
@@ -265,7 +289,6 @@ void handleConfigEntradas(AsyncWebServerRequest *request)
   String cad=entradas.generaJsonEstado(false);
   request->send(200, "text/json", cad); 
   }
-//void handleEntradas(AsyncWebServerRequest *request) {request->redirect("entradas.html");}
 
 /*********************************************/
 /*                                           */
@@ -359,7 +382,7 @@ void handleRecuperaManual(AsyncWebServerRequest *request)
     }
   else request->send(404, "text/plain", "Error"); 
   }
-/*******************************FIN ACTIVACION/DESACITVACION ENTRADAS/SALIDAS*****************************************************/
+/*******************************FIN ACTIVACION/DESACITVACION MEDIDAS, ENTRADAS Y SALIDAS*****************************************************/
 /*******************************MAQUINA DE ESADOS*****************************************************/
 /*************************************************/
 /*                                               */
@@ -374,13 +397,6 @@ void handleEstadoMaquinaEstados(AsyncWebServerRequest *request){
 }
 /****************************FIN MAQUINA ESTADOS******************************************/
 /****************************SECUENCIADOR******************************************/
-/****************************************************************/
-/*                                                              */
-/*   Servicio de representacion de los datos del secuenciador   */
-/*                                                              */
-/****************************************************************/
-//void handleSecuenciador(AsyncWebServerRequest *request){request->redirect("secuenciador.html");}
-
 /*********************************************************/
 /*                                                       */
 /*  Servicio de informacion delestado del secuenciador   */
@@ -421,19 +437,7 @@ void handleDesactivaSecuenciador(AsyncWebServerRequest *request){
   secuenciador.desactivar();
   request->send(200, "text/plain", "Secuenciador desactivado");
 }
-
-
 /****************************FIN SECUENCIADOR******************************************/
-/*********************************************/
-/*                                           */
-/*  Lee info del chipset mediante            */
-/*  peticion HTTP                            */ 
-/*                                           */
-/*********************************************/  
-void handleInfo(AsyncWebServerRequest *request){
-  String cad=generaJsonInfo();
-  request->send(200, "text/json", cad);
-}
 
 /****************************GESTION DE FICHEROS******************************************/
 /*********************************************/
@@ -484,6 +488,7 @@ void handleBorraFichero(AsyncWebServerRequest *request)
 /*  Lee un fichero a traves de una           */
 /*  peticion HTTP                            */ 
 /*  COPIADO DE ACTUADOR                      */
+/*                                           */
 /*********************************************/
 void handleLeeFichero(AsyncWebServerRequest *request){
   if(request->hasArg("nombre") ) {
@@ -507,28 +512,6 @@ void handleLeeFichero(AsyncWebServerRequest *request){
 
 /*********************************************/
 /*                                           */
-/*  Habilita la edicion y borrado del        */
-/*  fichero indicado, a traves de una        */
-/*  peticion HTTP                            */ 
-/*                                           */
-/*********************************************/ 
-/*
-void handleEditaFichero(AsyncWebServerRequest *request){
-  if(request->hasArg("nombre") ) //si existen esos argumentos
-    {
-    request->redirect("editaFichero.html?nombre=" + request->arg("nombre"));
-    return;
-    }
-  
-  AsyncResponseStream *response = request->beginResponseStream("text/html");   
-  response->printf(miniCabecera.c_str());
-  response->printf("Falta el argumento <nombre de fichero>"); 
-  response->printf(miniPie.c_str());
-  request->send(response);     
-}
-*/
-/*********************************************/
-/*                                           */
 /*  Lista los ficheros en el sistema a       */
 /*  traves de una peticion HTTP              */ 
 /*                                           */
@@ -541,17 +524,6 @@ void handleListaFicheros(AsyncWebServerRequest *request)
 
   request->send(200,"text/json",listadoFicheros(prefix));
   }
-
-/*
-void handleFicheros(AsyncWebServerRequest *request)
-  {
-  String prefix="/";  
-
-  if(request->hasArg("dir")) prefix=request->arg("dir");
-
-  request->redirect("ficheros.html?dir=" + prefix);
-  }
-*/  
 /****************************FIN DE GESTION DE FICHEROS******************************************/
 /****************************INICIO DE NOT FOUND Y RETORNO DESDE SPIFSS******************************************/
 /*********************************************/
@@ -623,7 +595,7 @@ bool handleFileRead(AsyncWebServerRequest *request)
   Traza.mensaje("handleFileRead: %s\n", path.c_str());
   
   if (!path.startsWith("/")) path += "/";
-  path = "/www" + path; //busco los ficheros en el SPIFFS en la carpeta www
+  //path = "/www" + path; //busco los ficheros en el SPIFFS en la carpeta www
   
   String contentType = getContentType(path);             // Get the MIME type
   String pathWithGz = path + ".gz";
@@ -672,7 +644,7 @@ bool handleFileReadChunked(AsyncWebServerRequest *request)
   Traza.mensaje("handleFileReadChunked: %s\n", path.c_str());
   
   if (!path.startsWith("/")) path += "/";
-  path = "/www" + path; //busco los ficheros en el SPIFFS en la carpeta www
+  //path = "/www" + path; //busco los ficheros en el SPIFFS en la carpeta www
   
   String contentType = getContentType(path);             // Get the MIME type
   String pathWithGz = path + ".gz";
@@ -730,7 +702,7 @@ void handleUpload(AsyncWebServerRequest *request, String filename, size_t index,
   if(final){
     Serial.printf("UploadEnd: %s, %u B\n", filename.c_str(), index+len);
     newFile.close();      
-    request->redirect("resultadoUpload.html");
+    request->redirect("/www/resultadoUpload.html");
   }
 }
 /****************************Google Home Notifier ******************************/

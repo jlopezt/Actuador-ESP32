@@ -9,8 +9,8 @@
 #define _GLOBAL_
 
 //Defines generales
-#define NOMBRE_FAMILIA   "Actuador" //"Actuador/Secuenciador (E/S)"
-#define VERSION          "esp32 - ver 7.1.0"//(ESP32 1.0.4|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)"
+#define NOMBRE_FAMILIA   "SmartSite" //"Actuador/Secuenciador (E/S)"
+#define VERSION          "esp32 - ver 7.2.0"//(ESP32 1.0.4|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)"
 
 #define TRUE              1
 #define FALSE             0

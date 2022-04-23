@@ -36,10 +36,31 @@ extern "C" {
 #endif
 }
 
+/*
 #ifdef ESP8266
 #include <Hash.h>
 #elif defined(ESP32)
 #include <hwcrypto/sha.h>
+*/
+/**************************************************/
+#ifdef ESP8266
+#include <Hash.h>
+#elif defined(ESP32)
+#include <esp_system.h>
+
+#if ESP_IDF_VERSION_MAJOR >= 4
+#if(ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(1, 0, 6))
+#include "sha/sha_parallel_engine.h"
+#else
+#include <esp32/sha.h>
+#endif
+#else
+#include <hwcrypto/sha.h>
+#endif
+
+
+/*************************************************/
+
 #else
 
 extern "C" {

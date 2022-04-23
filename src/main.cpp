@@ -12,7 +12,7 @@
 // Una vuela de loop son ANCHO_INTERVALO segundos 
 #define ANCHO_INTERVALO                 100 //Ancho en milisegundos de la rodaja de tiempo
 #define FRECUENCIA_OTA                    5 //cada cuantas vueltas de loop atiende las acciones
-#define FRECUENCIA_SENSORES              15 //cada cuantas vueltas de loop lee los sensores
+#define FRECUENCIA_SENSORES              50 //cada cuantas vueltas de loop lee los sensores
 #define FRECUENCIA_ENTRADAS               5 //cada cuantas vueltas de loop atiende las entradas
 #define FRECUENCIA_SALIDAS                5 //cada cuantas vueltas de loop atiende las salidas
 #define FRECUENCIA_SECUENCIADOR          10 //cada cuantas vueltas de loop atiende al secuenciador
@@ -51,6 +51,9 @@
 #include <ComprobacionErrores.h>
 
 #include <rom/rtc.h>
+
+//#include "soc/soc.h"
+//#include "soc/rtc_cntl_reg.h"
 /***************************** Includes *****************************/
 
 boolean inicializaConfiguracion(boolean debug);
@@ -71,6 +74,8 @@ uint16_t vuelta = 0; //MAX_VUELTAS-100; //vueltas de loop
 /*************************************** SETUP ***************************************/
 void setup()
   {
+  //WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable   detector
+
   Serial.begin(115200);
   configuraLed();
   enciendeLed();
@@ -205,7 +210,22 @@ void loop()
   //Prioridad 4: WatchDog
   if ((vuelta % FRECUENCIA_WIFI_WATCHDOG)==0) WifiWD();    
 //------------- FIN EJECUCION DE TAREAS ---------------------------------  
+/*
+  if ((vuelta % FRECUENCIA_OTA)==0) gestionaOTA(); //Gestion de actualizacion OTA
 
+  if ((vuelta % FRECUENCIA_SENSORES)==0) sensores.lee(debugGlobal); //Actualiza las entradas  
+  if ((vuelta % FRECUENCIA_ENTRADAS)==0) entradas.actualiza(debugGlobal); //Actualiza las entradas
+  if ((vuelta % FRECUENCIA_SECUENCIADOR)==0) secuenciador.actualiza(debugGlobal); //Actualiza la salida del secuenciador
+  if ((vuelta % FRECUENCIA_MAQUINAESTADOS)==0) maquinaEstados.actualiza(debugGlobal); //Actualiza la maquina de estados
+  if ((vuelta % FRECUENCIA_SALIDAS)==0) salidas.actualiza(debugGlobal); //comprueba las salidas
+
+  if ((vuelta % FRECUENCIA_SERVIDOR_WEBSOCKET)==0) atiendeWebSocket(debugGlobal); //atiende el servidor web
+  if ((vuelta % FRECUENCIA_MQTT)==0) atiendeMQTT();      
+  if ((vuelta % FRECUENCIA_ENVIO_DATOS)==0) enviaDatos(debugGlobal); //publica via MQTT los datos de entradas y salidas, segun configuracion
+  if ((vuelta % FRECUENCIA_ORDENES)==0) while(HayOrdenes(debugGlobal)) EjecutaOrdenes(debugGlobal); //Lee ordenes via serie
+
+  if ((vuelta % FRECUENCIA_WIFI_WATCHDOG)==0) WifiWD();    
+*/
   //sumo una vuelta de loop, si desborda inicializo vueltas a cero
   vuelta++;//sumo una vuelta de loop  
       

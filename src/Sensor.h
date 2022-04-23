@@ -37,7 +37,7 @@ class Sensor{
         Sensor* siguiente;
 
     public:
-        Sensor(void){siguiente=NULL;};
+        Sensor(void){siguiente=NULL;tipoSensor=TIPO_NULO;nombre="";};
         ~Sensor(){};
         virtual void inicializa(String _nombre, uint8_t _tipo, String parametros){Serial.printf("Clase padre\n");};
         //virtual boolean parseaConfiguracion(String contenido);
@@ -50,6 +50,7 @@ class Sensor{
         Sensor* getSiguiente(void){return siguiente;};
 
         virtual String generaJsonEstado(JsonObject& medida){return "";};
+        virtual String generaJsonConfiguracion(JsonObject& config){return "";};
         virtual void lee(void){Serial.printf("Clase padre\n");};
 };
 /***********************************FIN SENSOR*********************************************/
@@ -67,8 +68,11 @@ class SensorDS18B20 : public Sensor{
     public:
         SensorDS18B20();
         void inicializa(String _nombre, uint8_t _tipo, String parametros);
+        uint8_t* getDireccion(void){return direccion;};
+        String getDirecciontoString(void);
 
         String generaJsonEstado(JsonObject& medida);
+        String generaJsonConfiguracion(JsonObject& config);
         void lee(void);        
 };   
 /***********************************FIN DS18B20*********************************************/
@@ -89,6 +93,7 @@ class SensorDHT : public Sensor{
         SensorDHT();
         void inicializa(String _nombre, uint8_t _tipo, String parametros);
         String generaJsonEstado(JsonObject& medida);
+        String generaJsonConfiguracion(JsonObject& config);
         void lee(void);     
 };
 /***********************************FIN DHT*********************************************/
@@ -98,19 +103,20 @@ class SensorHDC1080 : public Sensor{
     private:
         ClosedCube_HDC1080* hdc1080;
         
-        int direccionI2C;
+        uint8_t direccionI2C;
 
         float temperatura;
         float humedad;
 
         //uint8_t convierteDireccion(String s);
         boolean parseaConfiguracion(String contenido);
-        void setDireccionI2C(int _direccionI2C){direccionI2C=_direccionI2C;};
+        void setDireccionI2C(uint8_t _direccionI2C){direccionI2C=_direccionI2C;};
 
     public:
         SensorHDC1080();
         void inicializa(String _nombre, uint8_t _tipo, String parametros);
         String generaJsonEstado(JsonObject& medida);
+        String generaJsonConfiguracion(JsonObject& config);
         void lee(void);     
 };
 /***********************************FIN HDC1080*********************************************/
@@ -120,18 +126,19 @@ class SensorBMP280 : public Sensor{
     private:
         Adafruit_BMP280* bmp280; // I2C Tº y presion
         
-        int direccionI2C;
+        uint8_t direccionI2C;
 
         float temperatura;
         float presion;
 
         boolean parseaConfiguracion(String contenido);
-        void setDireccionI2C(int _direccionI2C){direccionI2C=_direccionI2C;};
+        void setDireccionI2C(uint8_t _direccionI2C){direccionI2C=_direccionI2C;};
 
     public:
         SensorBMP280();
         void inicializa(String _nombre, uint8_t _tipo, String parametros);
         String generaJsonEstado(JsonObject& medida);
+        String generaJsonConfiguracion(JsonObject& config);
         void lee(void);     
 };
 /***********************************FIN BMP280*********************************************/
@@ -141,19 +148,20 @@ class SensorBME280 : public Sensor{
     private:
         Adafruit_BME280* bme280; // I2C Tº, humedad y presion
         
-        int direccionI2C;
+        uint8_t direccionI2C;
 
         float temperatura;
         float humedad;
         float presion;
         
         boolean parseaConfiguracion(String contenido);
-        void setDireccionI2C(int _direccionI2C){direccionI2C=_direccionI2C;};
+        void setDireccionI2C(uint8_t _direccionI2C){direccionI2C=_direccionI2C;};
 
     public:
         SensorBME280();
         void inicializa(String _nombre, uint8_t _tipo, String parametros);
         String generaJsonEstado(JsonObject& medida);
+        String generaJsonConfiguracion(JsonObject& config);
         void lee(void);     
 };
 /***********************************FIN HDC1080*********************************************/
@@ -163,14 +171,18 @@ class SensorBH1750 : public Sensor{
     private:
         BH1750* bh1750; //I2C direccion por defecto 0x23
 
+        uint8_t direccionI2C;
+
         float luz;
 
         boolean parseaConfiguracion(String contenido);
-
+        void setDireccionI2C(uint8_t _direccionI2C){direccionI2C=_direccionI2C;};
+        
     public:
         SensorBH1750();
         void inicializa(String _nombre, uint8_t _tipo, String parametros);
         String generaJsonEstado(JsonObject& medida);
+        String generaJsonConfiguracion(JsonObject& config);
         void lee(void);     
 };
 
@@ -187,6 +199,7 @@ class SensorGL5539 : public Sensor{
         SensorGL5539();
         void inicializa(String _nombre, uint8_t _tipo, String parametros);
         String generaJsonEstado(JsonObject& medida);
+        String generaJsonConfiguracion(JsonObject& config);
         void lee(void);     
 };
 /***********************************FIN GL5539*********************************************/
@@ -202,6 +215,7 @@ class SensorHumedadSuelo : public Sensor{
         SensorHumedadSuelo();
         void inicializa(String _nombre, uint8_t _tipo, String parametros);
         String generaJsonEstado(JsonObject& medida);
+        String generaJsonConfiguracion(JsonObject& config);
         void lee(void);     
 };
 /***********************************FIN HumedadSuelo*********************************************/

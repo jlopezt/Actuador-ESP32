@@ -57,7 +57,7 @@ class Sensores{
 
         //estado en json
         String generaJsonEstado(boolean debug=false);
-        //String generaJsonEstado(void);
+        String generaJsonConfiguracion(boolean debug=false);
 };
 
 extern Sensores sensores;

@@ -140,7 +140,7 @@ Serial.printf("********************************************************\n");
           return false;
         }
 
-        if(pCabeza==NULL) pCabeza=p;
+        if(pCabeza==NULL) pCabeza=p; //Si es el primero
         else pSensor->setSiguiente(p);
 
         pSensor=p;
@@ -232,7 +232,8 @@ uint8_t Sensores::tipoSensor(String tipo){
 
 void Sensores::lee(boolean debug){
   Sensor* p=pCabeza;
-  
+  //Serial.printf("Leo sensores\n");
+
   while(p!=NULL){
     Sensor* q;
     switch (p->getTipo()){
@@ -270,7 +271,7 @@ void Sensores::lee(boolean debug){
         break;
     }
 
-      p=p->getSiguiente();
+    p=p->getSiguiente();
   }  
 }
 
@@ -312,6 +313,54 @@ String Sensores::generaJsonEstado(boolean debug){
         break;
       case TIPO_SOILMOISTURECAPACITIVEV2:
         ((SensorHumedadSuelo*)p)->generaJsonEstado(medida);
+        break;
+      }
+      p=p->getSiguiente();
+  }
+
+  root.printTo(salida);
+  //Serial.printf("%s\n",salida.c_str());
+  return salida;   
+}
+
+String Sensores::generaJsonConfiguracion(boolean debug){
+  Sensor* p=pCabeza;
+  String salida="";
+
+  const size_t capacity = JSON_ARRAY_SIZE(numeroSensores) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(2) + 3*JSON_OBJECT_SIZE(3);
+  DynamicJsonBuffer jsonBuffer(capacity);
+
+  JsonObject& root = jsonBuffer.createObject();
+
+  JsonArray& jsonSensores = root.createNestedArray("sensores");
+
+  while(p!=NULL){
+    //Serial.printf("recuperando valores de  %s\n",p->getNombre().c_str());
+    JsonObject& jsonSensor = jsonSensores.createNestedObject();
+    switch (p->getTipo()){
+      case TIPO_DS18B20:
+        ((SensorDS18B20*)p)->generaJsonConfiguracion(jsonSensor);
+        break;
+      case TIPO_DHT22:
+        ((SensorDHT*)p)->generaJsonConfiguracion(jsonSensor);
+        break;
+      case TIPO_HDC1080:
+        ((SensorHDC1080*)p)->generaJsonConfiguracion(jsonSensor);
+        break;
+      case TIPO_BME280:
+        ((SensorBME280*)p)->generaJsonConfiguracion(jsonSensor);
+        break;
+      case TIPO_BMP280:
+        ((SensorBMP280*)p)->generaJsonConfiguracion(jsonSensor);
+        break;
+      case TIPO_GL5539:
+        ((SensorGL5539*)p)->generaJsonConfiguracion(jsonSensor);
+        break;
+      case TIPO_BH1750:
+        ((SensorBH1750*)p)->generaJsonConfiguracion(jsonSensor);
+        break;
+      case TIPO_SOILMOISTURECAPACITIVEV2:
+        ((SensorHumedadSuelo*)p)->generaJsonConfiguracion(jsonSensor);
         break;
       }
       p=p->getSiguiente();

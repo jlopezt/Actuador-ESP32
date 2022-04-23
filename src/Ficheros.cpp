@@ -196,6 +196,60 @@ boolean esDirectorio(String nombre)
 /* dispositivo. Devuelve una cadena separada    */
 /* por SEPARADOR                                */
 /************************************************/
+String listadoFicheros2(String prefix)
+  {   
+  String salida="";
+
+  if(!prefix.startsWith("/")) prefix="/" + prefix; Serial.printf("Prefix: %s\n",prefix.c_str());
+
+  const size_t capacity = 2*JSON_ARRAY_SIZE(15) + JSON_OBJECT_SIZE(31);
+  DynamicJsonBuffer jsonBuffer(capacity);
+
+  JsonObject& json = jsonBuffer.createObject();
+  json["padre"] = prefix;
+
+  JsonArray& subdirectorios = json.createNestedArray("subdirectorios");
+  JsonArray& ficheros = json.createNestedArray("ficheros");
+
+  File root = SPIFFS.open(prefix);
+  File file = root.openNextFile();
+
+  while(file)
+    {
+    String fichero=String(file.name());Serial.printf("Nombre fichero: %s\n",fichero.c_str());
+    //Si el nombre incluye el prefix, se lo quito
+    uint8_t inicio=(fichero.indexOf(prefix)==-1?0:fichero.indexOf(prefix));
+    fichero=fichero.substring(inicio+prefix.length()); Serial.printf("Nombre fichero: %s\n",fichero.c_str());
+
+    if(esDirectorio(fichero)) 
+      {Serial.printf("Es directorio: %s\n",fichero.c_str());
+      //verifico que el directorio no este ya en la lista
+      boolean existe=false;
+      String subdir=fichero.substring(0,fichero.indexOf("/"));
+      for(uint8_t i=0;i<subdirectorios.size();i++)
+        {
+        if(subdir==subdirectorios[i]) 
+          {
+          existe=true;
+          break;
+          }
+        }
+      if(!existe) subdirectorios.add(fichero.substring(0,fichero.indexOf("/")));
+      }
+    else 
+      {Serial.printf("Es fichero: %s\n",fichero.c_str());
+      JsonObject& fichero_nuevo = ficheros.createNestedObject();
+      fichero_nuevo["nombre"] = fichero;
+      fichero_nuevo["tamano"] = file.size();
+      fichero_nuevo["fechaEdicion"] = horaYfecha(file.getLastWrite());
+      }
+
+    file = root.openNextFile();
+    }   
+  json.printTo(salida);
+  return (salida);
+  }  
+/////////////////////////////////////////////////////
 String listadoFicheros(String prefix)
   {   
   String salida="";
@@ -212,20 +266,30 @@ String listadoFicheros(String prefix)
   JsonArray& ficheros = json.createNestedArray("ficheros");
 
   File root = SPIFFS.open(prefix);
+  
+  if(!root){
+      Serial.println("Error al abrir el sistema de ficheros\n");
+      return "";
+  }  
+  
+  if(!root.isDirectory()){
+      Serial.println("El prefijo indicado no es un directorio valido\n");
+      return "";
+  }
+    
   File file = root.openNextFile();
 
   while(file)
     {
-    String fichero=String(file.name());
-    //Si el nombre incluye el prefix, se lo quito
-    uint8_t inicio=(fichero.indexOf(prefix)==-1?0:fichero.indexOf(prefix));
-    fichero=fichero.substring(inicio+prefix.length());
-
-    if(esDirectorio(fichero)) 
+    String fichero=String(file.name());Serial.printf("Nombre fichero: %s\n",fichero.c_str());Serial.printf("Path del fichero: %s\n",root.path());
+    
+    if(file.isDirectory()) 
       {
+      //Serial.printf("Es directorio: %s\n",fichero.c_str());
       //verifico que el directorio no este ya en la lista
       boolean existe=false;
-      String subdir=fichero.substring(0,fichero.indexOf("/"));
+      String subdir=fichero.substring(0,fichero.indexOf("/"));//!!!!!!!!!!!
+      //Serial.printf("Direcotrio encontrado: %s\n",fichero);
       for(uint8_t i=0;i<subdirectorios.size();i++)
         {
         if(subdir==subdirectorios[i]) 
@@ -238,6 +302,7 @@ String listadoFicheros(String prefix)
       }
     else 
       {
+      //Serial.printf("Es fichero: %s\n",fichero.c_str());
       JsonObject& fichero_nuevo = ficheros.createNestedObject();
       fichero_nuevo["nombre"] = fichero;
       fichero_nuevo["tamano"] = file.size();

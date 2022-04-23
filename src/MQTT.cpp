@@ -92,7 +92,7 @@ void inicializaMQTT(void)
     {
     clienteMQTT.setClient(espClient);
     }
-  Traza.mensaje("Cliente MQTT configurado");
+  Traza.mensaje("Cliente MQTT configurado\n");
 
   //configuro el servidor y el puerto
   if (BrokerDir==String("")) clienteMQTT.setServer(IPBroker, puertoBroker);
@@ -188,6 +188,7 @@ void callbackMQTT(char* topic, byte* payload, unsigned int length)
   String cad=String(topic);
 
   //topics descartados (los genera este dispositivo)
+  if(cad==String(topicRoot + "/" + ID_MQTT + "/medidas")) return;
   if(cad==String(topicRoot + "/" + ID_MQTT + "/entradas")) return;
   if(cad==String(topicRoot + "/" + ID_MQTT + "/salidas")) return;
   if(cad==String(topicRoot + "/" + ID_MQTT + "/secuenciador")) return;
