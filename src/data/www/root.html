@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <TITLE>Domoticae</TITLE>    
+    <link rel="stylesheet" type="text/css" href="css.css">
+    <script type="text/javascript" src="./paho-mqtt-min.js"></script>
+    <script type="text/javascript" src="./MQTT.js"></script>
+    <script type="text/javascript" src="./root.js"></script>
+  </head>
+
+  <BODY onload="inicializa()">
+    <TABLE id="tabla_entradas" border="0" width="50%" cellpadding="0" cellspacing="0" width="300" class="tabla">
+        <CAPTION>Entradas</CAPTION>
+        <tbody id="body_tabla_entradas">
+            <TR>
+                <th width='5%'>id</th>
+                <th width='50%'>Nombre</th>
+                <th width='45%'>Estado</th>
+            </TR>
+            <!--Una fila por cada habitacion--> 
+        </tbody>     
+    </TABLE>
+    <BR><br>
+
+    <TABLE id="tabla_salidas" border="0" width="50%" cellpadding="0" cellspacing="0" width="300" class="tabla">
+        <CAPTION>Salidas</CAPTION>
+        <tbody id="body_tabla_salidas">
+            <TR>
+                <th width='5%'>id</th>
+                <th width='25%'>Nombre</th>
+                <th width='25%'>Estado</th>
+                <th width='45%'>Acción</th>
+            </TR>
+            <!--Una fila por cada habitacion--> 
+        </tbody>     
+    </TABLE>
+    <BR><BR>
+    
+    <TABLE border="0" width="50%" cellpadding="0" cellspacing="0" width="300" class="tabla">
+        <CAPTION id="secuenciadorCaption">Secuenciadores</CAPTION>
+        <tbody id="body_tabla_secuenciador">
+            <TR>
+                <th width='5%'>id</th>
+                <th width='45%'>Nombre</th>
+                <th width='25%'>Salida</th>
+                <th width='25%'>Estado</th>
+            </TR>
+            <!--Una fila por cada plan--> 
+        </tbody>    
+    </TABLE>
+    <BR><BR>
+
+    <TABLE border="0" width="50%" cellpadding="0" cellspacing="0" width="300" class="tabla">
+        <CAPTION>Máquina de estados</CAPTION>
+        <TR>
+            <TH width="100">Estado: </TH>
+            <TD id="estadoME" width="200" class="modo2">Medio</TD>
+        </TR>
+    </TABLE>
+  </BODY>
+</HTML>

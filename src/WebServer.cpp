@@ -36,7 +36,8 @@
 AsyncWebServer serverX(PUERTO_WEBSERVER);
 
 //Cadenas HTML precargadas
-String miniCabecera="<html><head></head><body><link rel='stylesheet' type='text/css' href='css.css'>\n";
+//String miniCabecera="<html><head></head><body><link rel='stylesheet' type='text/css' href='css.css'>\n";
+String miniCabecera="<html><head></head><body>\n";
 String miniPie="</body></html>";
 
 void handleNombre(AsyncWebServerRequest *request);

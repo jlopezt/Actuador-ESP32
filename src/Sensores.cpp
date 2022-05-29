@@ -234,7 +234,9 @@ void Sensores::lee(boolean debug){
   Sensor* p=pCabeza;
   //Serial.printf("Leo sensores\n");
 
-  while(p!=NULL){
+  //Serial.printf("Inicio lectura de sensores: %i\n",millis());
+
+  while(p!=NULL){    
     Sensor* q;
     switch (p->getTipo()){
       case TIPO_DS18B20:
@@ -270,6 +272,8 @@ void Sensores::lee(boolean debug){
         ((SensorHumedadSuelo*)q)->lee();
         break;
     }
+
+    //Serial.printf("(%i) Sensor: %s\n",millis(),p->getNombre().c_str());
 
     p=p->getSiguiente();
   }  

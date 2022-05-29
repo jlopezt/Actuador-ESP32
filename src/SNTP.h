@@ -111,5 +111,6 @@ String getFecha(void);
 /*                                                             */
 /***************************************************************/
 String horaYfecha(time_t hora);
-
+String horaYfecha(struct tm* ts);
+String horaYfechaArranque(void);
 #endif

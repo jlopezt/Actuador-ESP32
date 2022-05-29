@@ -13,7 +13,7 @@
 #define MAX_LONG_NOMBRE_DISPOSITIVO 32
 #define WIFI_PORTAL_TIMEOUT 5*60 //5 minutos en segundos
 #define TIME_OUT 10000
-#define DELAY_MULTIBASE 1000
+#define DELAY_MULTIBASE 200//1000
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/
@@ -162,21 +162,23 @@ boolean inicializaWifi(boolean debug)
   WiFi.setAutoReconnect(true);   
   //Activo el modo solo estacion, no access point
   WiFi.mode(WIFI_OFF);
+  delay(100);
   WiFi.mode(WIFI_STA);
 
   if(recuperaDatosWiFi(debug))
     {
-    Traza.mensaje("Conectando multibase\n");
-    if (conectaMultibase(debug)) 
+    //Configuro la IP fija
+    if (wifiIP!=IPAddress(0,0,0,0) && wifiGW!=IPAddress(0,0,0,0))
       {
-      //Configuro la IP fija
-      if (wifiIP!=IPAddress(0,0,0,0) && wifiGW!=IPAddress(0,0,0,0))
-        {
-        Traza.mensaje("Datos WiFi: IP fija-> %s, GW-> %s, subnet-> %s, DNS1-> %s, DNS2-> %s\n",wifiIP.toString().c_str(), wifiGW.toString().c_str(), wifiNet.toString().c_str(), wifiDNS1.toString().c_str(), wifiDNS2.toString().c_str());
-        WiFi.config(wifiIP, wifiGW, wifiNet, wifiDNS1, wifiDNS2);
-        }
-      else Traza.mensaje("No hay IP fija\n");
+      Traza.mensaje("Datos WiFi: IP fija-> %s, GW-> %s, subnet-> %s, DNS1-> %s, DNS2-> %s\n",wifiIP.toString().c_str(), wifiGW.toString().c_str(), wifiNet.toString().c_str(), wifiDNS1.toString().c_str(), wifiDNS2.toString().c_str());
+      WiFi.config(wifiIP, wifiGW, wifiNet, wifiDNS1, wifiDNS2);
+      }
+    else Traza.mensaje("No hay IP fija\n");
 
+    Traza.mensaje("Conectando multibase\n");
+    if (conectaMultibase(debug))
+    //if (MiWiFiMulti.run(TIME_OUT)==WL_CONNECTED) 
+      {
       //Inicializo mDNS para localizar el dispositivo
       inicializamDNS(nombre_dispositivo.c_str());
   
@@ -236,6 +238,9 @@ boolean conectaAutodetect(boolean debug)
   //wifiManager.setAPCallback(miAPCallback);//llamada cuando se actie el portal de configuracion
   wifiManager.setConfigPortalTimeout(WIFI_PORTAL_TIMEOUT);
   
+  //Prepara la configuracion en la que se levantará el AP
+  wifiManager.setAPStaticIPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
+
   //Si se ha configurado IP fija
   //if (wifiIP!=IPAddress(0,0,0,0)) wifiManager.setSTAStaticIPConfig(wifiIP,wifiGW,wifiNet);//Preparo la IP fija (IPAddress ip, IPAddress gw, IPAddress sn) 
 
@@ -264,8 +269,14 @@ boolean conectaAutodetect(boolean debug)
 boolean conectaMultibase(boolean debug)
   {
   // wait for WiFi connection
+  uint8_t estado=MiWiFiMulti.run(TIME_OUT);
+  Serial.printf("Resultado %i\n",estado);
+  return (estado==WL_CONNECTED?TRUE:FALSE);
+
+/*
   int time_out=0;
-  while(MiWiFiMulti.run()!=WL_CONNECTED)
+
+  do
     {
     Traza.mensaje("(Multi) Conectando Wifi...\n");
     //incluido en la funcion parpadeo como delay(DELAY/2);  
@@ -276,9 +287,11 @@ boolean conectaMultibase(boolean debug)
       if (debug) Traza.mensaje("No se pudo conectar al Wifi...\n");
       return FALSE; //No se ha conectado y sale con KO
       }
-    }
+    estado=WiFi.status();
+    }while(estado!=WL_CONNECTED); //while (WiFi.waitForConnectResult() != WL_CONNECTED);
     
   return TRUE; //se ha conectado y sale con OK
+  */
   }
 
 /**********************************************************************/

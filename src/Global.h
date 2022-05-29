@@ -63,6 +63,7 @@
 /***************************** Variables *****************************/
 extern String nombre_dispositivo;//Nombre del dispositivo, por defecto el de la familia
 extern int debugGlobal; //por defecto desabilitado
+extern int debugMain; //por defecto desabilitado
 extern int nivelActivo;
 /***************************** Variables *****************************/
 

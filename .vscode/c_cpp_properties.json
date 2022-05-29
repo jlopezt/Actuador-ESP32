@@ -232,7 +232,6 @@
                 "C:/Users/jlopezt/.platformio/packages/framework-arduinoespressif32/libraries/USB/src",
                 "C:/Users/jlopezt/.platformio/packages/framework-arduinoespressif32/libraries/WebServer/src",
                 "C:/Users/jlopezt/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
-                "C:/Users/jlopezt/.platformio/packages/tool-unity",
                 ""
             ],
             "browse": {
@@ -462,12 +461,11 @@
                     "C:/Users/jlopezt/.platformio/packages/framework-arduinoespressif32/libraries/USB/src",
                     "C:/Users/jlopezt/.platformio/packages/framework-arduinoespressif32/libraries/WebServer/src",
                     "C:/Users/jlopezt/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
-                    "C:/Users/jlopezt/.platformio/packages/tool-unity",
                     ""
                 ]
             },
             "defines": [
-                "PLATFORMIO=50205",
+                "PLATFORMIO=60001",
                 "ARDUINO_ESP32_DEV",
                 "HAVE_CONFIG_H",
                 "MBEDTLS_CONFIG_FILE=\"mbedtls/esp_config.h\"",

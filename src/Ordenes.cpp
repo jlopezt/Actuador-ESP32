@@ -311,11 +311,18 @@ void func_comando_echo(int iParametro, char* sParametro, float fParametro)//"ech
   Traza.mensaje("echo; %s\n",sParametro);
   }
 
-void func_comando_debug(int iParametro, char* sParametro, float fParametro)//"debug")
+void func_comando_debugGlobal(int iParametro, char* sParametro, float fParametro)//"debug")
   {
   ++debugGlobal=debugGlobal % 2;
   if (debugGlobal) Traza.mensaje("debugGlobal esta on\n");
   else Traza.mensaje("debugGlobal esta off\n");
+  }
+
+void func_comando_debugMain(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  ++debugMain=debugMain % 2;
+  if (debugMain) Traza.mensaje("debugMain esta on\n");
+  else Traza.mensaje("debugMain esta off\n");
   }
 
 void func_comando_ES(int iParametro, char* sParametro, float fParametro)//"debug")
@@ -434,6 +441,11 @@ void func_comando_scannerI2C(int iParametro, char* sParametro, float fParametro)
   {
   sensores.scannerI2C();
   }  
+
+void func_comando_uptime(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  Serial.printf("Hora del ultimo arranque: %s\n",horaYfechaArranque().c_str());
+  }  
 /***************************** FIN funciones para comandos ******************************************/ 
 
 void inicializaOrden(void)
@@ -515,8 +527,12 @@ void inicializaOrden(void)
   comandos[i++].p_func_comando=func_comando_echo;
    
   comandos[i].comando="debug";
-  comandos[i].descripcion="Activa/desactiva el modo debug";
-  comandos[i++].p_func_comando=func_comando_debug;
+  comandos[i].descripcion="Activa/desactiva el modo debug Global";
+  comandos[i++].p_func_comando=func_comando_debugGlobal;
+
+  comandos[i].comando="debugM";
+  comandos[i].descripcion="Activa/desactiva el modo debug Main";
+  comandos[i++].p_func_comando=func_comando_debugMain;
 
   comandos[i].comando="ES";
   comandos[i].descripcion="Entradas y Salidas";
@@ -585,6 +601,10 @@ void inicializaOrden(void)
   comandos[i].comando="ScannerI2C";
   comandos[i].descripcion="Scanner del bus I2C";
   comandos[i++].p_func_comando=func_comando_scannerI2C;
+
+  comandos[i].comando="uptime";
+  comandos[i].descripcion="Hora del ultimo arranque";
+  comandos[i++].p_func_comando=func_comando_uptime;
 
   //resto
   for(;i<MAX_COMANDOS;)

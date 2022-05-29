@@ -1,0 +1,168 @@
+<html>
+    <head>
+        <link rel='stylesheet' type='text/css' href='css.css'>
+        <script type="text/javascript">
+        function inicializa() {
+            const queryString = window.location.search;
+            console.log(queryString);
+            
+            const urlParams = new URLSearchParams(queryString);
+            var dir="/";            
+            if(urlParams.has("dir")){
+                dir = urlParams.get('dir');
+                console.log(dir);
+                }   
+
+            var xh = new XMLHttpRequest();
+            xh.onreadystatechange = function(){
+                if (xh.readyState == 4){
+                    if(xh.status == 200) {
+                    console.log("JSON: " + xh.responseText)
+                    actualizaFicheros(xh.responseText);
+                    }
+                }
+            };
+            xh.open("GET", "listaFicheros?dir=" + dir, true);
+            xh.send(null); 
+        }
+
+        function actualizaFicheros(datos) {
+            var filas=1;//la fila de los encabezados
+            var res = JSON.parse(datos);
+
+            //directorio padre
+            var padre=res.padre;            
+            if(padre[0]!="/") padre = "/" + padre;
+            document.getElementById("caption_ficheros").innerText="directiorio: " + padre;
+
+            if(padre!="/"){
+                var hilera = document.getElementById("padre");
+                if(hilera==null){
+                    console.log("no existe la fila, la creo");
+                    var hilera = document.createElement("tr");
+                    hilera.setAttribute("id", "padre");
+                    hilera.setAttribute("class","modo2");
+                    document.getElementById("body_tabla_ficheros").appendChild(hilera);
+        
+                    var celda = document.createElement("td");
+                    celda.setAttribute("id","padre_nombre");
+                    celda.setAttribute("align","left");
+                    celda.setAttribute("colspan","4");
+                    hilera.appendChild(celda);
+                }
+
+                document.getElementById("padre_nombre").innerHTML="<a class='enlaceBoton' href='ficheros?dir=" + padre.substring(0,padre.lastIndexOf("/")-1) + "'>..</a>";               
+                filas += 1;
+            }
+
+            //directorios
+            var directorios=res.subdirectorios;
+            console.log("numero de directrios: " + directorios.length);
+
+            directorios.forEach(function(directorio,indice,array) {
+                var hilera = document.getElementById("directorio_"+indice);
+                if(hilera==null){
+                    console.log("no existe la fila, la creo");
+                    var hilera = document.createElement("tr");
+                    hilera.setAttribute("id", "directorio_" + indice);
+                    hilera.setAttribute("class","modo2");
+                    document.getElementById("body_tabla_ficheros").appendChild(hilera);
+        
+                    var celda = document.createElement("td");
+                    celda.setAttribute("id","directorio_nombre_"+indice);
+                    celda.setAttribute("align","left");
+                    celda.setAttribute("colspan","4");
+                    hilera.appendChild(celda);
+                    }
+
+                document.getElementById("directorio_nombre_" + indice).innerHTML="<a class='enlaceBoton' href='ficheros?dir=" + padre + directorio + "'>subdirectorio &lt;" + directorio + "&gt;</a>";
+            });
+            filas += directorios.length;
+
+            //ficheros
+            var ficheros=res.ficheros;
+            console.log("numero de ficheros: " + ficheros.length);
+
+            ficheros.forEach(function(fichero,indice,array) {
+                var hilera = document.getElementById("fichero_"+indice);
+                if(hilera==null){
+                    console.log("no existe la fila, la creo");
+                    var hilera = document.createElement("tr");
+                    hilera.setAttribute("id", "fichero_" + indice);
+                    hilera.setAttribute("class","modo2");
+                    document.getElementById("body_tabla_ficheros").appendChild(hilera);
+        
+                    var celda = document.createElement("td");
+                    celda.setAttribute("id","fichero_nombre_"+indice);
+                    celda.setAttribute("align","left");
+                    celda.setAttribute("width","30%");
+                    hilera.appendChild(celda);
+
+                    var celda = document.createElement("td");
+                    celda.setAttribute("id","fichero_tamano_"+indice);
+                    celda.setAttribute("align","right");
+                    celda.setAttribute("width","20%");
+                    hilera.appendChild(celda);
+
+                    var celda = document.createElement("td");
+                    celda.setAttribute("id","fichero_fecha_"+indice);
+                    celda.setAttribute("align","right");
+                    celda.setAttribute("width","30%");
+                    hilera.appendChild(celda);
+
+                    celda = document.createElement("td");
+                    celda.setAttribute("id","fichero_borrar_"+indice);
+                    celda.setAttribute("align","center");
+                    celda.setAttribute("width","20%");
+                    hilera.appendChild(celda);
+                }
+
+                document.getElementById("fichero_nombre_" + indice).innerHTML="<a class='enlaceBoton' href='/editaFichero?nombre=" + padre + fichero.nombre + "'>" + fichero.nombre + "</a>";
+                document.getElementById("fichero_tamano_" + indice).innerHTML=fichero.tamano;
+                document.getElementById("fichero_fecha_" + indice).innerHTML=fichero.fechaEdicion;
+                document.getElementById("fichero_borrar_" + indice).innerHTML="<form action='borraFichero' target='_self'><input type='hidden' name='nombre' value='" + padre + fichero.nombre + "'><input type='submit' value='borrar'></form>";
+            });
+            filas += ficheros.length;
+
+            //Si hay filas de mas, las borro
+            var tabla = document.getElementById("tabla_ficheros");
+            if(tabla.rows.length>(filas)){ 
+                console.log("filas en tabla: " + (tabla.rows.length-1) + " | cabecera+raiz+dir+ficheros: " + filas);
+                for(i=tabla.rows.length;i>filas;i--){
+                    console.log("borro la fila " + (i));
+                    tabla.deleteRow(i-1);
+                }
+            }
+        }
+        </script>
+    </head>
+    <body onload="inicializa();">
+        <div style="float: left">
+            <TABLE id="tabla_ficheros" style="border: 0px; border-color: #FFFFFF;width:100%;" cellpadding="0" cellspacing="0" class="tabla">
+                <caption id="caption_ficheros"></caption>
+                <tbody id="body_tabla_ficheros">
+                    <tr>
+                        <th>nombre</th>
+                        <th>tama&ntilde;o</th>
+                        <th>modificado</th>
+                        <th></th>
+                    </tr>
+                    <!--Una row por fichero o direcotrio-->
+                </tbody>
+            </TABLE>
+        </div>
+        <div style="float: left; width: 50px;"><p style="color: #F0F0CE">.</p></div>
+        <div style="float: left">
+            <p align="center" style="margin-top: 0px;font-size: 16px; background-color: #83aec0; background-repeat: repeat-x; color: #FFFFFF; font-family: Trebuchet MS, Arial; text-transform: uppercase;">Crear un fichero nuevo</p>
+            <form action="creaFichero" target="_self">
+                <label for="nombre">nombre: </label>
+                <input type="text" id="nombre" name="nombre" value="">    
+                <input style="float: right;" type="submit" value="salvar">
+                <BR><BR>    
+                <label for="contenido">contenido: </label>
+                <br>
+                <textarea cols=80 rows=40 name="contenido"></textarea>  
+            </form>
+        </div>
+    </body>
+</html>

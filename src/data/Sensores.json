@@ -4,7 +4,6 @@
         {"nombre":"DS18B20_2","tipo": "DS18B20","parametros":{"direccion":"28:3A:5F:75:D0:01:3C:2F"}},
         {"nombre":"DS18B20_3","tipo": "DS18B20","parametros":{"direccion":"28:6D:36:75:D0:01:3C:66"}},
         {"nombre":"HDC1050_1","tipo": "HDC1080","parametros":{"direccionI2C":"0x40"}},
-        {"nombre":"DHT_1","tipo": "DHT22","parametros":{"pin":"32"}},
         {"nombre":"BH1750_1","tipo": "BH1750","parametros":{"direccionI2C":"0x23"}}
     ]
 }

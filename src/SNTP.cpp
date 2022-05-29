@@ -75,7 +75,7 @@ tm_wday int days since Sunday 0-6
 tm_yday int days since January 1  0-365
 tm_isdst int Daylight Saving Time flag 
 ***********************/
-
+struct tm uptime;
 /****************************************************/
 /*                                                  */
 /*    Inicializa el modulo de SNTP                  */ 
@@ -88,10 +88,22 @@ void inicializaReloj(void)
   if (getLocalTime(&timeinfo, 10000))  // wait up to 10sec to sync
     {
     Traza.mensaje("Time set: %i/%i/%i - %i:%i:%i\n",timeinfo.tm_mday,timeinfo.tm_mon,timeinfo.tm_year+1900,timeinfo.tm_hour,timeinfo.tm_min,timeinfo.tm_sec);
+    uptime.tm_sec=timeinfo.tm_sec;
+    uptime.tm_min=timeinfo.tm_min;
+    uptime.tm_hour=timeinfo.tm_hour;
+    uptime.tm_mday=timeinfo.tm_mday;
+    uptime.tm_mon=timeinfo.tm_mon;
+    uptime.tm_year=timeinfo.tm_year;
     } 
   else 
     {
     Traza.mensaje("No se pudo inicializar el reloj por SNTP\n");
+    uptime.tm_sec=0;
+    uptime.tm_min=0;
+    uptime.tm_hour=0;
+    uptime.tm_mday=0;
+    uptime.tm_mon=0;
+    uptime.tm_year=0;    
     }    
   }
   
@@ -263,6 +275,7 @@ String getFecha(void)
 /*  a partir de la estrucutura time_t que se le pasa           */
 /*                                                             */
 /***************************************************************/
+/*
 String horaYfecha(time_t entrada)
   {
   String cad="";  
@@ -276,3 +289,18 @@ String horaYfecha(time_t entrada)
 
   return (String(buf));    
   }
+  */
+String horaYfecha(time_t entrada){return horaYfecha(localtime(&entrada));}
+String horaYfecha(struct tm* ts)
+  {
+  String cad="";  
+  const char formato[]="%d-%m-%Y %H:%M:%S";
+  const uint8_t longitud=20;
+  char buf[longitud];
+
+  strftime(buf, sizeof(buf), formato, ts);
+  buf[longitud-1]=0;
+
+  return (String(buf));    
+  }
+  String horaYfechaArranque(void){return horaYfecha(&uptime);}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <TITLE>Domoticae</TITLE>
+    <link rel="stylesheet" type="text/css" href="css.css">
+    <script>
+      function inicializa() {
+        const queryString = window.location.search;
+        console.log(queryString);
+        
+        const urlParams = new URLSearchParams(queryString);
+        mensaje="";
+        
+        if(urlParams.has("mensaje")){
+          mensaje = urlParams.get('mensaje');
+          console.log(mensaje);
+          var m=document.getElementById("mensaje")
+          m.innerText=mensaje;
+          }        
+      }
+    </script>
+  </HEAD>
+  <BODY onload="inicializa()">
+
+    <br><br><br>
+    <META HTTP-EQUIV="REFRESH" CONTENT="5;URL=root">
+    <h3 id="mensaje" style="font-family:verdana;font-size:30px;color:black"></h3>
+    <br><br><br>
+
+  </body>
+</HTML>

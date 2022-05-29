@@ -10,19 +10,19 @@
  
 /***************************** Defines *****************************/
 // Una vuela de loop son ANCHO_INTERVALO segundos 
-#define ANCHO_INTERVALO                 100 //Ancho en milisegundos de la rodaja de tiempo
+#define ANCHO_INTERVALO                 200 //Ancho en milisegundos de la rodaja de tiempo
 #define FRECUENCIA_OTA                    5 //cada cuantas vueltas de loop atiende las acciones
-#define FRECUENCIA_SENSORES              50 //cada cuantas vueltas de loop lee los sensores
-#define FRECUENCIA_ENTRADAS               5 //cada cuantas vueltas de loop atiende las entradas
-#define FRECUENCIA_SALIDAS                5 //cada cuantas vueltas de loop atiende las salidas
-#define FRECUENCIA_SECUENCIADOR          10 //cada cuantas vueltas de loop atiende al secuenciador
-#define FRECUENCIA_MAQUINAESTADOS        10 //cada cuantas vueltas de loop atiende a la maquina de estados
+#define FRECUENCIA_SENSORES              15 //cada cuantas vueltas de loop lee los sensores
+#define FRECUENCIA_ENTRADAS               4 //cada cuantas vueltas de loop atiende las entradas
+#define FRECUENCIA_SALIDAS                4 //cada cuantas vueltas de loop atiende las salidas
+#define FRECUENCIA_SECUENCIADOR           9 //cada cuantas vueltas de loop atiende al secuenciador
+#define FRECUENCIA_MAQUINAESTADOS         9 //cada cuantas vueltas de loop atiende a la maquina de estados
 #define FRECUENCIA_SERVIDOR_FTP           3 //cada cuantas vueltas de loop atiende el servidor ftp
 #define FRECUENCIA_SERVIDOR_WEBSOCKET     1 //cada cuantas vueltas de loop atiende el servidor web
 #define FRECUENCIA_MQTT                  10 //cada cuantas vueltas de loop envia y lee del broker MQTT
-#define FRECUENCIA_ENVIO_DATOS          100 //cada cuantas vueltas de loop envia al broker el estado de E/S
-#define FRECUENCIA_ORDENES                2 //cada cuantas vueltas de loop atiende las ordenes via serie 
-#define FRECUENCIA_WIFI_WATCHDOG        100 //cada cuantas vueltas comprueba si se ha perdido la conexion WiFi
+#define FRECUENCIA_ENVIO_DATOS           49 //cada cuantas vueltas de loop envia al broker el estado de E/S
+#define FRECUENCIA_ORDENES                3 //cada cuantas vueltas de loop atiende las ordenes via serie 
+#define FRECUENCIA_WIFI_WATCHDOG         50 //cada cuantas vueltas comprueba si se ha perdido la conexion WiFi
 
 //configuracion del watchdog del sistema
 #define TIMER_WATCHDOG        0 //Utilizo el timer 0 para el watchdog
@@ -63,12 +63,33 @@ void configuraWatchdog(void);
 void alimentaWatchdog(void);
 
 /***************************** variables globales *****************************/
+enum ETAPAS{
+  SETUP=0,
+  INICIO,
+  OTA,
+  SENSORES,
+  ENTRADAS,
+  SECUENCIADOR,
+  MAQ_ESTADOS,
+  SALIDAS,
+  WEBSOCKETS,
+  MQTT,
+  ENVIO,
+  ORDENES,
+  WIFI_WD,
+  FIN
+};
+
+String nombreEtapas[]={"SETUP","INICIO","OTA","SENSORES","ENTRADAS","SECUENCIADOR","MAQ_ESTADOS","SALIDAS","WEBSOCKETS","MQTT","ENVIO","ORDENES","WIFI_WD","FIN"};
+
 String nombre_dispositivo;//Nombre del dispositivo, por defecto el de la familia
+int debugMain=0; //por defecto desabilitado
 int debugGlobal=0; //por defecto desabilitado
 int nivelActivo;//Indica si el rele se activa con HIGH o LOW
 
 hw_timer_t *timer = NULL;//Puntero al timer del watchdog
 uint16_t vuelta = 0; //MAX_VUELTAS-100; //vueltas de loop
+int etapa=SETUP;
 /***************************** variables globales *****************************/
 
 /*************************************** SETUP ***************************************/
@@ -184,6 +205,7 @@ void setup()
 
 void loop()
   {  
+  etapa=INICIO;
   //referencia horaria de entrada en el bucle
   time_t EntradaBucle=0;
   EntradaBucle=millis();//Hora de entrada en la rodaja de tiempo
@@ -194,22 +216,34 @@ void loop()
   //------------- EJECUCION DE TAREAS --------------------------------------
   //Acciones a realizar en el bucle   
   //Prioridad 0: OTA es prioritario.
+  etapa=OTA;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
   if ((vuelta % FRECUENCIA_OTA)==0) gestionaOTA(); //Gestion de actualizacion OTA
   //Prioridad 2: Funciones de control.
+  etapa=SENSORES;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
   if ((vuelta % FRECUENCIA_SENSORES)==0) sensores.lee(debugGlobal); //Actualiza las entradas  
+  etapa=ENTRADAS;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
   if ((vuelta % FRECUENCIA_ENTRADAS)==0) entradas.actualiza(debugGlobal); //Actualiza las entradas
+  etapa=SECUENCIADOR;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
   if ((vuelta % FRECUENCIA_SECUENCIADOR)==0) secuenciador.actualiza(debugGlobal); //Actualiza la salida del secuenciador
+  etapa=MAQ_ESTADOS;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
   if ((vuelta % FRECUENCIA_MAQUINAESTADOS)==0) maquinaEstados.actualiza(debugGlobal); //Actualiza la maquina de estados
+  etapa=SALIDAS;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
   if ((vuelta % FRECUENCIA_SALIDAS)==0) salidas.actualiza(debugGlobal); //comprueba las salidas
   //Prioridad 3: Interfaces externos de consulta    
   //if ((vuelta % FRECUENCIA_SERVIDOR_FTP)==0) gestionaFTP(); //atiende el servidor ftp
+  etapa=WEBSOCKETS;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
   if ((vuelta % FRECUENCIA_SERVIDOR_WEBSOCKET)==0) atiendeWebSocket(debugGlobal); //atiende el servidor web
+  etapa=MQTT;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
   if ((vuelta % FRECUENCIA_MQTT)==0) atiendeMQTT();      
+  etapa=ENVIO;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
   if ((vuelta % FRECUENCIA_ENVIO_DATOS)==0) enviaDatos(debugGlobal); //publica via MQTT los datos de entradas y salidas, segun configuracion
+  etapa=ORDENES;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
   if ((vuelta % FRECUENCIA_ORDENES)==0) while(HayOrdenes(debugGlobal)) EjecutaOrdenes(debugGlobal); //Lee ordenes via serie
   //Prioridad 4: WatchDog
+  etapa=WIFI_WD;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
   if ((vuelta % FRECUENCIA_WIFI_WATCHDOG)==0) WifiWD();    
 //------------- FIN EJECUCION DE TAREAS ---------------------------------  
+  etapa=FIN;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
 /*
   if ((vuelta % FRECUENCIA_OTA)==0) gestionaOTA(); //Gestion de actualizacion OTA
 
@@ -404,7 +438,7 @@ String generaJsonInfo(void)
 /*                                                             */
 /***************************************************************/
 void IRAM_ATTR resetModule(void) {
-  Traza.mensaje("Watchdog!!! reboot\n");
+  Serial.printf("Watchdog!!! Etapa: (%i)%s, rebooting....\n",etapa,nombreEtapas[etapa].c_str());
   //ets_printf("Watchdog!!! reboot\n");
   esp_restart();
 }
