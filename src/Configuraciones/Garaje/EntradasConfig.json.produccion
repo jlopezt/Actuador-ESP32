@@ -1,30 +1,60 @@
 {
-  "Entradas": [
-    {
-    "GPIO": 13, 
-    "nombre": "P. abierta", 
-    "tipo": "INPUT_PULLUP", 
-    "Estados": [
-      {"valor": 0, "texto": "Abierta"},
-      {"valor": 1, "texto": "---"}
-      ],
-    "Mensajes": [
-      {"valor": 0, "texto": "Puerta abierta"},
-      {"valor": 1, "texto": "Cerrando la puerta"}
-      ]
-    },
-    {
-    "GPIO": 12, 
-    "nombre": "P. cerrada", 
-    "tipo": "INPUT_PULLUP",
-    "Estados": [
-      {"valor": 0, "texto": "Cerrada"},
-      {"valor": 1, "texto": "---"}
-      ],
-    "Mensajes": [
-      {"valor": 0, "texto": "Puerta cerrada"},
-      {"valor": 1, "texto": "Abriendo la puerta"}
-      ]
-    }
-  ]
+	"Entradas": [
+		{
+		"GPIO": 23, 
+		"nombre": "Arriba", 
+		"tipo": "INPUT",
+		"estadoActivo": 1,
+		"Estados": [
+			{"valor": 0, "texto": "-"},
+			{"valor": 1, "texto": "Arriba"}
+			],
+		"Mensajes": [
+			{"valor": 0, "texto": "--"},
+			{"valor": 1, "texto": "Puerta abierta"}
+			]
+		},
+		{
+		"GPIO": 22, 
+		"nombre": "Abajo", 
+		"tipo": "INPUT",
+		"estadoActivo": 1,
+		"Estados": [
+			{"valor": 0, "texto": "-"},
+			{"valor": 1, "texto": "Abajo"}
+			],
+		"Mensajes": [
+			{"valor": 0, "texto": "--"},
+			{"valor": 1, "texto": "Puerta cerrada"}
+			]
+		},
+		{
+		"GPIO": 21, 
+		"nombre": "Seta", 
+		"tipo": "INPUT",
+		"estadoActivo": 1,
+		"Estados": [
+			{"valor": 0, "texto": "-"},
+			{"valor": 1, "texto": "Alarma"}
+			],
+		"Mensajes": [
+			{"valor": 0, "texto": "--"},
+			{"valor": 1, "texto": "Alarma activada"}
+			]
+		},				
+		{
+		"GPIO": 19, 
+		"nombre": "Celula", 
+		"tipo": "INPUT",
+		"estadoActivo": 1,
+		"Estados": [
+			{"valor": 0, "texto": "-"},
+			{"valor": 1, "texto": "Objeto"}
+			],
+		"Mensajes": [
+			{"valor": 0, "texto": "--"},
+			{"valor": 1, "texto": "Objeto presente"}
+			]
+		}
+	]
 }

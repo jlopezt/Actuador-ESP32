@@ -2,11 +2,11 @@
   "Salidas": [
     {
     "GPIO": 32, 
-    "nombre": "Pulsador",
+    "nombre": "Zona1",
     "tipo": 0,
     "inicio": "off",
     "anchoPulso": 1000,
-    "modo": 0,
+    "modo": 1,
     "controlador": 0,
     "Estados": [
       {"valor": 0, "texto": "Apagado"},
@@ -19,11 +19,11 @@
     },
     {
       "GPIO": 35, 
-      "nombre": "Maq.Estados",
+      "nombre": "Zona2",
       "tipo": 0,
       "inicio": "off",
       "anchoPulso": 1000,
-      "modo": 3,
+      "modo": 1,
       "controlador": 0,
       "Estados": [
         {"valor": 0, "texto": "Apagado"},
@@ -36,7 +36,7 @@
       },
       {
         "GPIO": 34, 
-        "nombre": "plan 0",
+        "nombre": "Zona3",
         "tipo": 0,
         "inicio": "off",
         "anchoPulso": 1000,
@@ -53,7 +53,7 @@
         },
         {
           "GPIO": 33, 
-          "nombre": "plan 1",
+          "nombre": "Zona4",
           "tipo": 0,
           "inicio": "off",
           "anchoPulso": 1000,

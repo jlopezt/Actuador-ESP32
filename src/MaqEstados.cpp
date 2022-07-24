@@ -281,7 +281,11 @@ uint8_t MaquinaEstados::getNumTransiciones(void){return numeroTransiciones;}
 uint8_t MaquinaEstados::getNumEntradas(void){return numeroEntradas;}
 uint8_t MaquinaEstados::getNumSalidas(void){return numeroSalidas;}
 
-String MaquinaEstados::getNombreEstadoActual(void){return estados[estadoActual].getNombre();}
+String MaquinaEstados::getNombreEstadoActual(void){
+  if(numeroEstados<=0) return "";//Si no se han definido estados, no hay nada que hacer
+
+  return estados[estadoActual].getNombre();
+}
 
 uint8_t MaquinaEstados::getMapeoEntrada(uint8_t id) 
   {
@@ -326,6 +330,11 @@ String MaquinaEstados::generaJsonEstado(void)
   
   JsonObject& root = jsonBuffer.createObject();
   
+  if(numeroEstados<=0 || numeroEntradas<=0 || numeroSalidas<=0 || numeroTransiciones<=0){//Si no se han definido la maquina, no hay nada que hacer
+    root.printTo(cad);
+    return cad;
+  }
+
   root["estado"] = maquinaEstados.getNombreEstadoActual();
   root["numeroEntradas"] = maquinaEstados.getNumEntradas();
   root["numeroSalidas"] = maquinaEstados.getNumSalidas();

@@ -6,11 +6,11 @@
   "xxxpuerto": 8883, 
   "usuarioMQTT": "domoticae", 
   "passwordMQTT": "88716", 
-  "ID_MQTT": "PuertaGaraje", 
+  "ID_MQTT": "Riego", 
   "topicRoot": "casaPre", 
-  "publicarMedidas": 1,
-  "publicarEntradas": 1,
+  "publicarMedidas": 0,
+  "publicarEntradas": 0,
   "publicarSalidas": 1,
   "publicarSecuenciador": 1,
-  "publicarMaquinaEstados":1
+  "publicarMaquinaEstados":0
 }

@@ -79,13 +79,24 @@ boolean Secuenciador::parseaConfiguracion(String contenido){
     String _nombre="";
     int8_t _salidaAsociada=-1;        //salida a la que se asocia la secuencia
     uint32_t _intervalos[INTERVALOS_EN_HORA];      //el valor es un campo de bit. los primeros INTERVALOS_EN_HORA son los intervalos de cada hora
-    for(uint8_t i=0;i<HORAS_EN_DIA;i++) _intervalos[i]=0;
+    for(uint8_t i=0;i<INTERVALOS_EN_HORA;i++) _intervalos[i]=0;
 
     JsonObject& _plan = Planes[i];//json["Planes"][i];
     //leo los valores del json
     _id=i;
     if(_plan.containsKey("nombre")) _nombre=_plan.get<String>("nombre");
+    else {
+      Traza.mensaje("Plan %i, no contiene campo nombre\n",_id);
+      numeroPlanes=0;//Esto aborta la configuracion de los planes!!!!!!!
+      return false;
+    }
+
     if(_plan.containsKey("salida")) _salidaAsociada=_plan.get<int>("salida");
+    else {
+      Traza.mensaje("Plan %i, no contiene campo salida\n",_id);
+      numeroPlanes=0;//Esto aborta la configuracion de los planes!!!!!!!
+      return false;
+    }
 
     if(_salidaAsociada>=salidas.getNumSalidas()) {
       Traza.mensaje("Plan %i, La salida asociada (%i) no esta configurada\n",_id,_salidaAsociada);

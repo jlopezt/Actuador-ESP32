@@ -22,6 +22,7 @@
 #define FRECUENCIA_MQTT                  10 //cada cuantas vueltas de loop envia y lee del broker MQTT
 #define FRECUENCIA_ENVIO_DATOS           49 //cada cuantas vueltas de loop envia al broker el estado de E/S
 #define FRECUENCIA_ORDENES                3 //cada cuantas vueltas de loop atiende las ordenes via serie 
+#define FRECUENCIA_PANTALLA               5 //cada cuantas vueltas de loop actualiza la pantalla
 #define FRECUENCIA_WIFI_WATCHDOG         50 //cada cuantas vueltas comprueba si se ha perdido la conexion WiFi
 
 //configuracion del watchdog del sistema
@@ -49,6 +50,7 @@
 #include <WebSockets.h>
 #include <WebServer.h>
 #include <ComprobacionErrores.h>
+#include <Pantalla.h>
 
 #include <rom/rtc.h>
 
@@ -76,11 +78,12 @@ enum ETAPAS{
   MQTT,
   ENVIO,
   ORDENES,
+  PANTALLA,
   WIFI_WD,
   FIN
 };
 
-String nombreEtapas[]={"SETUP","INICIO","OTA","SENSORES","ENTRADAS","SECUENCIADOR","MAQ_ESTADOS","SALIDAS","WEBSOCKETS","MQTT","ENVIO","ORDENES","WIFI_WD","FIN"};
+String nombreEtapas[]={"SETUP","INICIO","OTA","SENSORES","ENTRADAS","SECUENCIADOR","MAQ_ESTADOS","SALIDAS","WEBSOCKETS","MQTT","ENVIO","ORDENES","RELOJ","WIFI_WD","FIN"};
 
 String nombre_dispositivo;//Nombre del dispositivo, por defecto el de la familia
 int debugMain=0; //por defecto desabilitado
@@ -187,6 +190,10 @@ void setup()
   Traza.mensaje("\n\nInit Ordenes ----------------------------------------------------------------------\n");  
   inicializaOrden();//Inicializa los buffers de recepcion de ordenes desde PC
 
+  //Reloj
+  Traza.mensaje("\n\nInit Reloj ----------------------------------------------------------------------\n");  
+  inicializaPantalla();
+
   compruebaConfiguracion(0);
   parpadeaLed(2);
   apagaLed();//Por si acaso...
@@ -239,9 +246,12 @@ void loop()
   if ((vuelta % FRECUENCIA_ENVIO_DATOS)==0) enviaDatos(debugGlobal); //publica via MQTT los datos de entradas y salidas, segun configuracion
   etapa=ORDENES;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
   if ((vuelta % FRECUENCIA_ORDENES)==0) while(HayOrdenes(debugGlobal)) EjecutaOrdenes(debugGlobal); //Lee ordenes via serie
+  etapa=PANTALLA;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
+  if ((vuelta % FRECUENCIA_PANTALLA)==0) actualizaPantalla(); //actualiza la pantalla
+  
   //Prioridad 4: WatchDog
   etapa=WIFI_WD;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
-  if ((vuelta % FRECUENCIA_WIFI_WATCHDOG)==0) WifiWD();    
+  if ((vuelta % FRECUENCIA_WIFI_WATCHDOG)==0) WifiWD();      
 //------------- FIN EJECUCION DE TAREAS ---------------------------------  
   etapa=FIN;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
 /*
