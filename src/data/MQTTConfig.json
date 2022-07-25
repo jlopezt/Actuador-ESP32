@@ -9,8 +9,8 @@
   "ID_MQTT": "Riego", 
   "topicRoot": "casaPre", 
   "publicarMedidas": 0,
-  "publicarEntradas": 0,
+  "publicarEntradas": 1,
   "publicarSalidas": 1,
   "publicarSecuenciador": 1,
-  "publicarMaquinaEstados":0
+  "publicarMaquinaEstados":1
 }

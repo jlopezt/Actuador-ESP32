@@ -11,6 +11,8 @@
 /**********************************************/
 
 /***************************** Defines *****************************/
+#define MI_BUFFER_MQTT_SIZE 512
+#define MI_MQTT_KEEPALIVE   20
 //definicion de los comodines del MQTT
 #define WILDCARD_ALL      "#"
 #define WILDCARD_ONELEVEL "+"
@@ -97,6 +99,11 @@ void inicializaMQTT(void)
   //configuro el servidor y el puerto
   if (BrokerDir==String("")) clienteMQTT.setServer(IPBroker, puertoBroker);
   else clienteMQTT.setServer(BrokerDir.c_str(), puertoBroker);
+
+  //Configuro el tamaño del buffer
+  clienteMQTT.setBufferSize(MI_BUFFER_MQTT_SIZE);
+  clienteMQTT.setKeepAlive(MI_MQTT_KEEPALIVE);
+  
   //configuro el callback, si lo hay
   clienteMQTT.setCallback(callbackMQTT);
 

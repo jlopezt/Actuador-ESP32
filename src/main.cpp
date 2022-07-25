@@ -20,10 +20,10 @@
 #define FRECUENCIA_SERVIDOR_FTP           3 //cada cuantas vueltas de loop atiende el servidor ftp
 #define FRECUENCIA_SERVIDOR_WEBSOCKET     1 //cada cuantas vueltas de loop atiende el servidor web
 #define FRECUENCIA_MQTT                  10 //cada cuantas vueltas de loop envia y lee del broker MQTT
-#define FRECUENCIA_ENVIO_DATOS           49 //cada cuantas vueltas de loop envia al broker el estado de E/S
+#define FRECUENCIA_ENVIO_DATOS           47 //cada cuantas vueltas de loop envia al broker el estado de E/S
 #define FRECUENCIA_ORDENES                3 //cada cuantas vueltas de loop atiende las ordenes via serie 
-#define FRECUENCIA_PANTALLA               5 //cada cuantas vueltas de loop actualiza la pantalla
-#define FRECUENCIA_WIFI_WATCHDOG         50 //cada cuantas vueltas comprueba si se ha perdido la conexion WiFi
+#define FRECUENCIA_PANTALLA               7 //cada cuantas vueltas de loop actualiza la pantalla
+#define FRECUENCIA_WIFI_WATCHDOG         60 //cada cuantas vueltas comprueba si se ha perdido la conexion WiFi
 
 //configuracion del watchdog del sistema
 #define TIMER_WATCHDOG        0 //Utilizo el timer 0 para el watchdog

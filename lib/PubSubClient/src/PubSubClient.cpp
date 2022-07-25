@@ -373,6 +373,7 @@ boolean PubSubClient::loop() {
         if ((t - lastInActivity > this->keepAlive*1000UL) || (t - lastOutActivity > this->keepAlive*1000UL)) {
             if (pingOutstanding) {
                 this->_state = MQTT_CONNECTION_TIMEOUT;
+                Serial.printf("He sido yo, el keepAlive\n");
                 _client->stop();
                 return false;
             } else {

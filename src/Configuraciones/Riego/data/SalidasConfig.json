@@ -7,7 +7,7 @@
       "inicio": "off",
       "anchoPulso": 1000,
       "modo": 1,
-      "controlador": 1,
+      "controlador": 0,
       "Estados": [
         {"valor": 0, "texto": "Apagado"},
         {"valor": 1, "texto": "Encendido"}
@@ -24,7 +24,7 @@
       "inicio": "off",
       "anchoPulso": 1000,
       "modo": 1,
-      "controlador": 1,
+      "controlador": 0,
       "Estados": [
         {"valor": 0, "texto": "Apagado"},
         {"valor": 1, "texto": "Encendido"}
@@ -41,7 +41,7 @@
       "inicio": "off",
       "anchoPulso": 1000,
       "modo": 1,
-      "controlador": 1,
+      "controlador": 0,
       "Estados": [
         {"valor": 0, "texto": "Apagado"},
         {"valor": 1, "texto": "Encendido"}
@@ -50,23 +50,6 @@
         {"valor": 0, "texto": "Apagado"},
         {"valor": 1, "texto": "Encendido"}
       ]
-    },
-		  {
-			"GPIO": 33, 
-			"nombre": "plan 1",
-			"tipo": 0,
-			"inicio": "off",
-			"anchoPulso": 1000,
-			"modo": 3,
-			"controlador": 0,
-			"Estados": [
-			  {"valor": 0, "texto": "Apagado"},
-			  {"valor": 1, "texto": "Encendido"}
-			  ],
-			"Mensajes": [
-			  {"valor": 0, "texto": "Apagado"},
-			  {"valor": 1, "texto": "Encendido"}
-			  ]
-			}
+    }
   ]
 }

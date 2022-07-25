@@ -1,3 +1,18 @@
 {
-	"Entradas": []
+	"Entradas": [
+		{
+		"GPIO": 22, 
+		"nombre": "Arriba", 
+		"tipo": "INPUT",
+		"estadoActivo": 1,
+		"Estados": [
+			{"valor": 0, "texto": "-"},
+			{"valor": 1, "texto": "Arriba"}
+			],
+		"Mensajes": [
+			{"valor": 0, "texto": "--"},
+			{"valor": 1, "texto": "Puerta abierta"}
+			]
+		}
+	]
 }

@@ -88,10 +88,12 @@ String compruebaES(void)
     if(salidas.getSalida(salida).getPin()<0 || salidas.getSalida(salida).getPin()>MAX_PINES_ESP32) cad += "Salida " + String(salida) + " | pin no valido\n";  
     if(salidas.getSalida(salida).getAnchoPulso()<0) cad += "Salida " + String(salida) + " | ancho de pulso no valido\n";  
     if(salidas.getSalida(salida).getControlador()>0 && salidas.getSalida(salida).getModo()!=MODO_SECUENCIADOR && salidas.getSalida(salida).getModo()!=MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | controlador configurado en un modo incorrecto\n";  
-    if(salidas.getSalida(salida).getModo()==MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
-    if(salidas.getSalida(salida).getModo()==MODO_SECUENCIADOR) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
-    if(salidas.getSalida(salida).getModo()==MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | configurada en modo seguimiento pero el controlador configurado no es una entrada valida\n";  
-    if(salidas.getSalida(salida).getModo()==MODO_SECUENCIADOR) cad += "Salida " + String(salida) + " | configurada en modo secuenciador pero el controlador configurado no es un plan valido\n";  
+//    if(salidas.getSalida(salida).getModo()==MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
+//    if(salidas.getSalida(salida).getModo()==MODO_SEGUIMIENTO) cad += "Salida " + String(salida) + " | configurada en modo seguimiento pero el controlador configurado no es una entrada valida\n";  
+    if(salidas.getSalida(salida).getModo()==MODO_SEGUIMIENTO && salidas.getSalida(salida).getControlador()<0) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
+    if(salidas.getSalida(salida).getModo()==MODO_SEGUIMIENTO && salidas.getSalida(salida).getControlador()>=entradas.getNumEntradas()) cad += "Salida " + String(salida) + " | configurada en modo seguimiento pero el controlador configurado no es una entrada valida\n";  
+    if(salidas.getSalida(salida).getModo()==MODO_SECUENCIADOR && salidas.getSalida(salida).getControlador()<0) cad += "Salida " + String(salida) + " | no hay un controlador configurado en un modo que lo requiere\n";  
+    if(salidas.getSalida(salida).getModo()==MODO_SECUENCIADOR && salidas.getSalida(salida).getControlador()>=secuenciador.getNumPlanes()) cad += "Salida " + String(salida) + " | configurada en modo secuenciador pero el controlador configurado no es un plan valido\n";  
     if(salidas.getSalida(salida).getEstadoInicial()!=ESTADO_DESACTIVO && salidas.getSalida(salida).getEstadoInicial()!=ESTADO_ACTIVO) cad += "Salida " + String(salida) + " | inicio no valido\n";
     }
 
