@@ -205,6 +205,7 @@
 // For ESP32 Dev board (only tested with ILI9341 display)
 // The hardware SPI can be mapped to any pins
 
+/*Tapado por mi para lyligo relay
 //--->Destapado por mi
 #define TFT_MISO 19
 //--->Destapado por mi
@@ -219,6 +220,16 @@
 //--->Destapado por mi
 #define TFT_RST   4  // Reset pin (could connect to RST pin)
 //#define TFT_RST  -1  // Set TFT_RST to -1 if display RESET is connected to ESP32 board RST
+*/
+
+/*****************Defindo por mi para LiliGo Relay******************************/
+#define TFT_MISO 22//19
+#define TFT_MOSI 23
+#define TFT_SCLK 13//18
+#define TFT_CS   39//15  // Chip select control pin
+#define TFT_DC   27// 5  // Data Command control pin
+#define TFT_RST  26// 4  // Reset pin (could connect to RST pin)
+/***********************************************/
 
 // For ESP32 Dev board (only tested with GC9A01 display)
 // The hardware SPI can be mapped to any pins

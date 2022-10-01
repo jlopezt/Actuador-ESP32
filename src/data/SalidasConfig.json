@@ -2,12 +2,12 @@
   "Salidas": [
     {
       "GPIO": 32, 
-      "nombre": "Zona1",
+      "nombre": "Subir",
       "tipo": 0,
       "inicio": "off",
       "anchoPulso": 1000,
-      "modo": 1,
-      "controlador": 1,
+      "modo": 3,
+      "controlador": 0,
       "Estados": [
         {"valor": 0, "texto": "Apagado"},
         {"valor": 1, "texto": "Encendido"}
@@ -18,13 +18,13 @@
       ]
     },
     {
-      "GPIO": 35, 
-      "nombre": "Zona2",
+      "GPIO": 33, 
+      "nombre": "Bajar",
       "tipo": 0,
       "inicio": "off",
       "anchoPulso": 1000,
-      "modo": 1,
-      "controlador": 1,
+      "modo": 3,
+      "controlador": 0,
       "Estados": [
         {"valor": 0, "texto": "Apagado"},
         {"valor": 1, "texto": "Encendido"}
@@ -36,37 +36,37 @@
     },
     {
       "GPIO": 34, 
-      "nombre": "Zona3",
+      "nombre": "LuzRoja",
       "tipo": 0,
       "inicio": "off",
       "anchoPulso": 1000,
-      "modo": 1,
-      "controlador": 1,
+      "modo": 3,
+      "controlador": 0,
       "Estados": [
-        {"valor": 0, "texto": "Apagado"},
-        {"valor": 1, "texto": "Encendido"}
+        {"valor": 0, "texto": "--"},
+        {"valor": 1, "texto": "Alarma"}
       ],
       "Mensajes": [
-        {"valor": 0, "texto": "Apagado"},
-        {"valor": 1, "texto": "Encendido"}
+        {"valor": 0, "texto": "--"},
+        {"valor": 1, "texto": "Alarma"}
       ]
-    },
-		  {
-			"GPIO": 33, 
-			"nombre": "plan 1",
-			"tipo": 0,
-			"inicio": "off",
-			"anchoPulso": 1000,
-			"modo": 3,
-			"controlador": 0,
-			"Estados": [
-			  {"valor": 0, "texto": "Apagado"},
-			  {"valor": 1, "texto": "Encendido"}
-			  ],
-			"Mensajes": [
-			  {"valor": 0, "texto": "Apagado"},
-			  {"valor": 1, "texto": "Encendido"}
-			  ]
-			}
+    },   
+    {
+      "GPIO": 36,
+      "nombre": "boton",
+      "tipo": 0,
+      "inicio": "off",
+      "anchoPulso": 1000,
+      "modo": 0,
+      "controlador": 0,
+      "Estados": [
+        {"valor": 0, "texto": ""},
+        {"valor": 1, "texto": "Pulsado"}
+      ],
+      "Mensajes": [
+        {"valor": 0, "texto": ""},
+        {"valor": 1, "texto": "Boton pulsado"}
+      ]
+    }    
   ]
 }

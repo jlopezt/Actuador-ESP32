@@ -123,8 +123,10 @@ String compruebaMaquinaEstados(void)
   //Entradas
   cad += "Entradas\n";
   uint8_t nEntradas=maquinaEstados.getNumEntradas();
-  
+
   cad += "configuradas " + String(nEntradas) + " entradas\n";
+  if (nEntradas==0) cad += "El nuemro de entradas de la maquina de estados no puede ser cero\n";
+    
   for(uint8_t entrada=0;entrada<nEntradas;entrada++)
     {      
     if(maquinaEstados.getMapeoEntrada(entrada)>entradas.getNumEntradas()) cad += "Entrada " + String(entrada) + " | el numero de entrada es mayor al numero de entradas configurado\n";  
@@ -133,8 +135,10 @@ String compruebaMaquinaEstados(void)
   //Salidas
   cad += "Salidas\n";
   uint8_t nSalidas=maquinaEstados.getNumSalidas();
-  
+
   cad += "configuradas " + String(nSalidas) + " salidas\n";
+  if (nSalidas==0) cad += "El nuemro de salidas de la maquina de estados no puede ser cero\n";
+  
   for(uint8_t salida=0;salida<nSalidas;salida++)
     {
     if(maquinaEstados.getMapeoSalida(salida)>salidas.getNumSalidas()) cad += "Salida " + String(salida) + " | el numero de salida es mayor que el numero de salidas configuradas\n";  

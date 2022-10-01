@@ -33,6 +33,7 @@ class Estado{
     private:
         uint8_t id;
         String nombre;
+        int timeOut; //en milisegundos
         int8_t valorSalida[MAX_SALIDAS];
     public:
         //constructor
@@ -41,11 +42,13 @@ class Estado{
         void setId(uint8_t _id);
         void setNombre(String _nombre);
         void setValorSalida(uint8_t _salida, int8_t _valor);
+        void setTimeOut(int valor); //El valor viene en segundos
 
         //get
         uint8_t getId(void); //uint8_t getIdEstados(uint8_t estado);
         String getNombre(void); //String getNombreEstado(uint8_t estado);
         int8_t getValorSalida(uint8_t salida); //uint8_t getValorSalidaEstados(uint8_t estado, uint8_t salida);
+        int getTimeOut(){return timeOut;}
 };
 
 class Transicion{
@@ -79,6 +82,7 @@ class MaquinaEstados{
         uint8_t numeroTransiciones; //numero de lazos de la maquina de estados. A cada transicion se asocia un estado inicial, unos valores de las entradas y un estado final
 
         uint8_t estadoActual;
+        int tiempoLlegadaEstado;
         int8_t entradasActual[MAX_ENTRADAS]; //VAlor leido de las entradas
         int8_t salidasActual[MAX_SALIDAS];
         boolean debugMaquinaEstados;

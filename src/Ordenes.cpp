@@ -313,7 +313,7 @@ void func_comando_echo(int iParametro, char* sParametro, float fParametro)//"ech
 
 void func_comando_debugGlobal(int iParametro, char* sParametro, float fParametro)//"debug")
   {
-  ++debugGlobal=debugGlobal % 2;
+  debugGlobal=(debugGlobal+1) % 2;
   if (debugGlobal) Traza.mensaje("debugGlobal esta on\n");
   else Traza.mensaje("debugGlobal esta off\n");
   }

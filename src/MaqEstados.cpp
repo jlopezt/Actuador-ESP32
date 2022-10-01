@@ -34,6 +34,8 @@ MaquinaEstados::MaquinaEstados(void){
   //Estado de la maquina
   debugMaquinaEstados=false;
   estadoActual=ESTADO_INICIAL;
+  tiempoLlegadaEstado=millis();
+
   for(uint8_t i=0;i<entradas.getNumEntradas();i++) entradasActual[i]=NO_CONFIGURADO;
   for(uint8_t i=0;i<entradas.getNumEntradas();i++) salidasActual[i]=NO_CONFIGURADO;
   
@@ -131,6 +133,7 @@ boolean MaquinaEstados::parseaConfiguracion(String contenido)
     JsonObject& est = Estados[i];   
     estados[i].setId(est["id"]); 
     estados[i].setNombre(String((const char *)est["nombre"]));
+    estados[i].setTimeOut(est["timeout"]);
 
     JsonArray& Salidas = est["salidas"];
     int8_t num_salidas;
@@ -147,7 +150,7 @@ boolean MaquinaEstados::parseaConfiguracion(String contenido)
   Traza.mensaje("Se han definido %i estados\n",numeroEstados);
   for(int8_t i=0;i<numeroEstados;i++) 
     {
-    Traza.mensaje("%01i: id= %i| nombre: %s\n",i,estados[i].getId(),estados[i].getNombre().c_str());
+    Traza.mensaje("%01i: id= %i| nombre: %s | timeOut: %i\n",i,estados[i].getId(),estados[i].getNombre().c_str(),estados[i].getTimeOut());
     Traza.mensaje("salidas:\n");
     for(int8_t s=0;s<numeroSalidas;s++) 
       {
@@ -206,10 +209,13 @@ boolean MaquinaEstados::parseaConfiguracion(String contenido)
 void MaquinaEstados::actualiza(int debug)
   {
   boolean localDebug=debug || debugMaquinaEstados;
-    
-  //Actualizo el vaor de las entradas
-  for(uint8_t i=0;i<numeroEntradas;i++) entradasActual[i]=entradas.getEntrada(mapeoEntradas[i]).getEstado();//  estadoEntrada(mapeoEntradas[i]);
 
+  //Si no hay entradas y/o salidas no hay nada que hacer
+  if(numeroEntradas<=0 || numeroSalidas<=0) return;
+
+  //Actualizo el valor de las entradas
+  for(uint8_t i=0;i<numeroEntradas;i++) entradasActual[i]=entradas.getEntrada(mapeoEntradas[i]).getEstado();//  estadoEntrada(mapeoEntradas[i]);
+  
   if(localDebug) 
     {
     Traza.mensaje("Estado inicial: (%i) %s\n",estadoActual,estados[estadoActual].getNombre().c_str());
@@ -218,14 +224,23 @@ void MaquinaEstados::actualiza(int debug)
     }
     
   //busco en las transiciones a que estado debe evolucionar la maquina
-  estadoActual=mueveMaquina(estadoActual, entradasActual, localDebug);
+  uint8_t nuevoEstado=mueveMaquina(estadoActual, entradasActual, localDebug);
+
+  if(estadoActual==nuevoEstado && estados[estadoActual].getTimeOut()!=-1){
+    Serial.printf("Compruebo timeout de estado\n");
+    if(millis()>tiempoLlegadaEstado+estados[estadoActual].getTimeOut()) estadoActual=ESTADO_ERROR;
+  }
+  else {
+    estadoActual=nuevoEstado;
+    tiempoLlegadaEstado=millis();
+  }
 
   //Actualizo las salidas segun el estado actual
   if(actualizaSalidasMaquinaEstados(estadoActual)!=1) Traza.mensaje("Error al actualizar las salidas\n");
 
-  if(localDebug) Traza.mensaje("Estado actual: (%i) %s\n",estadoActual,estados[estadoActual].getNombre().c_str());
+  if(localDebug) Traza.mensaje("Estado actual: (%i) %s desde %i (timeOut estad: %i | millis ahora: %i)\n",estadoActual,estados[estadoActual].getNombre().c_str(),tiempoLlegadaEstado,estados[estadoActual].getTimeOut(),millis());
   }
-void MaquinaEstados::actualiza(void){actualiza(false);}
+void MaquinaEstados::actualiza(void){actualiza(debugGlobal);}
 
 /**********************************************************************/
 /* busco en las transiciones a que estado debe evolucionar la maquina */
@@ -356,7 +371,7 @@ String MaquinaEstados::generaJsonEstado(void)
     Salidas_0["estado"] = salidas.getSalida(mapeoSalidas[id]).getEstado();
     Salidas_0["salidaGlobal"] = mapeoSalidas[id];
     }
-
+/* No es estado es configuracion
   JsonArray& listaTransiciones = root.createNestedArray("transiciones");
   for(uint8_t regla=0;regla<numeroTransiciones;regla++) //las reglas se evaluan por orden
     {
@@ -368,7 +383,7 @@ String MaquinaEstados::generaJsonEstado(void)
 
     for(uint8_t entradaME=0;entradaME<numeroEntradas;entradaME++) valorEntradas.add(transiciones[regla].getValorEntrada(entradaME));
   }
-
+*/
   root.printTo(cad);
   return cad;  
   }
@@ -379,12 +394,17 @@ String MaquinaEstados::generaJsonEstado(void)
 Estado::Estado(void){  
   id=0;
   nombre="Estado_" + String(id);
+  timeOut=-1;
   for(uint8_t j=0;j<MAX_SALIDAS;j++) valorSalida[j]=NO_CONFIGURADO;
 }
 
 void Estado::setId(uint8_t _id) {id=_id;}
 void Estado::setNombre(String _nombre) {nombre=_nombre;}
 void Estado::setValorSalida(uint8_t _salida, int8_t _valor) {valorSalida[_salida]=_valor;}
+void Estado::setTimeOut(int valor){
+  if(valor==-1) timeOut=valor;
+  else timeOut=valor*1000;//El valor viene en segundos
+}
 
 uint8_t Estado::getId() {return id;}
 String Estado::getNombre(void) {return nombre;}

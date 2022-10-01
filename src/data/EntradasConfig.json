@@ -1,18 +1,74 @@
 {
 	"Entradas": [
 		{
-		"GPIO": 22, 
-		"nombre": "Arriba", 
-		"tipo": "INPUT",
-		"estadoActivo": 1,
-		"Estados": [
-			{"valor": 0, "texto": "-"},
-			{"valor": 1, "texto": "Arriba"}
+			"GPIO": 2, 
+			"nombre": "Pulsador", 
+			"tipo": "INPUT",
+			"estadoActivo": 1,
+			"Estados": [
+				{"valor": 0, "texto": "-"},
+				{"valor": 1, "texto": "Pulsado"}
 			],
-		"Mensajes": [
-			{"valor": 0, "texto": "--"},
-			{"valor": 1, "texto": "Puerta abierta"}
+			"Mensajes": [
+				{"valor": 0, "texto": "--"},
+				{"valor": 1, "texto": "Pulsado"}
 			]
-		}
+		},
+		{
+			"GPIO": 4, 
+			"nombre": "Arriba", 
+			"tipo": "INPUT",
+			"estadoActivo": 1,
+			"Estados": [
+				{"valor": 0, "texto": "-"},
+				{"valor": 1, "texto": "Arriba"}
+			],
+			"Mensajes": [
+				{"valor": 0, "texto": "--"},
+				{"valor": 1, "texto": "Puerta abierta"}
+			]
+		},
+		{
+			"GPIO": 12, 
+			"nombre": "Abajo", 
+			"tipo": "INPUT",
+			"estadoActivo": 1,
+			"Estados": [
+				{"valor": 0, "texto": "-"},
+				{"valor": 1, "texto": "Abajo"}
+			],
+			"Mensajes": [
+				{"valor": 0, "texto": "--"},
+				{"valor": 1, "texto": "Puerta cerrada"}
+			]
+		},
+		{
+			"GPIO": 14, 
+			"nombre": "Barrera",
+			"tipo": "INPUT",
+			"estadoActivo": 1,
+			"Estados": [
+			  {"valor": 0, "texto": "Paso libre"},
+			  {"valor": 1, "texto": "Objeto detectado"}
+			],
+			"Mensajes": [
+			  {"valor": 0, "texto": "Paso libre"},
+			  {"valor": 1, "texto": "Objeto detectado"}
+			]
+		  },
+		  {
+			"GPIO": 15, 
+			"nombre": "Emergencia",
+			"tipo": "INPUT",
+			"estadoActivo": 1,
+			"Estados": [
+			  {"valor": 0, "texto": "Apagado"},
+			  {"valor": 1, "texto": "Encendido"}
+			],
+			"Mensajes": [
+			  {"valor": 0, "texto": "Apagado"},
+			  {"valor": 1, "texto": "Encendido"}
+			]
+		  }  			
 	]
 }

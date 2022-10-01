@@ -50,7 +50,7 @@ void TrazaClass::mensaje(const char *str, ...)
     {
     case serie:
       Serial.print(cad); 
-      //break;
+      break;
     case ethernet:
       escribeTCP(cad);
       break;

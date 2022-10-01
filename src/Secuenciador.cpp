@@ -129,7 +129,8 @@ boolean Secuenciador::parseaConfiguracion(String contenido){
 /******************************************************************/
 void Secuenciador::actualiza(bool debug){
   if(!activado) return;
-    
+  if(getNumPlanes()==0) return;
+
   for(int8_t i=0;i<getNumPlanes();i++){
     /*
     Traza.mensaje("Inicio plan %i------------------------------------------------\n",i);

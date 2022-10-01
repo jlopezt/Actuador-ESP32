@@ -1,3 +1,4 @@
+/*
 // Sketch to draw an analogue clock on the screen
 // This uses anti-aliased drawing functions that are built into TFT_eSPI
 
@@ -38,10 +39,6 @@
 #define FACE_W CLOCK_R * 2 + 1
 #define FACE_H CLOCK_R * 2 + 1
 
-//#include <TFT_eSPI.h> // Master copy here: https://github.com/Bodmer/TFT_eSPI
-//#include <SPI.h>
-
-//#include "NotoSansBold15.h"
 #include <SNTP.h>
 #include <Pantalla.h>
 #include <reloj.h>
@@ -62,16 +59,6 @@ float time_secs = h * 3600 + m * 60 + s;
 uint32_t targetTime = 0;
 
 void initReloj(void) {
-/*
-  // Initialise the screen
-  tft.init();
-
-  // Ideally set orientation for good viewing angle range because
-  // the anti-aliasing effectiveness varies with screen viewing angle
-  // Usually this is when screen ribbon connector is at the bottom
-  tft.setRotation(0);
-  tft.fillScreen(TFT_BLACK);
-*/
   // Create the clock face sprite
   //face.setColorDepth(8); // 8 bit will work, but reduces effectiveness of anti-aliasing
   face.createSprite(FACE_W, FACE_H);
@@ -86,12 +73,6 @@ void initReloj(void) {
 }
 
 void updateReloj() {
-  /*
-  static uint8_t flag=0;
-  if(flag==0) Serial.printf("tic...\n");
-  else  Serial.printf("tac...\n");
-  flag=(++flag)%2;
-  */
   // Update time periodically
   if (targetTime < millis()) {
 
@@ -183,3 +164,4 @@ void getCoord(int16_t x, int16_t y, float *xp, float *yp, int16_t r, float a)
   *xp =  sx1 * r + x;
   *yp =  sy1 * r + y;
 }
+*/
