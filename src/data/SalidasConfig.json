@@ -1,7 +1,7 @@
 {
   "Salidas": [
     {
-      "GPIO": 32, 
+      "GPIO": 5, 
       "nombre": "Subir",
       "tipo": 0,
       "inicio": "off",
@@ -18,7 +18,7 @@
       ]
     },
     {
-      "GPIO": 33, 
+      "GPIO": 18, 
       "nombre": "Bajar",
       "tipo": 0,
       "inicio": "off",
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "GPIO": 34, 
+      "GPIO": 19, 
       "nombre": "LuzRoja",
       "tipo": 0,
       "inicio": "off",
@@ -67,6 +67,6 @@
         {"valor": 0, "texto": ""},
         {"valor": 1, "texto": "Boton pulsado"}
       ]
-    }    
+    }
   ]
 }

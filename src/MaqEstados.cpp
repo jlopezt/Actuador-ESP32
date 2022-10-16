@@ -227,7 +227,7 @@ void MaquinaEstados::actualiza(int debug)
   uint8_t nuevoEstado=mueveMaquina(estadoActual, entradasActual, localDebug);
 
   if(estadoActual==nuevoEstado && estados[estadoActual].getTimeOut()!=-1){
-    Serial.printf("Compruebo timeout de estado\n");
+    //Serial.printf("Compruebo timeout de estado\n");
     if(millis()>tiempoLlegadaEstado+estados[estadoActual].getTimeOut()) estadoActual=ESTADO_ERROR;
   }
   else {

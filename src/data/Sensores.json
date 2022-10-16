@@ -1,3 +1,6 @@
 {
-    "Sensores":[]
+    "Sensores":[
+        {"nombre":"DS18B20_1","tipo": "DS18B20","parametros":{"direccion":"28:68:26:75:D0:01:3C:F1","humbralTemperatura":22,"compararTemperatura": -1}},
+        {"nombre":"BME280_1","tipo": "BME280","parametros":{"direccionI2C":"0x23","humbralTemperatura":22,"compararTemperatura": 1,"humbralHumedad":66,"compararHumedad": -1,"humbralPresion":1000,"compararPresion": 1}}
+    ]
 }

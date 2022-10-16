@@ -194,12 +194,20 @@ void callbackMQTT(char* topic, byte* payload, unsigned int length)
   //Compara el topic recibido con los que tiene suscritos para redirigir a la funcion de gestion correspondiente  
   String cad=String(topic);
 
-  //topics descartados (los genera este dispositivo)
+  //topics descartados: los genera este dispositivo, se identifican por empezar por topicRoot + "/" + ID_MQTT
+  String topicPropio=topicRoot + "/" + ID_MQTT;
+  int lonTopicPropio=topicPropio.length();
+  if(cad.substring(0,lonTopicPropio)==topicPropio) return;
+  
+  //Serial.printf("No se descarta por ser propio. topicPropio: %s | topic mensaje: %s [%s]\n",topicPropio.c_str(),cad.c_str(),(cad.substring(0,lonTopicPropio)).c_str());
+  /*
   if(cad==String(topicRoot + "/" + ID_MQTT + "/medidas")) return;
   if(cad==String(topicRoot + "/" + ID_MQTT + "/entradas")) return;
   if(cad==String(topicRoot + "/" + ID_MQTT + "/salidas")) return;
   if(cad==String(topicRoot + "/" + ID_MQTT + "/secuenciador")) return;
   if(cad==String(topicRoot + "/" + ID_MQTT + "/maquinaEstados")) return;
+  if(cad==String(topicRoot + "/" + ID_MQTT + "/sensores")) return;
+  */
 
   //Para cada topic suscrito...
   //if(cad.equalsIgnoreCase(topicRoot + <topicSuscrito>)) <funcion de gestion>(topic,payload,length);  
@@ -378,7 +386,7 @@ boolean enviarMQTT(String topic, String payload)
   //si y esta conectado envio, sino salgo con error
   if (clienteMQTT.connected()) 
     {
-    String topicCompleto=topicRoot+"/"+topic;  
+    String topicCompleto=topicRoot+"/"+ID_MQTT+"/"+topic;  
     
     if(clienteMQTT.beginPublish(topicCompleto.c_str(), payload.length(), false))
       {
@@ -414,7 +422,7 @@ void enviaDatos(boolean debug)
     {
     payload=sensores.generaJsonEstado();//genero el json de las entradas
     //Lo envio al bus    
-    if(enviarMQTT(ID_MQTT+"/"+"medidas", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
+    if(enviarMQTT("medidas", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
     else if(debug)Traza.mensaje("¡¡Error al enviar json al broker!!\n");
     }
   else if(debug)Traza.mensaje("No publico medidas. Publicar medidas es %i\n",publicarMedidas);
@@ -423,7 +431,7 @@ void enviaDatos(boolean debug)
     {
     payload=entradas.generaJsonEstado();//genero el json de las entradas
     //Lo envio al bus    
-    if(enviarMQTT(ID_MQTT+"/"+"entradas", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
+    if(enviarMQTT("entradas", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
     else if(debug)Traza.mensaje("¡¡Error al enviar json al broker!!\n");
     }
   else if(debug)Traza.mensaje("No publico entradas. Publicar entradas es %i\n",publicarEntradas);
@@ -432,7 +440,7 @@ void enviaDatos(boolean debug)
     {
     payload=salidas.generaJsonEstado();//genero el json de las salidas
     //Lo envio al bus    
-    if(enviarMQTT(ID_MQTT+"/"+"salidas", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
+    if(enviarMQTT("salidas", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
     else if(debug)Traza.mensaje("¡¡Error al enviar json al broker!!\n");
     }  
   else if(debug)Traza.mensaje("No publico salidas. Publicar salidas es %i\n",publicarSalidas);  
@@ -441,7 +449,7 @@ void enviaDatos(boolean debug)
     {
     payload=secuenciador.generaJsonEstado();//genero el json de estado de la maquina d eestados
     //Lo envio al bus    
-    if(enviarMQTT(ID_MQTT+"/"+"secuenciador", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
+    if(enviarMQTT("secuenciador", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
     else if(debug)Traza.mensaje("¡¡Error al enviar json al broker!!\n");
     }  
   else if(debug)Traza.mensaje("No publico secuenciador. Publicar secuenciador es %i\n",publicarSecuenciador);      
@@ -450,7 +458,7 @@ void enviaDatos(boolean debug)
     {
     payload=maquinaEstados.generaJsonEstado();//genero el json de estado de la maquina d eestados
     //Lo envio al bus    
-    if(enviarMQTT(ID_MQTT+"/"+"maquinaEstados", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
+    if(enviarMQTT("maquinaEstados", payload)) {if(debug)Traza.mensaje("Enviado json al broker con exito.\n");}
     else if(debug)Traza.mensaje("¡¡Error al enviar json al broker!!\n");
     }  
   else if(debug)Traza.mensaje("No publico maquina de estados. Publicar maquina de estados es %i\n",publicarMaquinaEstados);  

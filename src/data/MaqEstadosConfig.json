@@ -8,7 +8,7 @@
 		{"id":3, "nombre": "Abajo",  "salidas":[0,0,0], "timeout": -1},
 		{"id":4, "nombre": "Subiendo", "salidas":[1,0,0], "timeout": 30},
 		{"id":5, "nombre": "Bajando",  "salidas":[0,1,0], "timeout": 30},
-    {"id":6, "nombre": "Alarma",  "salidas":[0,0,1], "timeout": 0}
+		{"id":6, "nombre": "Alarma",  "salidas":[0,0,1], "timeout": 0}
 		],
 	"Transiciones":[
     {"inicial":0,"entradas":[-1,-1,-1,-1,-1],"final":0},

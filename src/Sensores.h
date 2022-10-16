@@ -1,23 +1,12 @@
 /*****************************************/
 /*                                       */
-/*        Sistema de Sensores             */
+/*        Sistema de Sensores            */
 /*                                       */
 /*****************************************/
 
 /***************************** Defines *****************************/
 #ifndef _SENSORES_
 #define _SENSORES_
-
-//Tipos de sensores
-#define TIPO_NULO                      0 //"NULO"
-#define TIPO_DS18B20                   1 //"DS18B20"  //Temperatura
-#define TIPO_HDC1080                   2 //"HDC1080"  //Temperatura, Humedad
-#define TIPO_DHT22                     3 //"DHT22"    //Temperatura, Humedad
-#define TIPO_BME280                    4 //"BME280"   //Temperatura, Humedad y presion
-#define TIPO_BMP280                    5 //"BMP280"   //Temperatura y presion
-#define TIPO_GL5539                    6 //"GL5539"   //Luz
-#define TIPO_BH1750                    7 //"BH1750"   //Luz
-#define TIPO_SOILMOISTURECAPACITIVEV2  8 //"SOILMOISTUREV2" //Humedad del suelo 
 
 #define MAX_SENSORES   10
 /***************************** Defines *****************************/
