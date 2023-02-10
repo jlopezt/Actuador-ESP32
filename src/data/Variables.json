@@ -1,0 +1,26 @@
+{
+    "Variables":[
+        {
+        "nombre":"TemperaturaExterior",
+        "unidades":"ºC",
+        "descripcion":"Temepratura medida en el jardin",
+        "sensor": "BMP280_1",
+        "tipo":"TEMPERATURA",
+        "Humbrales":[
+            {"nombre": "mucho frio", "tipo":"inferior", "valor": 0, "mensaje": "Hace frio"},
+            {"nombre": "mucho calor", "tipo":"superior", "valor": 40, "mensaje": "¡¡Que calor!!"}
+            ]
+        },
+        {
+        "nombre":"PresionAtmosferica",
+        "unidades":"bar",
+        "descripcion":"Presion atmosferica",
+        "sensor": "BMP280_1",
+        "tipo":"PRESION",
+        "Humbrales":[
+            {"nombre": "tiempo inestable", "tipo":"inferior", "valor": 840, "mensaje": "puede llover"},
+            {"nombre": "anticiclonazo", "tipo":"superior", "valor": 1100, "mensaje": "Solete"}
+            ]
+        }                      
+    ]
+}

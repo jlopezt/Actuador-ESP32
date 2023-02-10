@@ -371,7 +371,7 @@ String MaquinaEstados::generaJsonEstado(void)
     Salidas_0["estado"] = salidas.getSalida(mapeoSalidas[id]).getEstado();
     Salidas_0["salidaGlobal"] = mapeoSalidas[id];
     }
-/* No es estado es configuracion
+  //**************No es estado es configuracion
   JsonArray& listaTransiciones = root.createNestedArray("transiciones");
   for(uint8_t regla=0;regla<numeroTransiciones;regla++) //las reglas se evaluan por orden
     {
@@ -383,7 +383,8 @@ String MaquinaEstados::generaJsonEstado(void)
 
     for(uint8_t entradaME=0;entradaME<numeroEntradas;entradaME++) valorEntradas.add(transiciones[regla].getValorEntrada(entradaME));
   }
-*/
+  //**************No es estado es configuracion
+  
   root.printTo(cad);
   return cad;  
   }

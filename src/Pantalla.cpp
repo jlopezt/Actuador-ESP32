@@ -2,7 +2,7 @@
 
 #include <Global.h>
 #include <Pantalla.h>
-//#include <reloj.h>
+#include <configNVS.h>
 #include <entrada.h>
 #include <Secuenciador.h>
 #include <MaqEstados.h>
@@ -82,7 +82,7 @@ void pantallaSecuenciador(void){
 
   // Encabezado de la pantalla
   face.setTextDatum(ML_DATUM);
-  face.drawString(nombre_dispositivo, 0, TOP_ARRIBA_SECUENCIADOR/2);
+  face.drawString(configNVS.nombreServicio, 0, TOP_ARRIBA_SECUENCIADOR/2);
   
   face.setTextDatum(MR_DATUM);
   face.drawString(String(hora()) + ":" + String(minuto()), SECUENCIADOR_W, TOP_ARRIBA_SECUENCIADOR/2);
@@ -144,7 +144,7 @@ void pantallaMaqEstados(void){
 
   // Encabezado de la pantalla
   face.setTextDatum(ML_DATUM);
-  face.drawString(nombre_dispositivo, 0, TOP_ARRIBA_MAQESTADOS/2);
+  face.drawString(configNVS,nombreServicio, 0, TOP_ARRIBA_MAQESTADOS/2);
   
   face.setTextDatum(MR_DATUM);
   face.drawString(String(hora()) + ":" + String(minuto()), MAQESTADOS_W, TOP_ARRIBA_MAQESTADOS/2);

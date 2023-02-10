@@ -21,14 +21,12 @@
 #define ONE_WIRE_BUS              4//Pin donde esta el DS18B20
 #define PIN_SENSOR_HUMEDAD_SUELO  8//Pin del sensor de humedad del suelo
 #define LDR_PIN                  10
-
-#define TOPIC_HUMBRAL_SENSORES "sensores"
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/
 #include <Sensores.h>
+#include <Variables.h>
 #include <Ficheros.h>
-#include <MQTT.h>
 /***************************** Includes *****************************/
 
 /***************************** Variables globales *****************************/
@@ -39,15 +37,13 @@ OneWire oneWire(ONE_WIRE_BUS);
 /***********************************DS18B20*********************************************/
 DallasTemperature* SensorDS18B20::ds18B20=(DallasTemperature *) new DallasTemperature(&oneWire);
 
-SensorDS18B20::SensorDS18B20(){}
+SensorDS18B20::SensorDS18B20():Sensor(){}
 
 void SensorDS18B20::inicializa(String _nombre, uint8_t _tipo, String parametros){
   if(ds18B20!=NULL) SensorDS18B20::ds18B20->begin();
 
   for(uint8_t i=0;i<8;i++) direccion[i]=0;
   temperatura=NO_LEIDO;
-  comparaHumbralTemperatura=0;
-  humbralTemperatura=0;
 
   setNombre(_nombre);
   setTipo(_tipo);
@@ -68,17 +64,8 @@ boolean SensorDS18B20::parseaConfiguracion(String contenido)  {
   if(!root.containsKey("direccion")) return false; 
   String _direccion=root.get<String>("direccion");
   convierteDireccionOneWire(_direccion, direccion);
-
-  if(!root.containsKey("compararTemperatura")) {Serial.printf("No se confiigura comparacion de temperatura\n");}
-  else{
-    if(!root.containsKey("humbralTemperatura")) {Serial.printf("ERROR: No hay humbral de temperatura\n");}
-    else{
-      comparaHumbralTemperatura=root.get<int>("compararTemperatura");
-      humbralTemperatura=root.get<float>("humbralTemperatura");
-    }
-  }
-   
-  Serial.printf("Configuracion del DS18B20 leida:\nParamteros: %s\ndireccion (str): %s\n comparar T: %i | humbral T: %.2f\n",contenido.c_str(),_direccion.c_str(),comparaHumbralTemperatura,humbralTemperatura);
+  
+  Serial.printf("Configuracion del DS18B20 leida:\nParamteros: %s\ndireccion (str): %s\n",contenido.c_str(),_direccion.c_str());
   Serial.printf("Direccion convertida: %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n",direccion[0],direccion[1],direccion[2],direccion[3],direccion[4],direccion[5],direccion[6],direccion[7]);
 //************************************************************************************************
   return true;
@@ -110,6 +97,11 @@ void SensorDS18B20::lee(void){
     return;
   }
 
+float SensorDS18B20::getValor(uint8_t _tipo){
+  if(_tipo==TIPO_TEMPERATURA) return temperatura;
+  return VALOR_NULO;
+};
+
 String SensorDS18B20::generaJsonEstado(JsonObject& root){
   root["nombre"] = getNombre();
   root["temperatura"] = temperatura;
@@ -137,33 +129,6 @@ String SensorDS18B20::getDirecciontoString(void){
   return String(temp);
 }
 
-uint8_t SensorDS18B20::compararHumbral(void){
-  if(comparaHumbralTemperatura==0) return 0;
-
-  uint8_t retorno=0;
-
-  //Serial.printf("comparaHumbralTemperatura: %i | Valor: %.2f | humbra: %.2f\n",comparaHumbralTemperatura,temperatura,humbralTemperatura);
-  if(comparaHumbralTemperatura>0){ 
-    //Serial.printf("Entro en comparar\n");    
-    if(temperatura>humbralTemperatura){
-      //Serial.printf("Entro en si es mayo el valor que el humbral\n");
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"temperatura\", \"humbral\":" + String(getHumbralTemperatura()) + ", \"nivel\":" + String(comparaHumbralTemperatura) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);
-    }
-  }
-  else{
-    if(temperatura<humbralTemperatura){
-      //Serial.printf("Entro en si es mayor el humbral que el valor\n");
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"temperatura\", \"humbral\":" + String(getHumbralTemperatura()) + ", \"nivel\":" + String(comparaHumbralTemperatura) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);
-    }
-  }
-
-  return retorno;
-}
-
 uint8_t HextoInt(uint8_t c){
     if(c>=97 && c<=122) return c-97+10;//minusculas
     if(c>=65 && c<90) return c-65+10;//mayusculas
@@ -173,17 +138,13 @@ uint8_t HextoInt(uint8_t c){
 /***********************************FIN DS18B20*********************************************/
 
 /***********************************DHT*********************************************/
-SensorDHT::SensorDHT(void){}
+SensorDHT::SensorDHT(void):Sensor(){}
 
 void SensorDHT::inicializa(String _nombre, uint8_t _tipo, String parametros){
   pin=0;
   dht=NULL;
   temperatura=NO_LEIDO;
   humedad=NO_LEIDO;
-  comparaHumbralTemperatura=0;
-  humbralTemperatura=0;
-  comparaHumbralHumedad=0;
-  humbralHumedad=0;
 
   setNombre(_nombre);
   setTipo(_tipo);
@@ -208,25 +169,7 @@ boolean SensorDHT::parseaConfiguracion(String contenido)  {
   uint8_t _pin=root.get<int>("pin");
   setPin(_pin);
 
-  if(!root.containsKey("compararTemperatura")) {Serial.printf("No se confiigura comparacion de temperatura\n");}
-  else{
-    if(!root.containsKey("humbralTemperatura")) {Serial.printf("ERROR: No hay humbral de temperatura\n");}
-    else{
-      comparaHumbralTemperatura=root.get<int>("compararTemperatura");
-      humbralTemperatura=root.get<float>("humbralTemperatura");
-    }
-  }
-
-  if(!root.containsKey("compararHumedad")) {Serial.printf("No se confiigura comparacion de humedad\n");}
-  else{
-    if(!root.containsKey("humbralHumedad")) {Serial.printf("ERROR: No hay humbral de humedad\n");}
-    else{
-      comparaHumbralHumedad=root.get<int>("compararHumedad");
-      humbralHumedad=root.get<float>("humbralHumedad");
-    }
-  }
-  
-  Serial.printf("Configuracion del DHT leida:\nParamteros: %s\npin (int): %i\n comparar T: %i | humbral T: %.2f\n comparar H: %i | humbral H: %.2f\n",contenido.c_str(),_pin,comparaHumbralTemperatura,humbralTemperatura,comparaHumbralHumedad,humbralHumedad);
+  Serial.printf("Configuracion del DHT leida:\nParamteros: %s\npin (int): %i\n",contenido.c_str(),_pin);
 //************************************************************************************************
   return true;
   }
@@ -272,57 +215,21 @@ String SensorDHT::generaJsonConfiguracion(JsonObject& root){
   return salida;
 }
 
-uint8_t SensorDHT::compararHumbral(void){
-  uint8_t retorno=0;
-
-  //Humbral temperatura
-  if(comparaHumbralTemperatura>0){ 
-    if(temperatura>humbralTemperatura){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"temperatura\", \"humbral\":" + String(getHumbralTemperatura()) + ", \"nivel\":" + String(comparaHumbralTemperatura) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-  else{
-    if(temperatura<humbralTemperatura){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"temperatura\", \"humbral\":" + String(getHumbralTemperatura()) + ", \"nivel\":" + String(comparaHumbralTemperatura) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-
-  //Humbral humedad
-  if(comparaHumbralHumedad>0){ 
-    if(humedad>humbralHumedad){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"humedad\", \"humbral\":" + String(getHumbralHumedad()) + ", \"nivel\":" + String(comparaHumbralHumedad) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-  else{
-    if(humedad<humbralHumedad){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"humedad\", \"humbral\":" + String(getHumbralHumedad()) + ", \"nivel\":" + String(comparaHumbralHumedad) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-
-  return retorno;
-}
+float SensorDHT::getValor(uint8_t _tipo){
+  if(_tipo==TIPO_TEMPERATURA) return temperatura;
+  if(_tipo==TIPO_HUMEDAD) return humedad;
+  return VALOR_NULO;
+};
 /***********************************FIN DHT*********************************************/
 
 /***********************************HDC1080*********************************************/
 //ClosedCube_HDC1080* SensorHDC1080::hdc1080=(ClosedCube_HDC1080*) new ClosedCube_HDC1080();
 
-SensorHDC1080::SensorHDC1080(void){}
+SensorHDC1080::SensorHDC1080(void):Sensor(){}
 
 void SensorHDC1080::inicializa(String _nombre, uint8_t _tipo, String parametros){
   temperatura=NO_LEIDO;
   humedad=NO_LEIDO;
-  comparaHumbralTemperatura=0;
-  humbralTemperatura=0;
-  comparaHumbralHumedad=0;
-  humbralHumedad=0;
 
   setNombre(_nombre);
   setTipo(_tipo);
@@ -348,25 +255,7 @@ boolean SensorHDC1080::parseaConfiguracion(String contenido)  {
   uint8_t _direccionI2C=convierteDireccionI2C(_direccionI2CString);
   setDireccionI2C(_direccionI2C);
 
-  if(!root.containsKey("compararTemperatura")) {Serial.printf("No se confiigura comparacion de temperatura\n");}
-  else{
-    if(!root.containsKey("humbralTemperatura")) {Serial.printf("ERROR: No hay humbral de temperatura\n");}
-    else{
-      comparaHumbralTemperatura=root.get<int>("compararTemperatura");
-      humbralTemperatura=root.get<float>("humbralTemperatura");
-    }
-  }
-
-  if(!root.containsKey("compararHumedad")) {Serial.printf("No se confiigura comparacion de humedad\n");}
-  else{
-    if(!root.containsKey("humbralHumedad")) {Serial.printf("ERROR: No hay humbral de humedad\n");}
-    else{
-      comparaHumbralHumedad=root.get<int>("compararHumedad");
-      humbralHumedad=root.get<float>("humbralHumedad");
-    }
-  }
-
-  Serial.printf("Configuracion del HDC1080 leida:\nParamteros: %s\ndireccion (int): %i\n comparar T: %i | humbral T: %.2f\n comparar H: %i | humbral H: %.2f\n",contenido.c_str(),_direccionI2C,comparaHumbralTemperatura,humbralTemperatura,comparaHumbralHumedad,humbralHumedad);
+  Serial.printf("Configuracion del HDC1080 leida:\nParamteros: %s\ndireccion (int): %i\n",contenido.c_str(),_direccionI2C);
 //************************************************************************************************
   return true;
   }
@@ -392,6 +281,12 @@ void SensorHDC1080::lee(void){
   else humedad= NO_LEIDO;
   }
 
+float SensorHDC1080::getValor(uint8_t _tipo){
+  if(_tipo==TIPO_TEMPERATURA) return temperatura;
+  if(_tipo==TIPO_HUMEDAD) return humedad;
+  return VALOR_NULO;
+};
+
 String SensorHDC1080::generaJsonEstado(JsonObject& root){
   root["nombre"] = getNombre();
   root["temperatura"] = temperatura;
@@ -413,56 +308,14 @@ String SensorHDC1080::generaJsonConfiguracion(JsonObject& root){
   root.printTo(salida);
   return salida;
 }
-
-uint8_t SensorHDC1080::compararHumbral(void){
-  uint8_t retorno=0;
-
-  //Humbral temperatura
-  if(comparaHumbralTemperatura>0){ 
-    if(temperatura>humbralTemperatura){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"temperatura\", \"humbral\":" + String(getHumbralTemperatura()) + ", \"nivel\":" + String(comparaHumbralTemperatura) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-  else{
-    if(temperatura<humbralTemperatura){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"temperatura\", \"humbral\":" + String(getHumbralTemperatura()) + ", \"nivel\":" + String(comparaHumbralTemperatura) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-
-  //Humbral humedad
-  if(comparaHumbralHumedad>0){ 
-    if(humedad>humbralHumedad){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"humedad\", \"humbral\":" + String(getHumbralHumedad()) + ", \"nivel\":" + String(comparaHumbralHumedad) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-  else{
-    if(humedad<humbralHumedad){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"humedad\", \"humbral\":" + String(getHumbralHumedad()) + ", \"nivel\":" + String(comparaHumbralHumedad) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-
-  return retorno;
-}
 /***********************************FIN HDC1080*********************************************/
 
 /***********************************BMP280*********************************************/
-SensorBMP280::SensorBMP280(void){}
+SensorBMP280::SensorBMP280(void):Sensor(){}
 
 void SensorBMP280::inicializa(String _nombre, uint8_t _tipo, String parametros){
   temperatura=NO_LEIDO;
   presion=NO_LEIDO;
-  comparaHumbralTemperatura=0;
-  humbralTemperatura=0;
-  comparaHumbralPresion=0;
-  humbralPresion=0;
 
   setNombre(_nombre);
   setTipo(_tipo);
@@ -491,25 +344,7 @@ boolean SensorBMP280::parseaConfiguracion(String contenido)  {
   uint8_t _direccionI2C=convierteDireccionI2C(_direccionI2CString);
   setDireccionI2C(_direccionI2C);
 
-  if(!root.containsKey("compararTemperatura")) {Serial.printf("No se confiigura comparacion de temperatura\n");}
-  else{
-    if(!root.containsKey("humbralTemperatura")) {Serial.printf("ERROR: No hay humbral de temperatura\n");}
-    else{
-      comparaHumbralTemperatura=root.get<int>("compararTemperatura");
-      humbralTemperatura=root.get<float>("humbralTemperatura");
-    }
-  }
-
-  if(!root.containsKey("compararPresion")) {Serial.printf("No se confiigura comparacion de presion\n");}
-  else{
-    if(!root.containsKey("humbralPresion")) {Serial.printf("ERROR: No hay humbral de presion\n");}
-    else{
-      comparaHumbralPresion=root.get<int>("compararPresion");
-      humbralPresion=root.get<float>("humbralPresion");
-    }
-  }
-
-  Serial.printf("Configuracion del BMp280 leida:\nParamteros: %s\ndireccion (int): %i\n comparar T: %i | humbral T: %.2f\n comparar P: %i | humbral P: %.2f\n",contenido.c_str(),_direccionI2C,comparaHumbralTemperatura,humbralTemperatura,comparaHumbralPresion,humbralPresion);  
+  Serial.printf("Configuracion del BMP280 leida:\nParamteros: %s\ndireccion (int): %i\n",contenido.c_str(),_direccionI2C);  
 //************************************************************************************************
   return true;
   }
@@ -532,6 +367,8 @@ void SensorBMP280::lee(void){
     p = bmp280->readPressure();
     if(!isnan(p)) presion=p;
     else presion= NO_LEIDO;
+
+    //Serial.printf("BMP280 (%s) | temperatura: %.2f | presion: %.2f\n",getNombre().c_str(),temperatura,presion);
   }
 
 String SensorBMP280::generaJsonEstado(JsonObject& root){
@@ -556,58 +393,20 @@ String SensorBMP280::generaJsonConfiguracion(JsonObject& root){
   return salida;
 }
 
-uint8_t SensorBMP280::compararHumbral(void){
-  uint8_t retorno=0;
-
-  //Humbral temperatura
-  if(comparaHumbralTemperatura>0){ 
-    if(temperatura>humbralTemperatura){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"temperatura\", \"humbral\":" + String(getHumbralTemperatura()) + ", \"nivel\":" + String(comparaHumbralTemperatura) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-  else{
-    if(temperatura<humbralTemperatura){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"temperatura\", \"humbral\":" + String(getHumbralTemperatura()) + ", \"nivel\":" + String(comparaHumbralTemperatura) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-
-  //Humbral humedad
-  if(comparaHumbralPresion>0){ 
-    if(presion>humbralPresion){
-      retorno++;
-      String mensaje="{\"sensor\":\"\"" + getNombre() + "\"\", \"variable\": \"presion\", \"humbral\":" + String(getHumbralPresion()) + ", \"nivel\":" + String(comparaHumbralPresion) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-  else{
-    if(presion<humbralPresion){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"presion\", \"humbral\":" + String(getHumbralPresion()) + ", \"nivel\":" + String(comparaHumbralPresion) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-
-  return retorno;
-}
+float SensorBMP280::getValor(uint8_t _tipo){
+  if(_tipo==TIPO_TEMPERATURA) return temperatura;
+  if(_tipo==TIPO_PRESION) return presion;
+  return VALOR_NULO;
+};
 /***********************************FIN BMP280*********************************************/
 
 /***********************************BME280*********************************************/
-SensorBME280::SensorBME280(void){}
+SensorBME280::SensorBME280(void):Sensor(){}
 
 void SensorBME280::inicializa(String _nombre, uint8_t _tipo, String parametros){  
   temperatura=NO_LEIDO;
   humedad=NO_LEIDO;
   presion=NO_LEIDO;
-  comparaHumbralTemperatura=0;
-  humbralTemperatura=0;
-  comparaHumbralPresion=0;
-  humbralPresion=0;
-  comparaHumbralHumedad=0;
-  humbralHumedad=0;
 
   setNombre(_nombre);
   setTipo(_tipo);
@@ -636,34 +435,7 @@ boolean SensorBME280::parseaConfiguracion(String contenido)  {
   uint8_t _direccionI2C=convierteDireccionI2C(_direccionI2CString);
   setDireccionI2C(_direccionI2C);
 
-  if(!root.containsKey("compararTemperatura")) {Serial.printf("No se confiigura comparacion de temperatura\n");}
-  else{
-    if(!root.containsKey("humbralTemperatura")) {Serial.printf("ERROR: No hay humbral de temperatura\n");}
-    else{
-      comparaHumbralTemperatura=root.get<int>("compararTemperatura");
-      humbralTemperatura=root.get<float>("humbralTemperatura");
-    }
-  }
-
-  if(!root.containsKey("compararHumedad")) {Serial.printf("No se confiigura comparacion de humedad\n");}
-  else{
-    if(!root.containsKey("humbralHumedad")) {Serial.printf("ERROR: No hay humbral de humedad\n");}
-    else{
-      comparaHumbralHumedad=root.get<int>("compararHumedad");
-      humbralHumedad=root.get<float>("humbralHumedad");
-    }
-  }
-
-  if(!root.containsKey("compararPresion")) {Serial.printf("No se confiigura comparacion de presion\n");}
-  else{
-    if(!root.containsKey("humbralPresion")) {Serial.printf("ERROR: No hay humbral de presion\n");}
-    else{
-      comparaHumbralPresion=root.get<int>("compararPresion");
-      humbralPresion=root.get<float>("humbralPresion");
-    }
-  }
-
-  Serial.printf("Configuracion del BME280 leida:\nParamteros: %s\ndireccion (int): %i\n comparar T: %i | humbral T: %.2f\n comparar H: %i | humbral H: %.2f\n comparar P: %i | humbral P: %.2f\n",contenido.c_str(),_direccionI2C,comparaHumbralTemperatura,humbralTemperatura,comparaHumbralHumedad,humbralHumedad,comparaHumbralPresion,humbralPresion);
+  Serial.printf("Configuracion del BME280 leida:\nParamteros: %s\ndireccion (int): %i\n",contenido.c_str(),_direccionI2C);
 //************************************************************************************************
   return true;
   }
@@ -694,6 +466,13 @@ void SensorBME280::lee(void){
   else presion= NO_LEIDO;
   }
 
+float SensorBME280::getValor(uint8_t _tipo){
+  if(_tipo==TIPO_TEMPERATURA) return temperatura;
+  if(_tipo==TIPO_HUMEDAD) return humedad;
+  if(_tipo==TIPO_PRESION) return presion;
+  return VALOR_NULO;
+};
+
 String SensorBME280::generaJsonEstado(JsonObject& root){
   root["nombre"] = getNombre();
   root["temperatura"] = temperatura;
@@ -716,69 +495,13 @@ String SensorBME280::generaJsonConfiguracion(JsonObject& root){
   root.printTo(salida);
   return salida;
 }
-
-uint8_t SensorBME280::compararHumbral(void){
-  uint8_t retorno=0;
-
-  //Humbral temperatura
-  if(comparaHumbralTemperatura>0){ 
-    if(temperatura>humbralTemperatura){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"temperatura\", \"humbral\":" + String(getHumbralTemperatura()) + ", \"nivel\":" + String(comparaHumbralTemperatura) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-  else{
-    if(temperatura<humbralTemperatura){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"temperatura\", \"humbral\":" + String(getHumbralTemperatura()) + ", \"nivel\":" + String(comparaHumbralTemperatura) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-
-  //Humbral humedad
-  if(comparaHumbralHumedad>0){ 
-    if(humedad>humbralHumedad){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"humedad\", \"humbral\":" + String(getHumbralHumedad()) + ", \"nivel\":" + String(comparaHumbralHumedad) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-  else{
-    if(humedad<humbralHumedad){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"humedad\", \"humbral\":" + String(getHumbralHumedad()) + ", \"nivel\":" + String(comparaHumbralHumedad) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-
-  //Humbral presion
-  if(comparaHumbralPresion>0){ 
-    if(presion>humbralPresion){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"presion\", \"humbral\":" + String(getHumbralPresion()) + ", \"nivel\":" + String(comparaHumbralPresion) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-  else{
-    if(presion<humbralPresion){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"presion\", \"humbral\":" + String(getHumbralPresion()) + ", \"nivel\":" + String(comparaHumbralPresion) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-
-  return retorno;
-}
 /***********************************FIN HDC1080*********************************************/
 
 /***********************************BH1750*********************************************/
-SensorBH1750::SensorBH1750(){}
+SensorBH1750::SensorBH1750():Sensor(){}
 
 void SensorBH1750::inicializa(String _nombre, uint8_t _tipo, String parametros){
   luz=NO_LEIDO;
-  comparaHumbralLuz=0;
-  humbralLuz=0;  
 
   setNombre(_nombre);
   setTipo(_tipo);
@@ -806,16 +529,7 @@ boolean SensorBH1750::parseaConfiguracion(String contenido){
   uint8_t _direccionI2C=convierteDireccionI2C(_direccionI2CString);
   setDireccionI2C(_direccionI2C);
 
-  if(!root.containsKey("compararLuz")) {Serial.printf("No se confiigura comparacion de luz\n");}
-  else{
-    if(!root.containsKey("humbralLuz")) {Serial.printf("ERROR: No hay humbral de luz\n");}
-    else{
-      comparaHumbralLuz=root.get<int>("compararLuz");
-      humbralLuz=root.get<float>("humbralLuz");
-    }
-  }
-
-  Serial.printf("Configuracion del BH1750 leida:\nParamteros: %s\ndireccion (int): %i\n comparar L: %i | humbral L: %.2f\n",contenido.c_str(),_direccionI2C,comparaHumbralLuz,humbralLuz);
+  Serial.printf("Configuracion del BH1750 leida:\nParamteros: %s\ndireccion (int): %i\n",contenido.c_str(),_direccionI2C);
 //************************************************************************************************
   return true;  
 }
@@ -840,6 +554,11 @@ void SensorBH1750::lee(void){
     }
   }
 
+float SensorBH1750::getValor(uint8_t _tipo){
+  if(_tipo==TIPO_LUZ) return luz;
+  return VALOR_NULO;
+};
+
 String SensorBH1750::generaJsonEstado(JsonObject& root){
   root["nombre"] = getNombre();
   root["luz"] = luz;
@@ -859,37 +578,13 @@ String SensorBH1750::generaJsonConfiguracion(JsonObject& root){
   root.printTo(salida);
   return salida;
 }
-
-uint8_t SensorBH1750::compararHumbral(void){
-  uint8_t retorno=0;
-
-  //Humbral temperatura
-  if(comparaHumbralLuz>0){ 
-    if(luz>humbralLuz){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"luz\", \"humbral\":" + String(getHumbralLuz()) + ", \"nivel\":" + String(comparaHumbralLuz) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-  else{
-    if(luz<humbralLuz){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"luz\", \"humbral\":" + String(getHumbralLuz()) + ", \"nivel\":" + String(comparaHumbralLuz) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-
-  return retorno;
-}
 /***********************************FIN BH1750*********************************************/
 
 /***********************************GL5539*********************************************/
-SensorGL5539::SensorGL5539(void){}
+SensorGL5539::SensorGL5539(void):Sensor(){}
 
 void SensorGL5539::inicializa(String _nombre, uint8_t _tipo, String parametros){
   luz=NO_LEIDO;
-  comparaHumbralLuz=0;
-  humbralLuz=0;  
 
   setNombre(_nombre);
   setTipo(_tipo);
@@ -907,16 +602,8 @@ boolean SensorGL5539::parseaConfiguracion(String contenido) {
 
   Serial.println("parsed json");
 //******************************Parte especifica del json a leer********************************
-  if(!root.containsKey("compararLuz")) {Serial.printf("No se confiigura comparacion de luz\n");}
-  else{
-    if(!root.containsKey("humbralLuz")) {Serial.printf("ERROR: No hay humbral de luz\n");}
-    else{
-      comparaHumbralLuz=root.get<int>("compararLuz");
-      humbralLuz=root.get<float>("humbralLuz");
-    }
-  }
 
-  Serial.printf("Configuracion del GL5539 leida:\nParamteros: %s\n comparar L: %i | humbral L: %.2f\n",contenido.c_str(),comparaHumbralLuz,humbralLuz);
+  Serial.printf("Configuracion del GL5539 leida:\nParamteros: %s\n",contenido.c_str());
 //**********************************************************************************************  
   return true;  
 }
@@ -929,6 +616,11 @@ void SensorGL5539::lee(void){
   if(!isnan(l)) luz=l;
   else luz= NO_LEIDO;
   }
+
+float SensorGL5539::getValor(uint8_t _tipo){
+  if(_tipo==TIPO_LUZ) return luz;
+  return VALOR_NULO;
+};
 
 String SensorGL5539::generaJsonEstado(JsonObject& root){
   root["nombre"] = getNombre();
@@ -948,37 +640,13 @@ String SensorGL5539::generaJsonConfiguracion(JsonObject& root){
   root.printTo(salida);
   return salida;
 }
-
-uint8_t SensorGL5539::compararHumbral(void){
-  uint8_t retorno=0;
-
-  //Humbral temperatura
-  if(comparaHumbralLuz>0){ 
-    if(luz>humbralLuz){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"luz\", \"humbral\":" + String(getHumbralLuz()) + ", \"nivel\":" + String(comparaHumbralLuz) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-  else{
-    if(luz<humbralLuz){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"luz\", \"humbral\":" + String(getHumbralLuz()) + ", \"nivel\":" + String(comparaHumbralLuz) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-
-  return retorno;
-}
 /***********************************FIN GL5539*********************************************/
 
 /***********************************HumedadSuelo*********************************************/
-SensorHumedadSuelo::SensorHumedadSuelo(void){}
+SensorHumedadSuelo::SensorHumedadSuelo(void):Sensor(){}
 
 void SensorHumedadSuelo::inicializa(String _nombre, uint8_t _tipo, String parametros){
   humedad=NO_LEIDO;
-  comparaHumbralHumedad=0;
-  humbralHumedad=0;  
 
   setNombre(_nombre);
   setTipo(_tipo);
@@ -996,16 +664,8 @@ boolean SensorHumedadSuelo::parseaConfiguracion(String contenido) {
 
   Serial.println("parsed json");
 //******************************Parte especifica del json a leer********************************
-  if(!root.containsKey("compararHumedad")) {Serial.printf("No se confiigura comparacion de humedad\n");}
-  else{
-    if(!root.containsKey("humbralHumedad")) {Serial.printf("ERROR: No hay humbral de humedad\n");}
-    else{
-      comparaHumbralHumedad=root.get<int>("compararHumedad");
-      humbralHumedad=root.get<float>("humbralHumedad");
-    }
-  }
 
-  Serial.printf("Configuracion de HumedadSuelo leida:\nParamteros: %s\n comparar H: %i | humbral H: %.2f\n",contenido.c_str(),comparaHumbralHumedad,humbralHumedad);
+  Serial.printf("Configuracion de HumedadSuelo leida:\nParamteros: %s\n",contenido.c_str());
 //**********************************************************************************************  
   return true;    
 }
@@ -1014,6 +674,11 @@ void SensorHumedadSuelo::lee(void){
   int sensorVal = analogRead(PIN_SENSOR_HUMEDAD_SUELO);
   humedad = map(sensorVal, MOJADO, SECO, 100, 0); 
   }
+
+float SensorHumedadSuelo::getValor(uint8_t _tipo){
+  if(_tipo==TIPO_HUMEDAD) return humedad;
+  return VALOR_NULO;
+};
 
 String SensorHumedadSuelo::generaJsonEstado(JsonObject& root){
   root["nombre"] = getNombre();
@@ -1032,28 +697,6 @@ String SensorHumedadSuelo::generaJsonConfiguracion(JsonObject& root){
   String salida="";
   root.printTo(salida);
   return salida;
-}
-
-uint8_t SensorHumedadSuelo::compararHumbral(void){
-  uint8_t retorno=0;
-
-  //Humbral humedad
-  if(comparaHumbralHumedad>0){ 
-    if(humedad>humbralHumedad){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"humedad\", \"humbral\":" + String(getHumbralHumedad()) + ", \"nivel\":" + String(comparaHumbralHumedad) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-  else{
-    if(humedad<humbralHumedad){
-      retorno++;
-      String mensaje="{\"sensor\":\"" + getNombre() + "\", \"variable\": \"humedad\", \"humbral\":" + String(getHumbralHumedad()) + ", \"nivel\":" + String(comparaHumbralHumedad) + "}";
-      enviarMQTT(TOPIC_HUMBRAL_SENSORES, mensaje);      
-    }
-  }
-
-  return retorno;
 }
 /***********************************FIN HumedadSuelo*********************************************/
 

@@ -1,0 +1,72 @@
+{
+  "Salidas": [
+    {
+      "GPIO": 5, 
+      "nombre": "Subir",
+      "tipo": 0,
+      "inicio": "off",
+      "anchoPulso": 1000,
+      "modo": 3,
+      "controlador": 0,
+      "Estados": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+      ],
+      "Mensajes": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+      ]
+    },
+    {
+      "GPIO": 18, 
+      "nombre": "Bajar",
+      "tipo": 0,
+      "inicio": "off",
+      "anchoPulso": 1000,
+      "modo": 3,
+      "controlador": 0,
+      "Estados": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+      ],
+      "Mensajes": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+      ]
+    },
+    {
+      "GPIO": 19, 
+      "nombre": "LuzRoja",
+      "tipo": 0,
+      "inicio": "off",
+      "anchoPulso": 1000,
+      "modo": 3,
+      "controlador": 0,
+      "Estados": [
+        {"valor": 0, "texto": "--"},
+        {"valor": 1, "texto": "Alarma"}
+      ],
+      "Mensajes": [
+        {"valor": 0, "texto": "--"},
+        {"valor": 1, "texto": "Alarma"}
+      ]
+    },   
+    {
+      "GPIO": 36,
+      "nombre": "boton",
+      "tipo": 0,
+      "inicio": "off",
+      "anchoPulso": 1000,
+      "modo": 0,
+      "controlador": 0,
+      "Estados": [
+        {"valor": 0, "texto": ""},
+        {"valor": 1, "texto": "Pulsado"}
+      ],
+      "Mensajes": [
+        {"valor": 0, "texto": ""},
+        {"valor": 1, "texto": "Boton pulsado"}
+      ]
+    }
+  ]
+}

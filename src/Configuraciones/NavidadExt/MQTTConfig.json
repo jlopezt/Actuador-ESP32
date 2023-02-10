@@ -1,0 +1,16 @@
+{ 
+  "IPBroker": "10.68.1.100", 
+  "puerto": 1883,
+  "xxxmodoMQTT": "TLS",
+  "xxxBrokerDir": "mqtt.lopeztola.com",
+  "xxxpuerto": 8883, 
+  "usuarioMQTT": "domoticae", 
+  "passwordMQTT": "88716", 
+  "ID_MQTT": "Adornos", 
+  "topicRoot": "casa", 
+  "publicarMedidas": 0,
+  "publicarEntradas": 0,
+  "publicarSalidas": 1,
+  "publicarSecuenciador": 1,
+  "publicarMaquinaEstados":0
+}

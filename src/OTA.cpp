@@ -28,6 +28,7 @@ Funcines que provee al libreria:
 /***************************** Includes *****************************/
 #include <Global.h>
 #include <OTA.h>
+#include <configNVS.h>
 #include <ArduinoOTA.h>
 #include <esp_ota_ops.h>
 #include <esp_partition.h>
@@ -67,7 +68,7 @@ void inicializaOTA(boolean debug)
   //Sets if the device should be rebooted after successful update. Default true
   //ArduinoOTAClass&/void setRebootOnSuccess(bool reboot);
 
-  ArduinoOTA.setHostname(nombre_dispositivo.c_str());
+  ArduinoOTA.setHostname(configNVS.nombreServicio.c_str());
   ArduinoOTA.setRebootOnSuccess(true);
   ArduinoOTA.setPassword((const char *)"88716");// No authentication by default
 

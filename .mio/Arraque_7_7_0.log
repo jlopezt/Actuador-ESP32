@@ -1,0 +1,963 @@
+ets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:1420
+ho 0 tail 12 room 4
+load:0x40078000,len:13512
+ho 0 tail 12 room 4
+load:0x40080400,len:3604
+entry 0x400805f0
+
+
+
+*************** SmartSite ***************
+*************** esp32 - ver 7.7.0 ***************
+***************************************************************
+*                                                             *
+*             Inicio del setup del modulo                     *
+*                                                             *
+***************************************************************
+Motivo del reinicio (0): POWERON_RESET
+Motivo del reinicio (1): EXT_CPU_RESET
+
+
+Init Ficheros ---------------------------------------------------------------------
+
+
+Init General ---------------------------------------------------------------------
+Inicio de lectura de fichero /Config.json
+Encontrado fichero de configuracion /Config.json.
+Abierto fichero de configuracion Config.json.
+Contenido del fichero: #{
+	"nombre_dispositivo": "Garaje",
+	"NivelActivo":0
+}#
+Cierro el fichero
+parsed json
+Configuracion leida:
+Nombre dispositivo: Garaje
+NivelActivo: 0
+
+
+Init WiFi -----------------------------------------------------------------------
+Recupero configuracion de archivo...
+Inicio de lectura de fichero /WiFiConfig.json
+Encontrado fichero de configuracion /WiFiConfig.json.
+Abierto fichero de configuracion WiFiConfig.json.
+Contenido del fichero: #{
+  "mDNS":"configurame",
+  "wifiIP":"10.68.0.51",
+  "wifiGW":"10.68.1.1",
+  "wifiNet":"255.255.0.0",
+  "wifiDNS1":"8.8.8.8",
+  "wifiDNS2":"8.8.4.4",
+  "wifi":[
+    {"ssid":"BASE1","password":"11223344556677889900abcdef"}
+  ]
+}#
+Cierro el fichero
+
+parsed json
+Configuracion leida:
+mDNS: configurame
+IP actuador: 10.68.0.51
+IP Gateway: 10.68.1.1
+IPSubred: 255.255.0.0
+IP DNS1: 8.8.8.8
+IP DNS2: 8.8.4.4
+Red *BASE1* aÃ±adida.
+Datos WiFi: IP fija-> 10.68.0.51, GW-> 10.68.1.1, subnet-> 255.255.0.0, DNS1-> 8.8.8.8, DNS2-> 8.8.4.4
+Conectando multibase
+Resultado 3
+mDNS iniciado. Nombre del dispositivo: Garaje
+------------------------WiFi conectada (configuracion almacenada)--------------------------------------
+WiFi conectada. IP: 10.68.0.51
+Mode: STA
+Channel: 11
+SSID (5): BASE1
+Passphrase (26): 11223344556677889900abcdef
+BSSID set: 1
+-------------------------------------------------------------------------------------------------------
+Traza iniciada con nivel 0 y salida 0
+
+
+Init OTA ------------------------------------------------------------------------
+
+
+Init SNTP ------------------------------------------------------------------------
+Time set: 29/9/2022 - 15:23:55
+
+
+Init MQTT -----------------------------------------------------------------------
+Inicio de lectura de fichero /MQTTConfig.json
+Encontrado fichero de configuracion /MQTTConfig.json.
+Abierto fichero de configuracion MQTTConfig.json.
+Contenido del fichero: #{ 
+  "IPBroker": "10.68.0.101", 
+  "puerto": 1883,
+  "xxxmodoMQTT": "TLS",
+  "xxxBrokerDir": "mqtt.lopeztola.com",
+  "xxxpuerto": 8883, 
+  "usuarioMQTT": "domoticae", 
+  "passwordMQTT": "88716", 
+  "ID_MQTT": "Riego", 
+  "topicRoot": "casaPre", 
+  "publicarMedidas": 0,
+  "publicarEntradas": 1,
+  "publicarSalidas": 1,
+  "publicarSecuenciador": 1,
+  "publicarMaquinaEstados":1
+}#
+Cierro el fichero
+
+parsed json
+Configuracion leida:
+ID MQTT: Riego
+IP broker: 10.68.0.101
+BrokerDir: 
+IP Puerto del broker: 1883
+timeReconnectMQTT: 0
+Usuario: domoticae
+Password: 88716
+Topic root: casaPre
+Publicar Medidas: 0
+Publicar entradas: 1
+Publicar salidas: 1
+Publicar secuenciador: 1
+Publicar maquina estados: 1
+Cliente MQTT configurado
+Parametros MQTT:
+ID_MQTT: Riego
+usuarioMQTT: domoticae
+passwordMQTT: 88716
+WILL_TOPIC: casaPre/will
+WILL_QOS: 1
+WILL_RETAIN: 0
+WILL_MSG: Â¡Riego caido!
+CLEAN_SESSION: 1
+Subscrito al topic casaPre/Riego/#
+Subscrito al topic ping
+connectado al broker
+
+
+Init Web ------------------------------------------------------------------------
+Servicio web iniciado en puerto 80
+
+
+Init Google Home Notifier -------------------------------------------------------
+Inicio de lectura de fichero /GHNConfig.json
+Encontrado fichero de configuracion /GHNConfig.json.
+Abierto fichero de configuracion GHNConfig.json.
+Contenido del fichero: #{
+	"activaGoogleHomeNotifier": 0,
+	"nombreEquipo": "Todos",
+	"idioma": "es"
+}#
+Cierro el fichero
+parsed json
+Configuracion leida:
+activaGoogleHomeNotifier: 0
+nombreEquipo: [Todos]
+idioma: [es]
+Google Home desactivado por configuraciÃ³n.
+
+
+Init WebSockets -----------------------------------------------------------------
+
+
+
+Init mDNS -----------------------------------------------------------------------
+
+mDNS iniciado. Nombre del dispositivo: configurame
+[ 16150][E][ESPmDNS.cpp:148] addService(): Failed adding service _http._tcp.
+
+
+
+Init FTP ----------------------------------------------------------------------------
+
+
+
+Init sensores ------------------------------------------------------------------------
+Inicio de lectura de fichero /Sensores.json
+Encontrado fichero de configuracion /Sensores.json.
+Abierto fichero de configuracion Sensores.json.
+Contenido del fichero: #{
+    "Sensores":[
+        {
+        "nombre":"BME280_1",
+        "tipo": "BME280",
+        "parametros":
+            {"direccionI2C":"0x23"}
+        }
+    ]
+}#
+Cierro el fichero
+parsed json
+********************************************************
+parsed json
+Hay direccionI2C en BME280
+Configuracion del BME280 leida:
+Paramteros: {"direccionI2C":"0x23"}
+direccion (int): 35
+Configuracion leida:
+nombre sensor: BME280_1
+tipo sensor : BME280
+parametros: {"direccionI2C":"0x23"}
+
+
+Init variables ------------------------------------------------------------------------
+Inicio de lectura de fichero /Variables.json
+Encontrado fichero de configuracion /Variables.json.
+Abierto fichero de configuracion Variables.json.
+Contenido del fichero: #{
+    "Variables":[
+        {
+        "nombre":"TemperaturaExterior",
+        "unidades":"ÂºC",
+        "descripcion":"Temepratura medida en el jardin",
+        "sensor": "BME280_1",
+        "tipo":"TEMPERATURA",
+        "Humbrales":[
+            {"nombre": "mucho frio", "tipo":"inferior", "valor": 0, "mensaje": "Hace frio"},
+            {"nombre": "mucho calor", "tipo":"superior", "valor": 40, "mensaje": "Â¡Â¡Que calor!!"}
+            ]
+        },
+        {
+        "nombre":"HumedadExterior",
+        "unidades":"%",
+        "descripcion":"Humedad medida en el jardin",
+        "sensor": "BME280_1",
+        "tipo":"HUMEDAD",
+        "Humbrales":[
+            {"nombre": "Resecon", "tipo":"inferior", "valor": 10, "mensaje": "Esto esta muy seco"}
+            ]
+        },
+        {
+        "nombre":"PresionAtmosferica",
+        "unidades":"bar",
+        "descripcion":"Presion atmosferica",
+        "sensor": "BME280_1",
+        "tipo":"PRESION",
+        "Humbrales":[
+            {"nombre": "tiempo inestable", "tipo":"inferior", "valor": 840, "mensaje": "puede llover"},
+            {"nombre": "anticiclonazo", "tipo":"superior", "valor": 1100, "mensaje": "Solete"}
+            ]
+        }                      
+    ]
+}#
+Cierro el fichero
+parsed json
+********************************************************
+Configuracion leida:
+nombre variable: TemperaturaExterior
+descripcion: Temepratura medida en el jardin
+unidades: ÂºC
+sensor : BME280_1
+tipo: 0
+	Humbral nombre: mucho frio | tipo: 255 | valor: 0.00 | mensaje: Hace frio
+	Humbral nombre: mucho calor | tipo: 0 | valor: 40.00 | mensaje: Â¡Â¡Que calor!!
+********************************************************
+Configuracion leida:
+nombre variable: HumedadExterior
+descripcion: Humedad medida en el jardin
+unidades: %
+sensor : BME280_1
+tipo: 0
+	Humbral nombre: Resecon | tipo: 255 | valor: 10.00 | mensaje: Esto esta muy seco
+********************************************************
+Configuracion leida:
+nombre variable: PresionAtmosferica
+descripcion: Presion atmosferica
+unidades: bar
+sensor : BME280_1
+tipo: 0
+	Humbral nombre: tiempo inestable | tipo: 255 | valor: 840.00 | mensaje: puede llover
+	Humbral nombre: anticiclonazo | tipo: 0 | valor: 1100.00 | mensaje: Solete
+Variable 0 | nombre: TemperaturaExterior | descripcion: Temepratura medida en el jardin | unidades: ÂºC
+Variable 1 | nombre: HumedadExterior | descripcion: Humedad medida en el jardin | unidades: %
+Variable 2 | nombre: PresionAtmosferica | descripcion: Presion atmosferica | unidades: bar
+
+
+Init entradas ------------------------------------------------------------------------
+Inicio de lectura de fichero /EntradasConfig.json
+Encontrado fichero de configuracion /EntradasConfig.json.
+Abierto fichero de configuracion EntradasConfig.json.
+Contenido del fichero: #{
+	"Entradas": [
+		{
+			"GPIO": 2, 
+			"nombre": "Pulsador", 
+			"tipo": "INPUT",
+			"estadoActivo": 1,
+			"Estados": [
+				{"valor": 0, "texto": "-"},
+				{"valor": 1, "texto": "Pulsado"}
+			],
+			"Mensajes": [
+				{"valor": 0, "texto": "--"},
+				{"valor": 1, "texto": "Pulsado"}
+			]
+		},
+		{
+			"GPIO": 4, 
+			"nombre": "Arriba", 
+			"tipo": "INPUT",
+			"estadoActivo": 1,
+			"Estados": [
+				{"valor": 0, "texto": "-"},
+				{"valor": 1, "texto": "Arriba"}
+			],
+			"Mensajes": [
+				{"valor": 0, "texto": "--"},
+				{"valor": 1, "texto": "Puerta abierta"}
+			]
+		},
+		{
+			"GPIO": 12, 
+			"nombre": "Abajo", 
+			"tipo": "INPUT",
+			"estadoActivo": 1,
+			"Estados": [
+				{"valor": 0, "texto": "-"},
+				{"valor": 1, "texto": "Abajo"}
+			],
+			"Mensajes": [
+				{"valor": 0, "texto": "--"},
+				{"valor": 1, "texto": "Puerta cerrada"}
+			]
+		},
+		{
+			"GPIO": 14, 
+			"nombre": "Barrera",
+			"tipo": "INPUT",
+			"estadoActivo": 1,
+			"Estados": [
+			  {"valor": 0, "texto": "Paso libre"},
+			  {"valor": 1, "texto": "Objeto detectado"}
+			],
+			"Mensajes": [
+			  {"valor": 0, "texto": "Paso libre"},
+			  {"valor": 1, "texto": "Objeto detectado"}
+			]
+		  },
+		  {
+			"GPIO": 15, 
+			"nombre": "Emergencia",
+			"tipo": "INPUT",
+			"estadoActivo": 1,
+			"Estados": [
+			  {"valor": 0, "texto": "Apagado"},
+			  {"valor": 1, "texto": "Encendido"}
+			],
+			"Mensajes": [
+			  {"valor": 0, "texto": "Apagado"},
+			  {"valor": 1, "texto": "Encendido"}
+			]
+		  }  			
+	]
+}#
+Cierro el fichero
+json leido:
+#{"Entradas":[{"GPIO":2,"nombre":"Pulsador","tipo":"INPUT","estadoActivo":1,"Estados":[{"valor":0,"texto":"-"},{"valor":1,"texto":"Pulsado"}],"Mensajes":[{"valor":0,"texto":"--"},{"valor":1,"texto":"Pulsado"}]},{"GPIO":4,"nombre":"Arriba","tipo":"INPUT","estadoActivo":1,"Estados":[{"valor":0,"texto":"-"},{"valor":1,"texto":"Arriba"}],"Mensajes":[{"valor":0,"texto":"--"},{"valor":1,"texto":"Puerta abierta"}]},{"GPIO":12,"nombre":"Abajo","tipo":"INPUT","estadoActivo":1,"Estados":[{"valor":0,"texto":"-"},{"valor":1,"texto":"Abajo"}],"Mensajes":[{"valor":0,"texto":"--"},{"valor":1,"texto":"Puerta cerrada"}]},{"GPIO":14,"nombre":"Barrera","tipo":"INPUT","estadoActivo":1,"Estados":[{"valor":0,"texto":"Paso libre"},{"valor":1,"texto":"Objeto detectado"}],"Mensajes":[{"valor":0,"texto":"Paso libre"},{"valor":1,"texto":"Objeto detectado"}]},{"GPIO":15,"nombre":"Emergencia","tipo":"INPUT","estadoActivo":1,"Estados":[{"valor":0,"texto":"Apagado"},{"valor":1,"texto":"Encendido"}],"Mensajes":[{"valor":0,"texto":"Apagado"},{"valor":1,"texto":"Encendido"}]}]}#
+
+parsed json
+Se configurarÃ¡n 5 entradas
+*************************
+Entradas:
+0: Pulsador | pin: 2 | tipo=INPUT | estado activo: 1
+Estados:
+Estado[0]: -
+Estado[1]: Pulsado
+Mensajes:
+Mensaje[0]: --
+Mensaje[1]: Pulsado
+
+1: Arriba | pin: 4 | tipo=INPUT | estado activo: 1
+Estados:
+Estado[0]: -
+Estado[1]: Arriba
+Mensajes:
+Mensaje[0]: --
+Mensaje[1]: Puerta abierta
+
+2: Abajo | pin: 12 | tipo=INPUT | estado activo: 1
+Estados:
+Estado[0]: -
+Estado[1]: Abajo
+Mensajes:
+Mensaje[0]: --
+Mensaje[1]: Puerta cerrada
+
+3: Barrera | pin: 14 | tipo=INPUT | estado activo: 1
+Estados:
+Estado[0]: Paso libre
+Estado[1]: Objeto detectado
+Mensajes:
+Mensaje[0]: Paso libre
+Mensaje[1]: Objeto detectado
+
+4: Emergencia | pin: 15 | tipo=INPUT | estado activo: 1
+Estados:
+Estado[0]: Apagado
+Estado[1]: Encendido
+Mensajes:
+Mensaje[0]: Apagado
+Mensaje[1]: Encendido
+*************************
+Nombre entrada[0]=Pulsador | pin entrada: 2 | tipo: INPUT | estado activo 1
+	Estados y mensajes:
+		Estado 0: - | mensaje: --
+		Estado 1: Pulsado | mensaje: Pulsado
+Nombre entrada[1]=Arriba | pin entrada: 4 | tipo: INPUT | estado activo 1
+	Estados y mensajes:
+		Estado 0: - | mensaje: --
+		Estado 1: Arriba | mensaje: Puerta abierta
+Nombre entrada[2]=Abajo | pin entrada: 12 | tipo: INPUT | estado activo 1
+	Estados y mensajes:
+		Estado 0: - | mensaje: --
+		Estado 1: Abajo | mensaje: Puerta cerrada
+Nombre entrada[3]=Barrera | pin entrada: 14 | tipo: INPUT | estado activo 1
+	Estados y mensajes:
+		Estado 0: Paso libre | mensaje: Paso libre
+		Estado 1: Objeto detectado | mensaje: Objeto detectado
+Nombre entrada[4]=Emergencia | pin entrada: 15 | tipo: INPUT | estado activo 1
+	Estados y mensajes:
+		Estado 0: Apagado | mensaje: Apagado
+		Estado 1: Encendido | mensaje: Encendido
+
+
+Init salidas ------------------------------------------------------------------------
+Inicio de lectura de fichero /SalidasConfig.json
+Encontrado fichero de configuracion /SalidasConfig.json.
+Abierto fichero de configuracion SalidasConfig.json.
+Contenido del fichero: #{
+  "Salidas": [
+    {
+      "GPIO": 5, 
+      "nombre": "Subir",
+      "tipo": 0,
+      "inicio": "off",
+      "anchoPulso": 1000,
+      "modo": 3,
+      "controlador": 0,
+      "Estados": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+      ],
+      "Mensajes": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+      ]
+    },
+    {
+      "GPIO": 18, 
+      "nombre": "Bajar",
+      "tipo": 0,
+      "inicio": "off",
+      "anchoPulso": 1000,
+      "modo": 3,
+      "controlador": 0,
+      "Estados": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+      ],
+      "Mensajes": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+      ]
+    },
+    {
+      "GPIO": 19, 
+      "nombre": "LuzRoja",
+      "tipo": 0,
+      "inicio": "off",
+      "anchoPulso": 1000,
+      "modo": 3,
+      "controlador": 0,
+      "Estados": [
+        {"valor": 0, "texto": "--"},
+        {"valor": 1, "texto": "Alarma"}
+      ],
+      "Mensajes": [
+        {"valor": 0, "texto": "--"},
+        {"valor": 1, "texto": "Alarma"}
+      ]
+    },   
+    {
+      "GPIO": 36,
+      "nombre": "boton",
+      "tipo": 0,
+      "inicio": "off",
+      "anchoPulso": 1000,
+      "modo": 0,
+      "controlador": 0,
+      "Estados": [
+        {"valor": 0, "texto": ""},
+        {"valor": 1, "texto": "Pulsado"}
+      ],
+      "Mensajes": [
+        {"valor": 0, "texto": ""},
+        {"valor": 1, "texto": "Boton pulsado"}
+      ]
+    }
+  ]
+}#
+Cierro el fichero
+json creado:
+#{"Salidas":[{"GPIO":5,"nombre":"Subir","tipo":0,"inicio":"off","anchoPulso":1000,"modo":3,"controlador":0,"Estados":[{"valor":0,"texto":"Apagado"},{"valor":1,"texto":"Encendido"}],"Mensajes":[{"valor":0,"texto":"Apagado"},{"valor":1,"texto":"Encendido"}]},{"GPIO":18,"nombre":"Bajar","tipo":0,"inicio":"off","anchoPulso":1000,"modo":3,"controlador":0,"Estados":[{"valor":0,"texto":"Apagado"},{"valor":1,"texto":"Encendido"}],"Mensajes":[{"valor":0,"texto":"Apagado"},{"valor":1,"texto":"Encendido"}]},{"GPIO":19,"nombre":"LuzRoja","tipo":0,"inicio":"off","anchoPulso":1000,"modo":3,"controlador":0,"Estados":[{"valor":0,"texto":"--"},{"valor":1,"texto":"Alarma"}],"Mensajes":[{"valor":0,"texto":"--"},{"valor":1,"texto":"Alarma"}]},{"GPIO":36,"nombre":"boton","tipo":0,"inicio":"off","anchoPulso":1000,"modo":0,"controlador":0,"Estados":[{"valor":0,"texto":""},{"valor":1,"texto":"Pulsado"}],"Mensajes":[{"valor":0,"texto":""},{"valor":1,"texto":"Boton pulsado"}]}]}#
+
+parsed json
+Se configurarÃ¡n 4 salidas
+Salida 0: nombre: Subir, tipo: 0; pin: 5, inicio: 0, valorPWM: -1, anchoPulso: 1000; modo: 3, canal: -1, frecuencia: -1, resolucion: -1, controlador: 0, nombre[0]: Apagado, nombre[1]: Encendido, mensaje[0]: Apagado, mensaje[1]: Encendido
+Salida 1: nombre: Bajar, tipo: 0; pin: 18, inicio: 0, valorPWM: -1, anchoPulso: 1000; modo: 3, canal: -1, frecuencia: -1, resolucion: -1, controlador: 0, nombre[0]: Apagado, nombre[1]: Encendido, mensaje[0]: Apagado, mensaje[1]: Encendido
+Salida 2: nombre: LuzRoja, tipo: 0; pin: 19, inicio: 0, valorPWM: -1, anchoPulso: 1000; modo: 3, canal: -1, frecuencia: -1, resolucion: -1, controlador: 0, nombre[0]: --, nombre[1]: Alarma, mensaje[0]: --, mensaje[1]: Alarma
+Salida 3: nombre: boton, tipo: 0; pin: 36, inicio: 0, valorPWM: -1, anchoPulso: 1000; modo: 0, canal: -1, frecuencia: -1, resolucion: -1, controlador: 0, nombre[0]: , nombre[1]: Pulsado, mensaje[0]: , mensaje[1]: Boton pulsado
+*************************
+Salidas:
+0: Subir |  pin: 5 | tipo: 0 | modo: 3 | controlador: -1 | ancho del pulso: 1000
+Estados:
+Estado[0]: Apagado
+Estado[1]: Encendido
+Mensajes:
+Mensaje[0]: Apagado
+Mensaje[1]: Encendido
+1: Bajar |  pin: 18 | tipo: 0 | modo: 3 | controlador: -1 | ancho del pulso: 1000
+Estados:
+Estado[0]: Apagado
+Estado[1]: Encendido
+Mensajes:
+Mensaje[0]: Apagado
+Mensaje[1]: Encendido
+2: LuzRoja |  pin: 19 | tipo: 0 | modo: 3 | controlador: -1 | ancho del pulso: 1000
+Estados:
+Estado[0]: --
+Estado[1]: Alarma
+Mensajes:
+Mensaje[0]: --
+Mensaje[1]: Alarma
+3: boton |  pin: 36 | tipo: 0 | modo: 0 | controlador: -1 | ancho del pulso: 1000
+Estados:
+Estado[0]: 
+Estado[1]: Pulsado
+Mensajes:
+Mensaje[0]: 
+Mensaje[1]: Boton pulsado
+*************************
+Nombre salida[0]=Subir | pin salida: 5 | tipo: 0 | estado= 0 | estado inicial: 0 | modo: 3
+	Estados y  mensajes:
+		Estado 0: Apagado | mensaje: Apagado
+		Estado 1: Encendido | mensaje: Encendido
+Nombre salida[1]=Bajar | pin salida: 18 | tipo: 0 | estado= 0 | estado inicial: 0 | modo: 3
+	Estados y  mensajes:
+		Estado 0: Apagado | mensaje: Apagado
+		Estado 1: Encendido | mensaje: Encendido
+Nombre salida[2]=LuzRoja | pin salida: 19 | tipo: 0 | estado= 0 | estado inicial: 0 | modo: 3
+	Estados y  mensajes:
+		Estado 0: -- | mensaje: --
+		Estado 1: Alarma | mensaje: Alarma
+Nombre salida[3]=boton | pin salida: 36 | tipo: 0 | estado= 0 | estado inicial: 0 | modo: 0
+	Estados y  mensajes:
+		Estado 0:  | mensaje: 
+		Estado 1: Pulsado | mensaje: Boton pulsado
+
+
+Init secuenciador ---------------------------------------------------------------------
+Inicio de lectura de fichero /SecuenciadorConfig.json
+Encontrado fichero de configuracion /SecuenciadorConfig.json.
+Abierto fichero de configuracion SecuenciadorConfig.json.
+Contenido del fichero: #{
+	"estadoInicial": 1,
+	"Planes":[]
+}#
+Cierro el fichero
+json creado:
+#{"estadoInicial":1,"Planes":[]}#
+
+parsed json
+Se configuraran 0 planes
+
+
+Init maquina de estados----------------------------------------------------------------
+Inicio de lectura de fichero /MaqEstadosConfig.json
+Encontrado fichero de configuracion /MaqEstadosConfig.json.
+Abierto fichero de configuracion MaqEstadosConfig.json.
+Contenido del fichero: #{
+	"Entradas": [0,1,2,3,4],
+	"Salidas": [0,1,2],
+	"Estados":[
+		{"id":0, "nombre": "Error",  "salidas":[0,0,0], "timeout": -1},
+		{"id":1, "nombre": "Inicio", "salidas":[0,0,0], "timeout": -1},
+		{"id":2, "nombre": "Arriba", "salidas":[0,0,0], "timeout": -1},
+		{"id":3, "nombre": "Abajo",  "salidas":[0,0,0], "timeout": -1},
+		{"id":4, "nombre": "Subiendo", "salidas":[1,0,0], "timeout": 30},
+		{"id":5, "nombre": "Bajando",  "salidas":[0,1,0], "timeout": 30},
+		{"id":6, "nombre": "Alarma",  "salidas":[0,0,1], "timeout": 0}
+		],
+	"Transiciones":[
+    {"inicial":0,"entradas":[-1,-1,-1,-1,-1],"final":0},
+
+    {"inicial":1,"entradas":[-1,-1,-1,-1,1],"final":6},
+    {"inicial":1,"entradas":[-1,-1,-1,1,0],"final":4},
+    {"inicial":1,"entradas":[-1,1,1,0,0],"final":0},
+    {"inicial":1,"entradas":[-1,0,0,0,0],"final":4},
+    {"inicial":1,"entradas":[-1,1,0,0,0],"final":2},
+    {"inicial":1,"entradas":[-1,0,1,0,0],"final":3},
+
+    {"inicial":2,"entradas":[-1,-1,-1,-1,1],"final":6},    
+    {"inicial":2,"entradas":[-1,-1,1,0,0],"final":0},
+    {"inicial":2,"entradas":[0,1,0,0,0],"final":2},
+    {"inicial":2,"entradas":[1,1,0,0,0],"final":5},
+    {"inicial":2,"entradas":[-1,0,0,0,0],"final":5},
+
+    {"inicial":3,"entradas":[-1,-1,-1,-1,1],"final":6},
+    {"inicial":3,"entradas":[-1,1,-1,0,0],"final":0},
+    {"inicial":3,"entradas":[0,0,1,0,0],"final":3},
+    {"inicial":3,"entradas":[1,0,1,0,0],"final":4},
+    {"inicial":3,"entradas":[-1,0,0,0,0],"final":4},
+
+    {"inicial":4,"entradas":[-1,-1,-1,-1,1],"final":6},
+    {"inicial":4,"entradas":[-1,1,1,-1,0],"final":0},
+    {"inicial":4,"entradas":[-1,0,-1,-1,0],"final":4},
+    {"inicial":4,"entradas":[-1,1,0,0,0],"final":2},
+
+    {"inicial":5,"entradas":[-1,-1,-1,-1,1],"final":6}, 
+    {"inicial":5,"entradas":[-1,1,1,-1,0],"final":0},
+    {"inicial":5,"entradas":[-1,-1,-1,1,0],"final":1},
+    {"inicial":5,"entradas":[-1,-1,0,0,0],"final":5},    
+    {"inicial":5,"entradas":[-1,0,1,0,0],"final":3},
+
+    {"inicial":6,"entradas":[-1,-1,-1,-1,1],"final":6},
+    {"inicial":6,"entradas":[-1,-1,-1,-1,0],"final":1}
+  ]
+}#
+Cierro el fichero
+json cargado:
+#{"Entradas":[0,1,2,3,4],"Salidas":[0,1,2],"Estados":[{"id":0,"nombre":"Error","salidas":[0,0,0],"timeout":-1},{"id":1,"nombre":"Inicio","salidas":[0,0,0],"timeout":-1},{"id":2,"nombre":"Arriba","salidas":[0,0,0],"timeout":-1},{"id":3,"nombre":"Abajo","salidas":[0,0,0],"timeout":-1},{"id":4,"nombre":"Subiendo","salidas":[1,0,0],"timeout":30},{"id":5,"nombre":"Bajando","salidas":[0,1,0],"timeout":30},{"id":6,"nombre":"Alarma","salidas":[0,0,1],"timeout":0}],"Transiciones":[{"inicial":0,"entradas":[-1,-1,-1,-1,-1],"final":0},{"inicial":1,"entradas":[-1,-1,-1,-1,1],"final":6},{"inicial":1,"entradas":[-1,-1,-1,1,0],"final":4},{"inicial":1,"entradas":[-1,1,1,0,0],"final":0},{"inicial":1,"entradas":[-1,0,0,0,0],"final":4},{"inicial":1,"entradas":[-1,1,0,0,0],"final":2},{"inicial":1,"entradas":[-1,0,1,0,0],"final":3},{"inicial":2,"entradas":[-1,-1,-1,-1,1],"final":6},{"inicial":2,"entradas":[-1,-1,1,0,0],"final":0},{"inicial":2,"entradas":[0,1,0,0,0],"final":2},{"inicial":2,"entradas":[1,1,0,0,0],"final":5},{"inicial":2,"entradas":[-1,0,0,0,0],"final":5},{"inicial":3,"entradas":[-1,-1,-1,-1,1],"final":6},{"inicial":3,"entradas":[-1,1,-1,0,0],"final":0},{"inicial":3,"entradas":[0,0,1,0,0],"final":3},{"inicial":3,"entradas":[1,0,1,0,0],"final":4},{"inicial":3,"entradas":[-1,0,0,0,0],"final":4},{"inicial":4,"entradas":[-1,-1,-1,-1,1],"final":6},{"inicial":4,"entradas":[-1,1,1,-1,0],"final":0},{"inicial":4,"entradas":[-1,0,-1,-1,0],"final":4},{"inicial":4,"entradas":[-1,1,0,0,0],"final":2},{"inicial":5,"entradas":[-1,-1,-1,-1,1],"final":6},{"inicial":5,"entradas":[-1,1,1,-1,0],"final":0},{"inicial":5,"entradas":[-1,-1,-1,1,0],"final":1},{"inicial":5,"entradas":[-1,-1,0,0,0],"final":5},{"inicial":5,"entradas":[-1,0,1,0,0],"final":3},{"inicial":6,"entradas":[-1,-1,-1,-1,1],"final":6},{"inicial":6,"entradas":[-1,-1,-1,-1,0],"final":1}]}#
+
+parsed json
+Entradas asociadas a la maquina de estados: 5
+orden 0 | id general 0
+orden 1 | id general 1
+orden 2 | id general 2
+orden 3 | id general 3
+orden 4 | id general 4
+Salidas asociadas a la maquina de estados: 3
+orden 0 | id general 0
+orden 1 | id general 1
+orden 2 | id general 2
+*************************
+Estados:
+Se han definido 7 estados
+0: id= 0| nombre: Error | timeOut: -1
+salidas:
+salida[0]: valor: 0
+salida[1]: valor: 0
+salida[2]: valor: 0
+1: id= 1| nombre: Inicio | timeOut: -1
+salidas:
+salida[0]: valor: 0
+salida[1]: valor: 0
+salida[2]: valor: 0
+2: id= 2| nombre: Arriba | timeOut: -1
+salidas:
+salida[0]: valor: 0
+salida[1]: valor: 0
+salida[2]: valor: 0
+3: id= 3| nombre: Abajo | timeOut: -1
+salidas:
+salida[0]: valor: 0
+salida[1]: valor: 0
+salida[2]: valor: 0
+4: id= 4| nombre: Subiendo | timeOut: 30000
+salidas:
+salida[0]: valor: 1
+salida[1]: valor: 0
+salida[2]: valor: 0
+5: id= 5| nombre: Bajando | timeOut: 30000
+salidas:
+salida[0]: valor: 0
+salida[1]: valor: 1
+salida[2]: valor: 0
+6: id= 6| nombre: Alarma | timeOut: 0
+salidas:
+salida[0]: valor: 0
+salida[1]: valor: 0
+salida[2]: valor: 1
+*************************
+*************************
+Transiciones:
+Se han definido 28 transiciones
+0: estado inicial= 0| estado final: 0
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: -1
+entradas[2]: valor: -1
+entradas[3]: valor: -1
+entradas[4]: valor: -1
+1: estado inicial= 1| estado final: 6
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: -1
+entradas[2]: valor: -1
+entradas[3]: valor: -1
+entradas[4]: valor: 1
+2: estado inicial= 1| estado final: 4
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: -1
+entradas[2]: valor: -1
+entradas[3]: valor: 1
+entradas[4]: valor: 0
+3: estado inicial= 1| estado final: 0
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: 1
+entradas[2]: valor: 1
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+4: estado inicial= 1| estado final: 4
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: 0
+entradas[2]: valor: 0
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+5: estado inicial= 1| estado final: 2
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: 1
+entradas[2]: valor: 0
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+6: estado inicial= 1| estado final: 3
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: 0
+entradas[2]: valor: 1
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+7: estado inicial= 2| estado final: 6
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: -1
+entradas[2]: valor: -1
+entradas[3]: valor: -1
+entradas[4]: valor: 1
+8: estado inicial= 2| estado final: 0
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: -1
+entradas[2]: valor: 1
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+9: estado inicial= 2| estado final: 2
+entradas:
+entradas[0]: valor: 0
+entradas[1]: valor: 1
+entradas[2]: valor: 0
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+10: estado inicial= 2| estado final: 5
+entradas:
+entradas[0]: valor: 1
+entradas[1]: valor: 1
+entradas[2]: valor: 0
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+11: estado inicial= 2| estado final: 5
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: 0
+entradas[2]: valor: 0
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+12: estado inicial= 3| estado final: 6
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: -1
+entradas[2]: valor: -1
+entradas[3]: valor: -1
+entradas[4]: valor: 1
+13: estado inicial= 3| estado final: 0
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: 1
+entradas[2]: valor: -1
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+14: estado inicial= 3| estado final: 3
+entradas:
+entradas[0]: valor: 0
+entradas[1]: valor: 0
+entradas[2]: valor: 1
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+15: estado inicial= 3| estado final: 4
+entradas:
+entradas[0]: valor: 1
+entradas[1]: valor: 0
+entradas[2]: valor: 1
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+16: estado inicial= 3| estado final: 4
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: 0
+entradas[2]: valor: 0
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+17: estado inicial= 4| estado final: 6
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: -1
+entradas[2]: valor: -1
+entradas[3]: valor: -1
+entradas[4]: valor: 1
+18: estado inicial= 4| estado final: 0
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: 1
+entradas[2]: valor: 1
+entradas[3]: valor: -1
+entradas[4]: valor: 0
+19: estado inicial= 4| estado final: 4
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: 0
+entradas[2]: valor: -1
+entradas[3]: valor: -1
+entradas[4]: valor: 0
+20: estado inicial= 4| estado final: 2
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: 1
+entradas[2]: valor: 0
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+21: estado inicial= 5| estado final: 6
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: -1
+entradas[2]: valor: -1
+entradas[3]: valor: -1
+entradas[4]: valor: 1
+22: estado inicial= 5| estado final: 0
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: 1
+entradas[2]: valor: 1
+entradas[3]: valor: -1
+entradas[4]: valor: 0
+23: estado inicial= 5| estado final: 1
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: -1
+entradas[2]: valor: -1
+entradas[3]: valor: 1
+entradas[4]: valor: 0
+24: estado inicial= 5| estado final: 5
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: -1
+entradas[2]: valor: 0
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+25: estado inicial= 5| estado final: 3
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: 0
+entradas[2]: valor: 1
+entradas[3]: valor: 0
+entradas[4]: valor: 0
+26: estado inicial= 6| estado final: 6
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: -1
+entradas[2]: valor: -1
+entradas[3]: valor: -1
+entradas[4]: valor: 1
+27: estado inicial= 6| estado final: 1
+entradas:
+entradas[0]: valor: -1
+entradas[1]: valor: -1
+entradas[2]: valor: -1
+entradas[3]: valor: -1
+entradas[4]: valor: 0
+*************************
+
+
+Init Ordenes ----------------------------------------------------------------------
+
+
+Comandos:Comando 0: [help]
+Comando 1: [IP]
+Comando 2: [nivelActivo]
+Comando 3: [restart]
+Comando 4: [activa]
+Comando 5: [desactiva]
+Comando 6: [estadoSalida]
+Comando 7: [info]
+Comando 8: [flist]
+Comando 9: [fexist]
+Comando 10: [fopen]
+Comando 11: [fremove]
+Comando 12: [format]
+Comando 13: [hora]
+Comando 14: [minuto]
+Comando 15: [segundo]
+Comando 16: [reloj]
+Comando 17: [echo]
+Comando 18: [debug]
+Comando 19: [debugM]
+Comando 20: [ES]
+Comando 21: [actSec]
+Comando 22: [desSec]
+Comando 23: [estSec]
+Comando 24: [estPlan]
+Comando 25: [MQTTConfig]
+Comando 26: [entradas]
+Comando 27: [salidas]
+Comando 28: [GHN]
+Comando 29: [debugME]
+Comando 30: [CheckConfig]
+Comando 31: [setPWM]
+Comando 32: [getPWM]
+Comando 33: [setSalida]
+Comando 34: [sensores]
+Comando 35: [ScannerOW]
+Comando 36: [ScannerI2C]
+Comando 37: [uptime]
+
+------------------------------------------------------------------------------
+Init Verificar errores configuracion---------------------------------------------------
+     ficheros--------------------------------------------------------------------------
+El fichero /Errores.log ya existe, sera sobreescrito.
+Nombre fichero: /Errores.log
+Contenido fichero: Log verificacion configuracion - 29/10/2022 - 15:23
+
+Abierto fichero Errores.log.
+Guardo contenido:
+#Log verificacion configuracion - 29/10/2022 - 15:23
+#
+Cierro el fichero
+     GHN-------------------------------------------------------------------------------
+     Wifi------------------------------------------------------------------------------
+     WebServer-------------------------------------------------------------------------
+     MQTT------------------------------------------------------------------------------
+     E/S-------------------------------------------------------------------------------
+     Secuenciador----------------------------------------------------------------------
+Secuenciador
+configurados 0 planes de secuenciador
+     MaquinaEstados--------------------------------------------------------------------
+Fin Verificar errores configuracion----------------------------------------------------
+
+
+***************************************************************
+*                                                             *
+*               Fin del setup del modulo                      *
+*                                                             *
+***************************************************************
+

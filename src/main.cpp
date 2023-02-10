@@ -1,5 +1,5 @@
 /*
- * Actuador con E/S
+ * Actuador con E/S, secuenciador, maquina de estados, sensores y variables
  *
  * Actuador remoto
  * 
@@ -30,11 +30,12 @@
 #define PREESCALADO_WATCHDOG 80 //el relog es de 80Mhz, lo preesalo entre 80 para pasarlo a 1Mhz
 #define TIEMPO_WATCHDOG      1000*1000*ANCHO_INTERVALO //Si en N ANCHO_INTERVALO no se atiende el watchdog, saltara. ESTA EN microsegundos
 /***************************** Defines *****************************/
-
 /***************************** Includes *****************************/
 #include <Global.h>
+#include <configNVS.h>
 #include <RedWifi.h>
 #include <Sensores.h>
+#include <Variables.h> 
 #include <Entradas.h>
 #include <Salidas.h>
 #include <Ficheros.h>
@@ -51,19 +52,21 @@
 #include <WebServer.h>
 #include <ComprobacionErrores.h>
 #include <Pantalla.h>
+#include <ClienteHTTP.h>
 
 #include <rom/rtc.h>
 
 //#include "soc/soc.h"
 //#include "soc/rtc_cntl_reg.h"
 /***************************** Includes *****************************/
-
+/***************************** Prototipos *****************************/
 boolean inicializaConfiguracion(boolean debug);
 boolean parseaConfiguracionGlobal(String contenido);
+void enviaConfiguracion(void);
 const char* reset_reason(RESET_REASON reason);
 void configuraWatchdog(void);
 void alimentaWatchdog(void);
-
+/***************************** Prototipos *****************************/
 /***************************** variables globales *****************************/
 enum ETAPAS{
   SETUP=0,
@@ -85,7 +88,6 @@ enum ETAPAS{
 
 String nombreEtapas[]={"SETUP","INICIO","OTA","SENSORES","ENTRADAS","SECUENCIADOR","MAQ_ESTADOS","SALIDAS","WEBSOCKETS","MQTT","ENVIO","ORDENES","RELOJ","WIFI_WD","FIN"};
 
-String nombre_dispositivo;//Nombre del dispositivo, por defecto el de la familia
 int debugMain=0; //por defecto desabilitado
 int debugGlobal=0; //por defecto desabilitado
 int nivelActivo;//Indica si el rele se activa con HIGH o LOW
@@ -99,7 +101,6 @@ int etapa=SETUP;
 void setup()
   {
   //WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable   detector
-
   Serial.begin(115200);
   configuraLed();
   enciendeLed();
@@ -114,7 +115,11 @@ void setup()
   Traza.mensaje("***************************************************************\n");
 
   for(int8_t core=0;core<2;core++) Traza.mensaje("Motivo del reinicio (%i): %s\n",core,reset_reason(rtc_get_reset_reason(core)));  
-  
+
+  Traza.mensaje("\n\nInit NVS --------------------------------------------------------------------------\n");
+  //NVS - Cargo el ID de device
+  inicializaNVS();
+
   Traza.mensaje("\n\nInit Ficheros ---------------------------------------------------------------------\n");
   //Ficheros - Lo primero para poder leer los demas ficheros de configuracion
   inicializaFicheros(debugGlobal);
@@ -133,6 +138,10 @@ void setup()
     Traza.begin(0,serie);
     Traza.mensaje("Traza iniciada con nivel %i y salida %i\n",Traza.getNivelDebug(),Traza.getMedio());
     /*----------------Inicializaciones que necesitan red-------------*/
+    //Plataforma domoticae
+    Traza.mensaje("\n\nInit Plataforma domoticae -------------------------------------------------------\n");
+    inicializaPlataforma(debugGlobal);
+    parpadeaLed(1);
     //OTA
     Traza.mensaje("\n\nInit OTA ------------------------------------------------------------------------\n");
     inicializaOTA(debugGlobal);
@@ -170,6 +179,10 @@ void setup()
   Traza.mensaje("\n\nInit sensores ------------------------------------------------------------------------\n");
   sensores.inicializa();
 
+  //Variables
+  Traza.mensaje("\n\nInit variables ------------------------------------------------------------------------\n");
+  variables.inicializa();
+
   //Entradas
   Traza.mensaje("\n\nInit entradas ------------------------------------------------------------------------\n");
   entradas.inicializa();
@@ -197,6 +210,7 @@ void setup()
 #endif
 
   compruebaConfiguracion(0);
+  enviaConfiguracion();
   parpadeaLed(2);
   apagaLed();//Por si acaso...
   
@@ -229,7 +243,10 @@ void loop()
   if ((vuelta % FRECUENCIA_OTA)==0) gestionaOTA(); //Gestion de actualizacion OTA
   //Prioridad 2: Funciones de control.
   etapa=SENSORES;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
-  if ((vuelta % FRECUENCIA_SENSORES)==0) sensores.lee(debugGlobal); //Actualiza las entradas  
+  if ((vuelta % FRECUENCIA_SENSORES)==0) {
+    sensores.lee(debugMain); //Lee las medidas de los sensores
+    variables.lee(debugMain);//Actualiza los valores de las variables
+  }
   etapa=ENTRADAS;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
   if ((vuelta % FRECUENCIA_ENTRADAS)==0) entradas.actualiza(debugGlobal); //Actualiza las entradas
   etapa=SECUENCIADOR;if(debugMain) Serial.printf("Etapa: %s | milis: %i\n", nombreEtapas[etapa],millis());
@@ -296,13 +313,12 @@ boolean inicializaConfiguracion(boolean debug)
   if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
 
   //cargo el valores por defecto
-  nombre_dispositivo=String(NOMBRE_FAMILIA); //Nombre del dispositivo, por defecto el de la familia
-  nivelActivo=LOW;  
+    nivelActivo=LOW;  
   
   if(!leeFichero(GLOBAL_CONFIG_FILE, cad))
     {
     Traza.mensaje("No existe fichero de configuracion global\n");
-    cad="{\"nombre_dispositivo\": \"" + String(NOMBRE_FAMILIA) + "\",\"NivelActivo\":0}"; //config por defecto    
+    cad="{\"NivelActivo\":0}"; //config por defecto    
     //salvo la config por defecto
     if(salvaFichero(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion global creado por defecto\n"); 
     }
@@ -327,16 +343,13 @@ boolean parseaConfiguracionGlobal(String contenido)
     {
     Traza.mensaje("parsed json\n");
 //******************************Parte especifica del json a leer********************************
-    if (json.containsKey("nombre_dispositivo")) nombre_dispositivo=((const char *)json["nombre_dispositivo"]);    
-    if(nombre_dispositivo==NULL) nombre_dispositivo=String(NOMBRE_FAMILIA);
- 
     if (json.containsKey("NivelActivo")) 
       {
       if((int)json["NivelActivo"]==0) nivelActivo=LOW;
       else nivelActivo=HIGH;
       }
     
-    Traza.mensaje("Configuracion leida:\nNombre dispositivo: %s\nNivelActivo: %i\n",nombre_dispositivo.c_str(),nivelActivo);
+    Traza.mensaje("Configuracion leida:\nNivelActivo: %i\n",nivelActivo);
 //************************************************************************************************
     return true;
     }
@@ -366,7 +379,7 @@ String generaJsonConfiguracionNivelActivo(String configActual, int nivelAct)
   if(configActual=="") 
     {
     Traza.mensaje("No existe el fichero. Se genera uno nuevo\n");
-    return "{\"nombre_dispositivo\": \"Nombre dispositivo\", \"NivelActivo\": \"" + String(nivelAct) + "\"}";
+    return "{\"NivelActivo\": \"" + String(nivelAct) + "\"}";
     }
     
   DynamicJsonBuffer jsonBuffer;
@@ -388,6 +401,38 @@ String generaJsonConfiguracionNivelActivo(String configActual, int nivelAct)
   return salida;  
   } 
 
+/**********************************************************************/
+/* Salva la configuracion general en formato json                     */
+/**********************************************************************/  
+String generaJsonConfiguracionGlobal(void){
+  boolean nuevo=true;
+  String salida="";
+
+  //Genero el nuevo JSON
+  //7 elementos, 2 arrays de 2 parametros cada uno
+  const size_t capacity = JSON_OBJECT_SIZE(3);
+  DynamicJsonBuffer jsonBufferNuevo(capacity);
+  JsonObject& nuevoJson = jsonBufferNuevo.createObject();      
+
+  nuevoJson["NivelActivo"]=nivelActivo;
+
+  nuevoJson.printTo(salida);//pinto el json que he creado
+  Traza.mensaje("json creado:\n#%s#\n",salida.c_str());
+
+  return salida;  
+}
+
+void salvaConfiguracionGlobal(void)
+  {
+  String cad="";
+  
+  Traza.mensaje("---------------------Salvando configuracion general---------------\n");
+  Traza.mensaje("Valores que voy a salvar:\nnivel activo : %i\n",nivelActivo);
+
+  cad=generaJsonConfiguracionGlobal();
+  if(!salvaFichero(GLOBAL_CONFIG_FILE, GLOBAL_CONFIG_BAK_FILE, cad)) Traza.mensaje("No se pudo salvar el fichero\n");  
+  Traza.mensaje("---------------------Fin salvando configuracion---------------\n");
+  }
 /**********************************************************************/
 /*       Vuelca a un json informacion general del dispositivo         */
 /**********************************************************************/  
@@ -501,3 +546,45 @@ const char* reset_reason(RESET_REASON reason)
   }
 }
 /***************************************WatchDog**************************************************/
+
+
+void enviaConfiguracion(void){
+  String servidor = String(URL_PLATAFORMA) + "/configuracion/";
+  String contenido="";
+  String URL="";
+
+  //test, si no responde 200 salgo
+  if(!testHTTP()) return;
+  boolean retorno=false;
+Serial.printf("Test OK\n");
+  //Config
+  retorno = enviaFicheroConfig(GLOBAL_CONFIG_FILE);
+  Serial.printf("Envio de Config: %s\n",(retorno?"OK":"KO"));
+  //WiFi
+  retorno = enviaFicheroConfig(WIFI_CONFIG_FILE);
+  Serial.printf("Envio de WiFi: %s\n",(retorno?"OK":"KO"));
+  //MQTT
+  retorno = enviaFicheroConfig(MQTT_CONFIG_FILE);
+  Serial.printf("Envio de MQTT: %s\n",(retorno?"OK":"KO"));
+  //Entradas
+  retorno = enviaFicheroConfig(ENTRADAS_CONFIG_FILE);
+  Serial.printf("Envio de entradas: %s\n",(retorno?"OK":"KO")); 
+  //Salidas
+  retorno = enviaFicheroConfig(SALIDAS_CONFIG_FILE);
+  Serial.printf("Envio de salidas: %s\n",(retorno?"OK":"KO"));
+  //Secuenciador
+  retorno = enviaFicheroConfig(SECUENCIADOR_CONFIG_FILE);
+  Serial.printf("Envio de secuenciador: %s\n",(retorno?"OK":"KO"));
+  //Maquina estados
+  retorno = enviaFicheroConfig(MAQUINAESTADOS_CONFIG_FILE);
+  Serial.printf("Envio de maquina de estados: %s\n",(retorno?"OK":"KO"));
+  //GHN
+  retorno = enviaFicheroConfig(GHN_CONFIG_FILE);
+  Serial.printf("Envio de GHN: %s\n",(retorno?"OK":"KO"));
+  //Sensores
+  retorno = enviaFicheroConfig(SENSORES_CONFIG_FILE);
+  Serial.printf("Envio de sensores: %s\n",(retorno?"OK":"KO"));
+  //Variables
+  retorno = enviaFicheroConfig(VARIABLES_CONFIG_FILE);
+  Serial.printf("Envio de variables: %s\n",(retorno?"OK":"KO"));
+}

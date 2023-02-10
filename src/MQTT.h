@@ -24,46 +24,6 @@
 /************************************************/
 void inicializaMQTT(void);
 
-/************************************************/
-/* Recupera los datos de configuracion          */
-/* del archivo de MQTT                          */
-/************************************************/
-boolean recuperaDatosMQTT(boolean debug);
-
-/*********************************************/
-/* Parsea el json leido del fichero de       */
-/* configuracio MQTT                         */
-/*********************************************/
-boolean parseaConfiguracionMQTT(String contenido);
-
-/***********************************************Funciones de gestion de mensajes MQTT**************************************************************/
-/***************************************************/
-/* Funcion que recibe el mensaje cuando se publica */
-/* en el bus un topic al que esta subscrito        */
-/***************************************************/
-void callbackMQTT(char* topic, byte* payload, unsigned int length);
-
-/****************************************************/
-/* Funcion que gestiona la respuesta a los mensajes */ 
-/* MQTT menos al Ping                               */
-/****************************************************/
-void respondeGenericoMQTT(char* topic, byte* payload, unsigned int length);
-  
-/***************************************************/
-/* Funcion que gestiona la respuesta al ping MQTT  */
-/***************************************************/
-void respondePingMQTT(char* topic, byte* payload, unsigned int length);
-
-/***************************************************/
-/*    Genera el JSON de respuesta al Ping MQTT     */
-/***************************************************/
-String generaJSONPing(boolean debug);  
-
-/********************************************/
-/* Funcion que gestiona la conexion al bus  */
-/* MQTT del broker                          */
-/********************************************/
-boolean conectaMQTT(void);  
 
 /********************************************/
 /* Funcion que envia un mensaje al bus      */

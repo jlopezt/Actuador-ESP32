@@ -7,7 +7,7 @@
   "usuarioMQTT": "domoticae", 
   "passwordMQTT": "88716", 
   "ID_MQTT": "Riego", 
-  "topicRoot": "casaPre", 
+  "topicRoot": "domoticae", 
   "publicarMedidas": 0,
   "publicarEntradas": 1,
   "publicarSalidas": 1,

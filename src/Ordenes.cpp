@@ -15,6 +15,7 @@
 /***************************** Includes *****************************/
 #include <Global.h>
 #include <Ordenes.h>
+#include <configNVS.h>
 #include <Sensores.h>
 #include <Entradas.h>
 #include <Salidas.h>
@@ -446,6 +447,14 @@ void func_comando_uptime(int iParametro, char* sParametro, float fParametro)//"d
   {
   Serial.printf("Hora del ultimo arranque: %s\n",horaYfechaArranque().c_str());
   }  
+
+void func_comando_leeNVS(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  configNVS_t c;  
+  if(!leeConfigNVS(&c)) Serial.printf("error al leer NVS.\n");
+  //else Serial.printf("Datos leidos\nDevice ID : %016llx\nnombre mDNS: %s\nSSID : %s\nPassword : (*****...%s)\nusuario : %s\ncontraseña : (*****...%s)\n",c.deviceID,c.nombremDNS.c_str(),c.SSID.c_str(),c.pass.substring(configNVS.pass.length()-4).c_str(),c.usuario.c_str(),c.contrasena.substring(c.contrasena.length()-4).c_str());
+  else Serial.printf("Datos leidos\nDevice ID : %016llx\nnombre Servicio: %s\nnombre mDNS: %s\nSSID : %s\nPassword : (*****...%s)\nusuario : %s\ncontraseña : (%s)\n",c.deviceID,c.nombreServicio,c.nombremDNS.c_str(),c.SSID.c_str(),c.pass.substring(configNVS.pass.length()-4).c_str(),c.usuario.c_str(),c.contrasena.c_str());  
+  }  
 /***************************** FIN funciones para comandos ******************************************/ 
 
 void inicializaOrden(void)
@@ -605,6 +614,10 @@ void inicializaOrden(void)
   comandos[i].comando="uptime";
   comandos[i].descripcion="Hora del ultimo arranque";
   comandos[i++].p_func_comando=func_comando_uptime;
+
+  comandos[i].comando="leeNVS";
+  comandos[i].descripcion="Muestra el contenido de NVS";
+  comandos[i++].p_func_comando=func_comando_leeNVS;
 
   //resto
   for(;i<MAX_COMANDOS;)

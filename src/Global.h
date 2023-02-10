@@ -10,7 +10,7 @@
 
 //Defines generales
 #define NOMBRE_FAMILIA   "SmartSite" //"Actuador/Secuenciador (E/S)"
-#define VERSION          "esp32 - ver 7.6.0"//(ESP32 1.0.4|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)"
+#define VERSION          "esp32 - ver 7.7.0"//(ESP32 1.0.4|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)"
 
 #define TRUE              1
 #define FALSE             0
@@ -21,6 +21,8 @@
 #define SUBSEPARADOR     '#'
 
 #define MAX_VUELTAS      UINT16_MAX// 32767 
+
+#define URL_PLATAFORMA   "https://prepro.domoticae.es"
 
 //Ficheros de configuracion
 #define FICHERO_ERRORES                  "/Errores.log"
@@ -44,6 +46,8 @@
 #define FTP_CONFIG_BAK_FILE              "/FTPConfig.json.bak"
 #define SENSORES_CONFIG_FILE             "/Sensores.json"
 #define SENSORES_CONFIG_BAK_FILE         "/Sensores.json.bak"
+#define VARIABLES_CONFIG_FILE            "/Variables.json"
+#define VARIABLES_CONFIG_BAK_FILE        "/Variables.json.bak"
 
 //Entradas y Salidas
 #define MAX_PINES         20 //numero de pines disponibles para entradas y salidas
@@ -65,7 +69,6 @@
 /***************************** Includes *****************************/
 
 /***************************** Variables *****************************/
-extern String nombre_dispositivo;//Nombre del dispositivo, por defecto el de la familia
 extern int debugGlobal; //por defecto desabilitado
 extern int debugMain; //por defecto desabilitado
 extern int nivelActivo;
@@ -79,6 +82,7 @@ void parpadeaLed(uint8_t veces, uint16_t espera=100);
 void parpadeaLed(uint8_t veces, uint16_t espera);
 
 String generaJsonConfiguracionNivelActivo(String configActual, int nivelAct);
+void salvaConfiguracionGlobal(void);
 String generaJsonInfo(void);
 /************************* Utilidades ***************************/
 

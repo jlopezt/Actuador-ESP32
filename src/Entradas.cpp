@@ -179,7 +179,7 @@ String Entradas::generaJsonEstado(boolean filtro)
   
   JsonObject& root = jsonBuffer.createObject();
   
-  JsonArray& Entradas = root.createNestedArray("entradas");
+  JsonArray& Entradas = root.createNestedArray("datos");////entradas
   for(int8_t id=0;id<entradas.getNumEntradas();id++)
     {
     JsonObject& Entradas_0 = Entradas.createNestedObject(); 

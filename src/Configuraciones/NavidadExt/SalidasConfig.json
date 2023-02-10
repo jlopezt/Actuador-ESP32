@@ -1,0 +1,38 @@
+{
+  "Salidas": [
+    {
+      "GPIO": 13, 
+      "nombre": "Luces",
+      "tipo": 0,
+      "inicio": "off",
+      "anchoPulso": 1000,
+      "modo": 1,
+      "controlador": 0,
+      "Estados": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+      ],
+      "Mensajes": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+      ]
+    },
+    {
+      "GPIO": 12, 
+      "nombre": "Test",
+      "tipo": 0,
+      "inicio": "off",
+      "anchoPulso": 1000,
+      "modo": 0,
+      "controlador": 0,
+      "Estados": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+      ],
+      "Mensajes": [
+        {"valor": 0, "texto": "Apagado"},
+        {"valor": 1, "texto": "Encendido"}
+      ]
+    }    
+  ]
+}

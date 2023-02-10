@@ -1,0 +1,49 @@
+{
+	"Entradas": [0,1,2,3,4],
+	"Salidas": [0,1,2],
+	"Estados":[
+		{"id":0, "nombre": "Error",  "salidas":[0,0,0], "timeout": -1},
+		{"id":1, "nombre": "Inicio", "salidas":[0,0,0], "timeout": -1},
+		{"id":2, "nombre": "Arriba", "salidas":[0,0,0], "timeout": -1},
+		{"id":3, "nombre": "Abajo",  "salidas":[0,0,0], "timeout": -1},
+		{"id":4, "nombre": "Subiendo", "salidas":[1,0,0], "timeout": 30},
+		{"id":5, "nombre": "Bajando",  "salidas":[0,1,0], "timeout": 30},
+		{"id":6, "nombre": "Alarma",  "salidas":[0,0,1], "timeout": 0}
+		],
+	"Transiciones":[
+    {"inicial":0,"entradas":[-1,-1,-1,-1,-1],"final":0},
+
+    {"inicial":1,"entradas":[-1,-1,-1,-1,1],"final":6},
+    {"inicial":1,"entradas":[-1,-1,-1,1,0],"final":4},
+    {"inicial":1,"entradas":[-1,1,1,0,0],"final":0},
+    {"inicial":1,"entradas":[-1,0,0,0,0],"final":4},
+    {"inicial":1,"entradas":[-1,1,0,0,0],"final":2},
+    {"inicial":1,"entradas":[-1,0,1,0,0],"final":3},
+
+    {"inicial":2,"entradas":[-1,-1,-1,-1,1],"final":6},    
+    {"inicial":2,"entradas":[-1,-1,1,0,0],"final":0},
+    {"inicial":2,"entradas":[0,1,0,0,0],"final":2},
+    {"inicial":2,"entradas":[1,1,0,0,0],"final":5},
+    {"inicial":2,"entradas":[-1,0,0,0,0],"final":5},
+
+    {"inicial":3,"entradas":[-1,-1,-1,-1,1],"final":6},
+    {"inicial":3,"entradas":[-1,1,-1,0,0],"final":0},
+    {"inicial":3,"entradas":[0,0,1,0,0],"final":3},
+    {"inicial":3,"entradas":[1,0,1,0,0],"final":4},
+    {"inicial":3,"entradas":[-1,0,0,0,0],"final":4},
+
+    {"inicial":4,"entradas":[-1,-1,-1,-1,1],"final":6},
+    {"inicial":4,"entradas":[-1,1,1,-1,0],"final":0},
+    {"inicial":4,"entradas":[-1,0,-1,-1,0],"final":4},
+    {"inicial":4,"entradas":[-1,1,0,0,0],"final":2},
+
+    {"inicial":5,"entradas":[-1,-1,-1,-1,1],"final":6}, 
+    {"inicial":5,"entradas":[-1,1,1,-1,0],"final":0},
+    {"inicial":5,"entradas":[-1,-1,-1,1,0],"final":1},
+    {"inicial":5,"entradas":[-1,-1,0,0,0],"final":5},    
+    {"inicial":5,"entradas":[-1,0,1,0,0],"final":3},
+
+    {"inicial":6,"entradas":[-1,-1,-1,-1,1],"final":6},
+    {"inicial":6,"entradas":[-1,-1,-1,-1,0],"final":1}
+  ]
+}

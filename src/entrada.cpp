@@ -98,8 +98,8 @@ void Entrada::enviaMensaje(int8_t estado){
   String mensaje="";
 
   mensaje="{\"origen\": \"" + nombre + "\",\"mensaje\":\"" + mensajes[estado] + "\"}";
-  Traza.mensaje("Envia mensaje para la entrada %s y por cambiar a estado %i. Mensaje: %s\n\n",nombre.c_str(),estado,mensajes[estado].c_str());
-  Traza.mensaje("A enviar: topic %s\nmensaje %s\n", TOPIC_MENSAJES,mensaje.c_str());
+  //Traza.mensaje("Envia mensaje para la entrada %s y por cambiar a estado %i. Mensaje: %s\n\n",nombre.c_str(),estado,mensajes[estado].c_str());
+  //Traza.mensaje("A enviar: topic %s\nmensaje %s\n", TOPIC_MENSAJES,mensaje.c_str());
   enviarMQTT(TOPIC_MENSAJES, mensaje);
 }
 /****************************** Fin otras *****************************/

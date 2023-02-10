@@ -232,9 +232,7 @@ uint8_t Sensores::tipoSensor(String tipo){
 
 void Sensores::lee(boolean debug){
   Sensor* p=pCabeza;
-  //Serial.printf("Leo sensores\n");
-
-  //Serial.printf("Inicio lectura de sensores: %i\n",millis());
+  if(debug) Serial.printf("Inicio lectura de sensores: %i\n",millis());
 
   while(p!=NULL){    
     Sensor* q;
@@ -242,46 +240,38 @@ void Sensores::lee(boolean debug){
       case TIPO_DS18B20:
         q= (SensorDS18B20*)p;
         ((SensorDS18B20*)q)->lee();
-        ((SensorDS18B20*)q)->compararHumbral();
         break;
       case TIPO_DHT22:
         q= (SensorDHT*)p;
         ((SensorDHT*)q)->lee();
-        ((SensorDHT*)q)->compararHumbral();
         break;
       case TIPO_HDC1080:
         q= (SensorHDC1080*)p;
         ((SensorHDC1080*)q)->lee();
-        ((SensorHDC1080*)q)->compararHumbral();
         break;
       case TIPO_BME280:
         q= (SensorBME280*)p;
         ((SensorBME280*)q)->lee();
-        ((SensorBME280*)q)->compararHumbral();
         break;
       case TIPO_BMP280:
         q= (SensorBMP280*)p;
         ((SensorBMP280*)q)->lee();
-        ((SensorBMP280*)q)->compararHumbral();
         break;
       case TIPO_GL5539:
         q= (SensorGL5539*)p;
         ((SensorGL5539*)q)->lee();
-        ((SensorGL5539*)q)->compararHumbral();
         break;
       case TIPO_BH1750:
         q= (SensorBH1750*)p;
         ((SensorBH1750*)q)->lee();
-        ((SensorBH1750*)q)->compararHumbral();
         break;
       case TIPO_SOILMOISTURECAPACITIVEV2:
         q= (SensorHumedadSuelo*)p;
         ((SensorHumedadSuelo*)q)->lee();
-        ((SensorHumedadSuelo*)q)->compararHumbral();
         break;
     }
 
-    //Serial.printf("(%i) Sensor: %s\n",millis(),p->getNombre().c_str());
+    if(debug) Serial.printf("(%i) Sensor: %s\n",millis(),p->getNombre().c_str());
 
     p=p->getSiguiente();
   }  
@@ -296,7 +286,7 @@ String Sensores::generaJsonEstado(boolean debug){
 
   JsonObject& root = jsonBuffer.createObject();
 
-  JsonArray& medidas = root.createNestedArray("Medidas");
+  JsonArray& medidas = root.createNestedArray("datos");////Medidas
 
   while(p!=NULL){
     //Serial.printf("recuperando valores de  %s\n",p->getNombre().c_str());
@@ -382,3 +372,16 @@ String Sensores::generaJsonConfiguracion(boolean debug){
   //Serial.printf("%s\n",salida.c_str());
   return salida;   
 }
+
+/*Devuleve un puntero al sensor identificado por su nombre*/
+Sensor* Sensores::getSensor(String _nombre){
+  Sensor* p=pCabeza;
+
+  while(p!=NULL){
+    if(p->getNombre()==_nombre) return p;
+    p=p->getSiguiente();
+  }
+
+  return NULL;
+}
+

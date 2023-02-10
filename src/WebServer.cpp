@@ -14,6 +14,7 @@
 #include <Global.h>
 #include <WebServer.h>
 #include <Sensores.h>
+#include <Variables.h>
 #include <Entradas.h>
 #include <Salidas.h>
 #include <Secuenciador.h>
@@ -25,6 +26,7 @@
 #include <Ficheros.h>
 #include <GoogleHomeNotifier.h>
 
+#include <configNVS.h>
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include "ESPAsyncWebServer.h"
@@ -41,8 +43,11 @@ String miniCabecera="<html><head></head><body>\n";
 String miniPie="</body></html>";
 
 void handleNombre(AsyncWebServerRequest *request);
+void handleServicios(AsyncWebServerRequest *request);
 
-void handleEstadoMedidas(AsyncWebServerRequest *request);
+void handleEstadoVariables(AsyncWebServerRequest *request);
+void handleConfigVariables(AsyncWebServerRequest *request);
+void handleEstadoSensores(AsyncWebServerRequest *request);
 void handleConfigSensores(AsyncWebServerRequest *request);
 
 void handleEstadoEntradas(AsyncWebServerRequest *request);
@@ -68,6 +73,11 @@ void handleParticiones(AsyncWebServerRequest *request);
 void handleSetNextBoot(AsyncWebServerRequest *request);
 void handleInfo(AsyncWebServerRequest *request);
 void handleRestart(AsyncWebServerRequest *request);
+void handleResetWiFi(AsyncWebServerRequest *request);
+void handleResetUser(AsyncWebServerRequest *request);
+void handleResetID(AsyncWebServerRequest *request);
+void handleResetTotal(AsyncWebServerRequest *request);
+void handleInicializaNVS(AsyncWebServerRequest *request);
 
 void handleListaFicheros(AsyncWebServerRequest *request);
 void handleLeeFichero(AsyncWebServerRequest *request);
@@ -78,8 +88,10 @@ void handleNotFound(AsyncWebServerRequest *request);
 void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
 bool handleFileRead(AsyncWebServerRequest *request);
 bool handleFileReadChunked(AsyncWebServerRequest *request);
+
 size_t loadData(File f, uint8_t *buffer, size_t maxLen, size_t index);
 String getContentType(String filename);
+String generaJsonServicios(boolean debug);
 
 void handleSpeechPath(AsyncWebServerRequest *request);
 /*************************** Fin variables globales ***************************/
@@ -90,8 +102,11 @@ void inicializaWebServer(void)
   /*******Configuracion del Servicio Web***********/  
   //Inicializo los serivcios, decalra las URIs a las que va a responder
   serverX.on("/nombre", HTTP_GET, handleNombre); //devuelve un JSON con las medidas, reles y modo para actualizar la pagina de datos
+  serverX.on("/servicios", HTTP_GET, handleServicios); //devuelve un JSON con las medidas, reles y modo para actualizar la pagina de datos  
 
-  serverX.on("/estadoMedidas", HTTP_GET, handleEstadoMedidas); //Responde con la identificacion del modulo
+  serverX.on("/estadoVariables", HTTP_GET, handleEstadoVariables); //Responde con la identificacion del modulo
+  serverX.on("/configVariables", HTTP_GET, handleConfigVariables); //Responde con la identificacion del modulo
+  serverX.on("/estadoSensores", HTTP_GET, handleEstadoSensores); //Responde con la identificacion del modulo
   serverX.on("/configSensores", HTTP_GET, handleConfigSensores); //Servicio de estdo de reles
 
   serverX.on("/estadoEntradas", HTTP_GET, handleEstadoEntradas); //Responde con la identificacion del modulo  
@@ -121,6 +136,12 @@ void inicializaWebServer(void)
   serverX.on("/setNextBoot", HTTP_ANY, handleSetNextBoot);
 
   serverX.on("/restart", HTTP_ANY, handleRestart);  //URI de test
+  serverX.on("/resetWiFi", HTTP_ANY, handleResetWiFi);  //URI de test
+  serverX.on("/resetUser", HTTP_ANY, handleResetUser);  //URI de test
+  serverX.on("/resetID", HTTP_ANY, handleResetID);  //URI de test
+  serverX.on("/resetTotal", HTTP_ANY, handleResetTotal);  //URI de test
+  serverX.on("/inicializaNVS", HTTP_ANY, handleInicializaNVS);  //URI de test
+
   serverX.on("/info", HTTP_ANY, handleInfo);  //URI de test
  
   //upload de ficheros
@@ -158,13 +179,25 @@ void handleNombre(AsyncWebServerRequest *request)
   
   JsonObject& root = jsonBuffer.createObject();
   root["nombreFamilia"] = NOMBRE_FAMILIA;
-  root["nombreDispositivo"] = nombre_dispositivo;
+  root["nombreDispositivo"] = configNVS.nombreServicio;
   root["version"] = VERSION;
   
   String cad="";
   root.printTo(cad);
   request->send(200,"text/json",cad);
   }
+
+/*********************************************/
+/*                                           */
+/*  Lista de servicios proporcionados por    */
+/*  el actuador                              */ 
+/*                                           */
+/*********************************************/  
+void handleServicios(AsyncWebServerRequest *request) {
+  String cad=generaJsonServicios(false);
+  
+  request->send(200, "text/json", cad); 
+  }  
 
 /*********************************************/
 /*                                           */
@@ -177,6 +210,87 @@ void handleRestart(AsyncWebServerRequest *request)
   delay(1000);
   ESP.restart();
   }
+
+/*********************************************/
+/*                                           */
+/*  Resetea la memoria NVS donde se almacena */
+/*  el ssid y la password WiFi               */ 
+/*                                           */
+/*********************************************/  
+void handleResetWiFi(AsyncWebServerRequest *request){
+  resetNVS_WiFi();
+  
+  request->send(200, "text/json", "{}");
+}
+
+/*********************************************/
+/*                                           */
+/*  Resetea la memoria NVS donde se almacena */
+/*  el usuario y password de la plataforma   */ 
+/*                                           */
+/*********************************************/  
+void handleResetUser(AsyncWebServerRequest *request){
+  resetNVS_user();
+  
+  request->send(200, "text/json", "{}");
+}
+
+/*********************************************/
+/*                                           */
+/*  Resetea la memoria NVS donde se almacena */
+/*  el deviceID                              */ 
+/*                                           */
+/*********************************************/  
+void handleResetID(AsyncWebServerRequest *request){
+  resetNVS_ID();
+
+  request->send(200, "text/json", "{}");
+}
+
+/*********************************************/
+/*                                           */
+/*  Resetea la memoria NVS y el SPIFFS       */
+/*                                           */ 
+/*********************************************/  
+void handleResetTotal(AsyncWebServerRequest *request){
+  resetNVS_Total();  
+
+  request->send(200, "text/json", "{}");
+}
+
+/*********************************************/
+/*                                           */
+/*  Resetea la memoria NVS con los valores   */
+/*  por defecto                              */
+/*                                           */ 
+/*********************************************/  
+void handleInicializaNVS(AsyncWebServerRequest *request){
+  String cad="/inicializaNVS?DeviceID=<value>&mDNS=<value>&SSID=<value>&pass=<value>";
+
+  //No hay argumentos, valores por defecto
+  if(request->args()==0) escribeConfigNVSDefecto();
+  else{
+    for (uint8_t i=0; i<request->args(); i++){
+      Serial.printf("parametro: %s | valor: %s\n",request->argName(i),request->arg(i));
+
+      if(request->argName(i)=="DeviceID"){ 
+        configNVS.deviceID=request->arg(i).toInt();
+        Serial.printf("Valor de Device ID: %016llx\n",configNVS.deviceID);
+      }
+      else if(request->argName(i)=="nombreServicio") configNVS.nombreServicio=request->arg(i);
+      else if(request->argName(i)=="mDNS") configNVS.nombremDNS=request->arg(i);
+      else if(request->argName(i)=="SSID") configNVS.SSID=request->arg(i);
+      else if(request->argName(i)=="pass") configNVS.pass=request->arg(i);
+      else if(request->argName(i)=="usuario") configNVS.usuario=request->arg(i);
+      //else if(request->argName(i)=="contrasena") configNVS.contrasena=request->arg(i);      
+      else Serial.printf("argumento %s no valido\n",request->argName(i).c_str());
+    }
+
+    escribeConfigNVS(configNVS);
+  }
+
+  request->send(200, "text/json", "{\"formato\": \"" + cad + "\"}");
+}
 
 /*********************************************/
 /*                                           */
@@ -222,10 +336,23 @@ void handleInfo(AsyncWebServerRequest *request){
 /*  las entradas y devuelve un formato json      */
 /*                                               */
 /*************************************************/  
-void handleEstadoMedidas(AsyncWebServerRequest *request)
+void handleEstadoSensores(AsyncWebServerRequest *request)
   {
   String cad=sensores.generaJsonEstado();
-  
+
+  request->send(200, "text/json", cad); 
+  }  
+
+/*************************************************/
+/*                                               */
+/*  Servicio de consulta de estado de            */
+/*  las entradas y devuelve un formato json      */
+/*                                               */
+/*************************************************/  
+void handleEstadoVariables(AsyncWebServerRequest *request)
+  {
+  String cad=variables.generaJsonEstado();
+
   request->send(200, "text/json", cad); 
   }  
 
@@ -263,6 +390,18 @@ void handleEstadoSalidas(AsyncWebServerRequest *request)
 /*****************************************************/  
 void handleConfigSensores(AsyncWebServerRequest *request){
   String cad=sensores.generaJsonConfiguracion(false);
+  request->send(200, "text/json", cad);
+  //request->redirect("Sensores.json");
+  }
+
+/*****************************************************/
+/*                                                   */
+/*  Servicio de consulta de estado de los sensores   */
+/*  devuelve un formato json                         */
+/*                                                   */
+/*****************************************************/  
+void handleConfigVariables(AsyncWebServerRequest *request){
+  String cad=variables.generaJsonConfiguracion(false);
   request->send(200, "text/json", cad);
   //request->redirect("Sensores.json");
   }
@@ -539,7 +678,7 @@ void handleNotFound(AsyncWebServerRequest *request)
     Traza.mensaje("No se encontro el fichero en SPIFFS\n");  
     String message = miniCabecera;
 
-    message += "<h1>" + nombre_dispositivo + "<br></h1>";
+    message += "<h1>" + configNVS.nombreServicio + "<br></h1>";
     message += "File Not Found\n\n";
     message += "URI: ";
     message += request->url();
@@ -719,3 +858,22 @@ void handleSpeechPath(AsyncWebServerRequest *request)
   if(enviaNotificacion((char*)phrase.c_str())) request->send(200, "text / plain", "OK");
   else request->send(404, "text / plain", "KO");  
   }
+
+String generaJsonServicios(boolean debug){
+  String cad="";
+
+  const size_t capacity = JSON_ARRAY_SIZE(5) + JSON_OBJECT_SIZE(1);
+  DynamicJsonBuffer jsonBuffer(capacity);
+
+  JsonObject& root = jsonBuffer.createObject();
+
+  JsonArray& Servicios = root.createNestedArray("datos");////Servicios
+  if(entradas.getNumEntradas()>0) Servicios.add("Entradas");
+  if(salidas.getNumSalidas()>0) Servicios.add("Salidas");
+  if(maquinaEstados.getNumEstados()>0) Servicios.add("MaquinaEstados");
+  if(secuenciador.getNumPlanes()>0) Servicios.add("Secuenciador");
+  if(variables.getNumVariables()>0) Servicios.add("Variables");  
+
+  root.printTo(cad);
+  return cad;  
+}

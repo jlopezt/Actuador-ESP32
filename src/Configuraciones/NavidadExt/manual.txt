@@ -1,0 +1,175 @@
+/*****General*****/
+  "/nombre"
+  Parametros: ninguno
+  Ejemplo: http://10.68.0.52/nombre
+  Salida:
+  {"nombreFamilia":"Actuador","nombreDispositivo":"Garaje","version":"esp32 - ver 7.0.0"}
+
+  "/restart"
+  Parametros: ninguno
+  Ejemplo: http://10.68.0.52/restart
+  Salida: ninguna
+  
+  "/info"
+  Parametros: ninguno
+  Ejemplo: http://10.68.0.52/info
+  Salida:
+  {"basica":{"uptime":"317","hora":"10:37","fecha":"03/04/2022","nivelActivo":"0"},"infoSalidas":[{"id":"0","nombre":"Pulsador","estado":0},{"id":"1","nombre":"Maq.Estados","estado":0},{"id":"2","nombre":"plan 0","estado":0},{"id":"3","nombre":"plan 1","estado":1}],"wifi":{"ssid":"BASE1","ip":"10.68.0.52","potencia":"-44"},"MQTT":{"ipBRoker":"10.68.0.101","puertoBroker":1883,"usuario":"domoticae","pasword":"88716","topicRoot":"casaPre"},"hardware":{"FreeHeap":"214880","ChipId":"1","SdkVersion":"v3.3.5-1-g85c43024c","CpuFreqMHz":"240","FlashChipSize":"4194304","FlashChipSpeed":"40000000"}}
+  
+/*****Entradas y Salidas*****/
+  "/estadoEntradas"
+  Parametros: ninguno
+  Ejemplo: http://10.68.0.52/estadoEntradas
+  Salida:
+  {"entradas":[{"id":0,"nombre":"Arriba","estado":0,"nombreEstado":"-"},{"id":1,"nombre":"Abajo","estado":0,"nombreEstado":"-"},{"id":2,"nombre":"Seta","estado":0,"nombreEstado":"-"},{"id":3,"nombre":"Celula","estado":0,"nombreEstado":"-"}]}
+
+  "/estadoSalidas"
+  Parametros: ninguno
+  Ejemplo: http://10.68.0.52/estadoSalidas
+  Salida:
+  {"salidas":[{"id":0,"nombre":"Pulsador","pin":32,"modo":"Manual","controlador":-1,"estado":0,"nombreEstado":"Apagado","anchoPulso":1000,"finPulso":0},{"id":1,"nombre":"Maq.Estados","pin":35,"modo":"MaquinaEstados","controlador":-1,"estado":0,"nombreEstado":"Apagado","anchoPulso":1000,"finPulso":0},{"id":2,"nombre":"plan 0","pin":34,"modo":"Secuenciador","controlador":1,"estado":0,"nombreEstado":"Apagado","anchoPulso":1000,"finPulso":0},{"id":3,"nombre":"plan 1","pin":33,"modo":"Secuenciador","controlador":0,"estado":1,"nombreEstado":"Encendido","anchoPulso":1000,"finPulso":0}]}
+
+  "/configEntradas"
+  Parametros: ningno
+  Ejemplo: http://10.68.0.52/configEntradas
+  Salida:
+  {"entradas":[{"id":0,"nombre":"Arriba","estado":0,"nombreEstado":"-","tipo":"INPUT","pin":23,"estadoActivo":1,"estadoFisico":0,"mensajeEstado":"--"},{"id":1,"nombre":"Abajo","estado":0,"nombreEstado":"-","tipo":"INPUT","pin":22,"estadoActivo":1,"estadoFisico":0,"mensajeEstado":"--"},{"id":2,"nombre":"Seta","estado":0,"nombreEstado":"-","tipo":"INPUT","pin":21,"estadoActivo":1,"estadoFisico":0,"mensajeEstado":"--"},{"id":3,"nombre":"Celula","estado":0,"nombreEstado":"-","tipo":"INPUT","pin":19,"estadoActivo":1,"estadoFisico":0,"mensajeEstado":"--"}]}
+
+  "/configSalidas"
+  Parametros: ninguno
+  Ejemplo: http://10.68.0.52/configSalidas
+  salida:
+  {"salidas":[{"id":0,"nombre":"Pulsador","pin":32,"modo":"Manual","controlador":-1,"estado":0,"nombreEstado":"Apagado","anchoPulso":1000,"finPulso":0,"tipo":"Digital","valorPWM":-1,"mensajeEstado":"Apagado","inicio":0},{"id":1,"nombre":"Maq.Estados","pin":35,"modo":"MaquinaEstados","controlador":-1,"estado":0,"nombreEstado":"Apagado","anchoPulso":1000,"finPulso":0,"tipo":"Digital","valorPWM":-1,"mensajeEstado":"Apagado","inicio":0},{"id":2,"nombre":"plan 0","pin":34,"modo":"Secuenciador","controlador":1,"estado":1,"nombreEstado":"Encendido","anchoPulso":1000,"finPulso":0,"tipo":"Digital","valorPWM":-1,"mensajeEstado":"Encendido","inicio":0},{"id":3,"nombre":"plan 1","pin":33,"modo":"Secuenciador","controlador":0,"estado":0,"nombreEstado":"Apagado","anchoPulso":1000,"finPulso":0,"tipo":"Digital","valorPWM":-1,"mensajeEstado":"Apagado","inicio":0}]}
+
+  "/activaSalida"
+  Parametros: Id salida
+  Ejemplo: http://10.68.0.52/activaSalida?id=0
+  Salida:
+  Salida activada
+  
+  "/desactivaSalida"
+  Parametros: Id salida
+  Ejemplo: http://10.68.0.52/desactivaSalida?id=0
+  Salida:
+  Salida desactivada
+ 
+  "/fuerzaSalidaManual"
+  Parametros: Id salida
+  Ejemplo: http://10.68.0.52/fuerzaSalidaManual?id=0
+  Salida:
+  Salida en modo manual
+  
+  "/recuperaSalidaManual"
+  Parametros: Id salida
+  Ejemplo: http://10.68.0.52/recuperaSalidaManual?id=0
+  Salida:
+  Salida en modo automatico
+  
+  "/pulsoSalida"
+  Parametros: Id salida
+  Ejemplo: http://10.68.0.52/pulsoSalida?id=0
+  Salida:
+  Pulso generado
+  
+/*****Secuenciador*****/
+  "/configSecuenciador"
+  Parametros: ninguno
+  Ejemplo: http://10.68.0.52/configSecuenciador
+  Salida:
+    {
+        "estadoInicial": 1,
+        "Planes":[
+            {
+            "nombre": "primero",
+            "salida": 3,
+            "intervalos": [
+                {"id":  0, "valor":11184810},
+                {"id":  1, "valor":5592405},
+                {"id":  2, "valor":11184810},
+                {"id":  3, "valor":5592405},
+    ----------------------------------------
+                {"id": 117, "valor":5592405},
+                {"id": 118, "valor":11184810},
+                {"id": 119, "valor":5592405}				
+                ]	
+            },
+            {
+            "nombre": "segundo",
+            "salida": 2,
+            "intervalos": [
+                {"id":  0, "valor":5592405},
+                {"id":  1, "valor":11184810},
+                {"id":  2, "valor":5592405},
+    ------------------------------------------
+                {"id":  57, "valor":11184810},
+                {"id":  58, "valor":5592405},
+                {"id":  59, "valor":11184810}
+                ]	
+            }
+        ]
+    }
+    
+  "/estadoSecuenciador"
+  Parametros: ninguno
+  Ejemplo: http://10.68.0.52/estadoSecuenciador
+  Salida:
+  {"estado":1,"planes":[{"id":0,"nombre":"primero","salida":3,"estado":1},{"id":1,"nombre":"segundo","salida":2,"estado":0}]}
+  
+  "/activaSecuenciador"
+  Parametros: ninguno
+  Ejemplo: http://10.68.0.52/activaSecuenciador
+  Salida:
+  Secuenciador activado
+  
+  "/desactivaSecuenciador"
+  Parametros: ninguno
+  Ejemplo: http://10.68.0.52/desactivaSecuenciador
+  Salida:
+  Secuenciador desactivado
+  
+/*****Maq. Estados*****/
+  "/estadoMaquinaEstados"
+  Parametros: ninguno
+  Ejemplo: http://10.68.0.52/estadoMaquinaEstados
+  Salida:
+  {"estado":"Medio","numeroEntradas":4,"numeroSalidas":1,"entradas":[{"id":0,"nombre":"Arriba","estado":0,"entradaGlobal":0},{"id":1,"nombre":"Abajo","estado":0,"entradaGlobal":1},{"id":2,"nombre":"Seta","estado":0,"entradaGlobal":2},{"id":3,"nombre":"Celula","estado":0,"entradaGlobal":3}],"salidas":[{"id":0,"nombre":"Maq.Estados","estado":0,"salidaGlobal":1}],"transiciones":[{"inicial":"Error","final":"Alarma","entradas":[-1,-1,1,-1]},{"inicial":"Error","final":"Objeto","entradas":[-1,-1,0,1]},{"inicial":"Error","final":"Abajo","entradas":[0,1,0,0]},{"inicial":"Error","final":"Arriba","entradas":[1,0,0,0]},{"inicial":"Error","final":"Medio","entradas":[0,0,0,0]},{"inicial":"Error","final":"Error","entradas":[1,1,0,0]},{"inicial":"Inicio","final":"Alarma","entradas":[-1,-1,1,-1]},{"inicial":"Inicio","final":"Objeto","entradas":[-1,-1,0,1]},{"inicial":"Inicio","final":"Abajo","entradas":[0,1,0,0]},{"inicial":"Inicio","final":"Arriba","entradas":[1,0,0,0]},{"inicial":"Inicio","final":"Medio","entradas":[0,0,0,0]},{"inicial":"Inicio","final":"Error","entradas":[1,1,0,0]},{"inicial":"Arriba","final":"Alarma","entradas":[-1,-1,1,-1]},{"inicial":"Arriba","final":"Objeto","entradas":[-1,-1,0,1]},{"inicial":"Arriba","final":"Abajo","entradas":[0,1,0,0]},{"inicial":"Arriba","final":"Arriba","entradas":[1,0,0,0]},{"inicial":"Arriba","final":"Medio","entradas":[0,0,0,0]},{"inicial":"Arriba","final":"Error","entradas":[1,1,0,0]},{"inicial":"Abajo","final":"Alarma","entradas":[-1,-1,1,-1]},{"inicial":"Abajo","final":"Objeto","entradas":[-1,-1,0,1]},{"inicial":"Abajo","final":"Abajo","entradas":[0,1,0,0]},{"inicial":"Abajo","final":"Arriba","entradas":[1,0,0,0]},{"inicial":"Abajo","final":"Medio","entradas":[0,0,0,0]},{"inicial":"Abajo","final":"Error","entradas":[1,1,0,0]},{"inicial":"Medio","final":"Alarma","entradas":[-1,-1,1,-1]},{"inicial":"Medio","final":"Objeto","entradas":[-1,-1,0,1]},{"inicial":"Medio","final":"Abajo","entradas":[0,1,0,0]},{"inicial":"Medio","final":"Arriba","entradas":[1,0,0,0]},{"inicial":"Medio","final":"Medio","entradas":[0,0,0,0]},{"inicial":"Medio","final":"Error","entradas":[1,1,0,0]},{"inicial":"Alarma","final":"Alarma","entradas":[-1,-1,1,-1]},{"inicial":"Alarma","final":"Objeto","entradas":[-1,-1,0,1]},{"inicial":"Alarma","final":"Abajo","entradas":[0,1,0,0]},{"inicial":"Alarma","final":"Arriba","entradas":[1,0,0,0]},{"inicial":"Alarma","final":"Medio","entradas":[0,0,0,0]},{"inicial":"Alarma","final":"Error","entradas":[1,1,0,0]},{"inicial":"Objeto","final":"Alarma","entradas":[-1,-1,1,-1]},{"inicial":"Objeto","final":"Objeto","entradas":[-1,-1,0,1]},{"inicial":"Objeto","final":"Abajo","entradas":[0,1,0,0]},{"inicial":"Objeto","final":"Arriba","entradas":[1,0,0,0]},{"inicial":"Objeto","final":"Medio","entradas":[0,0,0,0]},{"inicial":"Objeto","final":"Error","entradas":[1,1,0,0]}]}
+  
+/*****Ficheros*****/
+  "/listaFicheros"
+  Parametros: ninguno
+  Ejemplo: http://10.68.0.52/listaFicheros
+  Salida:
+  {"padre":"/","subdirectorios":["www"],"ficheros":[{"nombre":"SecuenciadorConfig.json","tamano":6283,"fechaEdicion":"01-01-1970 00:59:59"},{"nombre":"ca.crt","tamano":1440,"fechaEdicion":"01-01-1970 00:59:59"},{"nombre":"Config.json","tamano":56,"fechaEdicion":"01-01-1970 00:59:59"},{"nombre":"MQTTConfig.json","tamano":375,"fechaEdicion":"01-01-1970 00:59:59"},{"nombre":"EntradasConfig.json","tamano":1161,"fechaEdicion":"01-01-1970 00:59:59"},{"nombre":"GHNConfig.json","tamano":81,"fechaEdicion":"01-01-1970 00:59:59"},{"nombre":"MaqEstadosConfig.json","tamano":2602,"fechaEdicion":"01-01-1970 00:59:59"},{"nombre":"WiFiConfig.json","tamano":227,"fechaEdicion":"02-04-2022 11:28:51"},{"nombre":"Errores.log","tamano":663,"fechaEdicion":"03-04-2022 10:31:56"},{"nombre":"SalidasConfig.json","tamano":1757,"fechaEdicion":"01-01-1970 00:59:59"}]}
+  
+  "/creaFichero"
+  Parametros: nombre, contenido
+  Ejemplo: http://10.68.0.52/creaFichero?nombre=/miFichero.txt&contenido=este es el contenido del fichero
+  Salida:
+  Fichero creado
+  
+  "/borraFichero"
+  Parametros: nombre
+  Ejemplo: http://10.68.0.52/borraFichero?nombre=/miFichero.txt
+  Salida:
+  Fichero borrado
+  
+  "/leeFichero"
+  Parametros: nombre
+  Ejemplo: http://10.68.0.52/leeFichero?nombre=/miFichero.txt
+  Salida:
+  [Contenido del fichero]
+  
+/*****Particiones*****/
+  "/particiones"
+  Parametros:
+  Ejemplo: http://10.68.0.52/particiones
+  Salida:
+  {"particionEjecucion":"app0","particionProximoArranque":"app0","particionProximoUpdate":"app1","particiones":[{"nombre":"app0","tipo":"app","subtipo":"ota_16","direccion":"65536","tamano":"1310720","encriptado":"No"},{"nombre":"app1","tipo":"app","subtipo":"ota_17","direccion":"1376256","tamano":"1310720","encriptado":"No"}]}
+  
+  "/setNextBoot"
+  Parametros: p (nombre de la particion)
+  Ejemplo: http://10.68.0.52/setNextBoot?p=app0
+  Salida:
+  particion activada
+  
+

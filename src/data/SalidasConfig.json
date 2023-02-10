@@ -60,11 +60,11 @@
       "modo": 0,
       "controlador": 0,
       "Estados": [
-        {"valor": 0, "texto": ""},
+        {"valor": 0, "texto": "No se"},
         {"valor": 1, "texto": "Pulsado"}
       ],
       "Mensajes": [
-        {"valor": 0, "texto": ""},
+        {"valor": 0, "texto": "No se que poner"},
         {"valor": 1, "texto": "Boton pulsado"}
       ]
     }

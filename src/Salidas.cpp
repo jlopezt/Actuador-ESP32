@@ -274,7 +274,7 @@ String Salidas::generaJsonEstado(boolean filtro){
   
   JsonObject& root = jsonBuffer.createObject();
   
-  JsonArray& Salidas = root.createNestedArray("salidas");
+  JsonArray& Salidas = root.createNestedArray("datos");////salidas
   for(int8_t id=0;id<numeroSalidas;id++){
 
     JsonObject& Salidas_0 = Salidas.createNestedObject();

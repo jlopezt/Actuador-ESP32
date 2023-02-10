@@ -20,6 +20,7 @@
 #include <Global.h>
 #include <RedWifi.h>
 #include <Ficheros.h>
+#include <configNVS.h>
 
 //needed for library
 #include <WiFi.h> 
@@ -49,6 +50,7 @@ boolean conectaAutodetect(boolean debug);
 boolean parseaConfiguracionWifi(String contenido);
 boolean recuperaDatosWiFi(boolean debug);
 
+void printDiag(Print& p);//Copiada de la libreria WiFi.cpp para no mostrar la pass del wifi en las trazas
 /************************************************************************************/
 boolean inicializamDNS(const char *nombre)
   {  
@@ -69,7 +71,7 @@ boolean inicializamDNS(const char *nombre)
   return false;    
   }  
 
-void salvaConfiguracion(void)
+void salvaConfiguracionWiFi(void)
   {
   String cad="";
   
@@ -91,7 +93,6 @@ void salvaConfiguracion(void)
 boolean recuperaDatosWiFi(boolean debug)
   {
   String cad="";
-  if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
 
   //cargo el valores por defecto
   wifiIP=IPAddress(0,0,0,0);
@@ -100,14 +101,22 @@ boolean recuperaDatosWiFi(boolean debug)
   wifiDNS1=IPAddress(0,0,0,0);
   wifiDNS2=IPAddress(0,0,0,0);
   mDNS=NOMBRE_mDNS_CONFIG;
+
+  //Recupero datos del archivo    
+  if (debug) Traza.mensaje("Recupero configuracion de archivo...\n");
   
   if(!leeFichero(WIFI_CONFIG_FILE, cad)) 
     {
     //Confgiguracion por defecto
-    Traza.mensaje("No existe fichero de configuracion WiFi o no es valido\n");
-    //cad="{\"wifi\": [ {\"ssid\": \"BASE0\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE1\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE2\" ,\"password\": \"11223344556677889900abcdef\"}, {\"ssid\": \"BASE-1\",\"password\": \"11223344556677889900abcdef\"}]}";
-    //cad="{\"mDNS\":\"actuador\",\"wifiIP\":\"0.0.0.0\",   \"wifiGW\":\"0.0.0.0\",  \"wifiNet\": \"0.0.0.0\",   \"wifiDNS1\":\"0.0.0.0\",\"wifiDNS2\":\"0.0.0.0\",\"wifi\": []}";
-    //if(salvaFichero(WIFI_CONFIG_FILE, WIFI_CONFIG_BAK_FILE, cad)) Traza.mensaje("Fichero de configuracion WiFi creado por defecto\n");
+    Traza.mensaje("No existe fichero de configuracion WiFi o no es valido\nIntentando configuracion NVS\n");
+
+    if(configNVS.SSID!=String("")) {
+      Serial.printf("Encontrada configuracion WiFi en NVS\n");
+      MiWiFiMulti.addAP(configNVS.SSID.c_str() , configNVS.pass.c_str());
+      mDNS=configNVS.nombremDNS;
+      return true;
+    }
+    else return false;
     }
 
   return(parseaConfiguracionWifi(cad));
@@ -117,13 +126,12 @@ boolean recuperaDatosWiFi(boolean debug)
 /* Parsea el json leido del fichero de       */
 /* configuracio Wifi                         */
 /*********************************************/
-boolean parseaConfiguracionWifi(String contenido)
-  {  
+boolean parseaConfiguracionWifi(String contenido){  
   DynamicJsonBuffer jsonBuffer;
   JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
-  if (json.success()) 
-    {
-    Traza.mensaje("\nparsed json\n");
+
+  if (json.success()){
+    Serial.printf("\nparsed json\n");
 //******************************Parte especifica del json a leer********************************
     if (json.containsKey("wifiIP")) wifiIP.fromString((const char *)json["wifiIP"]); 
     if (json.containsKey("wifiGW")) wifiGW.fromString((const char *)json["wifiGW"]);
@@ -132,25 +140,34 @@ boolean parseaConfiguracionWifi(String contenido)
     if (json.containsKey("wifiDNS2")) wifiDNS2.fromString((const char *)json["wifiDNS2"]);
     if (json.containsKey("mDNS")) mDNS=String((const char *)json["mDNS"]);
     
-    Traza.mensaje("Configuracion leida:\nmDNS: %s\nIP actuador: %s\nIP Gateway: %s\nIPSubred: %s\nIP DNS1: %s\nIP DNS2: %s\n",mDNS.c_str(),wifiIP.toString().c_str(),wifiGW.toString().c_str(),wifiNet.toString().c_str(),wifiDNS1.toString().c_str(),wifiDNS2.toString().c_str());    
+    Serial.printf("Configuracion leida:\nmDNS: %s\nIP actuador: %s\nIP Gateway: %s\nIPSubred: %s\nIP DNS1: %s\nIP DNS2: %s\n",mDNS.c_str(),wifiIP.toString().c_str(),wifiGW.toString().c_str(),wifiNet.toString().c_str(),wifiDNS1.toString().c_str(),wifiDNS2.toString().c_str());    
 
-    if (!json.containsKey("wifi")) return false;
-    
     JsonArray& wifi = json["wifi"];
-    if(wifi.size()==0) return false;
-        
-    for(uint8_t i=0;i<wifi.size();i++)
-      {
+    //if(wifi.size()==0 && configNVS.SSID==String("")) return false;
+    if(wifi.size()==0){
+      //Si hay datos NVS, los cargo
+      Traza.mensaje("Recupero configuracion de configNVS...\n");
+
+      if(configNVS.SSID!=String("")) {
+        Serial.printf("Encontrada configuracion WiFi en NVS\n");
+        MiWiFiMulti.addAP(configNVS.SSID.c_str() , configNVS.pass.c_str());
+        mDNS=configNVS.nombremDNS;
+        return true;
+      }
+      else return false;
+    }
+
+    for(uint8_t i=0;i<wifi.size();i++){
       const char* wifi_ssid = wifi[i]["ssid"];
       const char* wifi_password = wifi[i]["password"];
       MiWiFiMulti.addAP(wifi_ssid , wifi_password);
-      Traza.mensaje("Red *%s* añadida.\n",wifi_ssid);
-      }//del for
+      Serial.printf("Red *%s* añadida.\n",wifi_ssid);
+    }//del for
 //************************************************************************************************
     return true;
-    }
-  return false;
   }
+  return false;
+}
 
 boolean inicializaWifi(boolean debug)
   {
@@ -179,12 +196,13 @@ boolean inicializaWifi(boolean debug)
     if (conectaMultibase(debug))
     //if (MiWiFiMulti.run(TIME_OUT)==WL_CONNECTED) 
       {
-      //Inicializo mDNS para localizar el dispositivo
-      inicializamDNS(nombre_dispositivo.c_str());
+      //Inicializo mDNS para localizar el dispositivo      
+      inicializamDNS(configNVS.nombreServicio.c_str());
   
       Traza.mensaje("------------------------WiFi conectada (configuracion almacenada)--------------------------------------\n");
-      Traza.mensaje("WiFi conectada. IP: %s\n",WiFi.localIP().toString().c_str());
-      WiFi.printDiag(Serial);
+      Traza.mensaje("IP: %s\n", WiFi.localIP().toString().c_str());
+      //WiFi.printDiag(Serial);
+      printDiag(Serial);
       Traza.mensaje("-------------------------------------------------------------------------------------------------------\n");
 
       return true;
@@ -194,9 +212,10 @@ boolean inicializaWifi(boolean debug)
   Traza.mensaje("Conectando autodetect\n");
   if (conectaAutodetect(debug))
     {
-    Traza.mensaje("------------------------WiFi conectada(autodetect)--------------------------------------\n");
+    Traza.mensaje("------------------------WiFi conectada (autodetect)--------------------------------------\n");
     Traza.mensaje("WiFi conectada. IP: %s\n",WiFi.localIP().toString().c_str());
-    WiFi.printDiag(Serial);
+    //WiFi.printDiag(Serial);
+    printDiag(Serial);
     Traza.mensaje("----------------------------------------------------------------------------------------\n");
 
     return true;
@@ -213,7 +232,14 @@ boolean conectaAutodetect(boolean debug)
   AsyncWiFiManager wifiManager(&server,&dns);
 
   Traza.mensaje("\n Entrando...\n");
-  
+
+  //Nombre dispositivo
+  AsyncWiFiManagerParameter dispositivoParametro("Dispositivo","Dispositivo",configNVS.nombreServicio.c_str(),15+1);//,"Nombre del dispositivo");
+  wifiManager.addParameter(&dispositivoParametro);  
+  //Usurio de la plataforma
+  AsyncWiFiManagerParameter usuarioParametro("Usuario","Usuario",configNVS.usuario.c_str(),15+1);//,"Nombre del dispositivo");
+  wifiManager.addParameter(&usuarioParametro);  
+
   //IP
   AsyncWiFiManagerParameter IPParametro("IP","IP",wifiIP.toString().c_str(),15+1);//,"Nombre del dispositivo");
   wifiManager.addParameter(&IPParametro);
@@ -255,10 +281,21 @@ boolean conectaAutodetect(boolean debug)
     wifiNet.fromString(String(SubnetParametro.getValue()));
     wifiDNS1.fromString(String(DNS1Parametro.getValue()));
     wifiDNS2.fromString(String(DNS2Parametro.getValue()));
-    mDNS=String(mDNSParametro.getValue()); //Serial.printf("longitud mDNS: %i\n",mDNSParametro.getValueLength());
-    Traza.mensaje("Datos leidos del portal: \n IP fija-> %s\n GW-> %s\n subnet-> %s\n DNS1-> %s\n DNS2-> %s\n",wifiIP.toString().c_str(), wifiGW.toString().c_str(), wifiNet.toString().c_str(), wifiDNS1.toString().c_str(), wifiDNS2.toString().c_str());
+    Traza.mensaje("Datos leidos del portal: \n IP fija-> %s\n GW-> %s\n subnet-> %s\n DNS1-> %s\n DNS2-> %s\n",wifiIP.toString().c_str(), wifiGW.toString().c_str(), wifiNet.toString().c_str(), wifiDNS1.toString().c_str(), wifiDNS2.toString().c_str());  
+    salvaConfiguracionWiFi();
 
-    salvaConfiguracion();
+    configNVS_t c;
+    c.deviceID=ESP.getEfuseMac();
+    c.nombreServicio=String(dispositivoParametro.getValue());
+    c.usuario=String(usuarioParametro.getValue());  
+    c.SSID=WiFi.SSID();
+    c.pass=WiFi.psk();
+    c.nombremDNS=String(mDNSParametro.getValue()); //Serial.printf("longitud mDNS: %i\n",mDNSParametro.getValueLength());
+    c.contrasena="";//Se rellena en la funcion de escribir en NVS
+
+    Serial.printf("Datos a salvar en NVS: \n Device ID: %016llx\n nombremDNS: %s\nSSID: %s\n pass (***...%s)\nusuario: %s\n",c.deviceID,c.nombremDNS.c_str(),c.SSID.c_str(),c.pass.substring(c.pass.length()-4).c_str(),c.usuario.c_str());
+    escribeConfigNVS(c);
+
     Traza.mensaje("Configuracion finalizada correctamente.\n Reinciando...\n");
     }
   
@@ -312,8 +349,7 @@ void WifiWD(void) {if(WiFi.status() != WL_CONNECTED) ESP.restart();}
 /**********************************************************************/
 /* Salva la configuracion de las bases wifi conectada en formato json */
 /**********************************************************************/  
-String generaJsonConfiguracionWifi(String configActual, String ssid, String password)
-  {
+String generaJsonConfiguracionWifi(String configActual, String ssid, String password){
   boolean nuevo=true;
   String salida="";
 
@@ -336,12 +372,14 @@ String generaJsonConfiguracionWifi(String configActual, String ssid, String pass
   strcpy(cadDNS1,wifiDNS1.toString().c_str());
   strcpy(cadDNS2,wifiDNS2.toString().c_str());    
 
-  nuevoJson["mDNS"] = mDNS.c_str(); 
+
   nuevoJson["wifiIP"] = cadIp; 
   nuevoJson["wifiGW"] = cadGw; 
   nuevoJson["wifiNet"] = cadNet; 
   nuevoJson["wifiDNS1"] = cadDNS1; 
   nuevoJson["wifiDNS2"] = cadDNS2; 
+/*
+  nuevoJson["mDNS"] = mDNS.c_str(); 
 
   JsonArray& nuevoWifi=nuevoJson.createNestedArray("wifi");
   
@@ -353,56 +391,104 @@ String generaJsonConfiguracionWifi(String configActual, String ssid, String pass
   json.printTo(temp);//pinto el json que he leido
   Traza.mensaje("json creado:\n#%s#\n",temp.c_str());
 
-  if (json.success()) 
-    {
+  if (json.success()){
     Traza.mensaje("\nparsed json\n");   
-/************************/
+    //************************
     JsonArray& wifi=(json.containsKey("wifi")?json["wifi"]:json.createNestedArray("wifi"));//parseo del fichero que he leido
 
-    for(uint8_t i=0;i<wifi.size();i++)
-      {
-      if(strcmp(wifi[i]["ssid"],"NONE")) //Si la base no es NONE que es la que pongo cuando no hay fichero
-        {
+    for(uint8_t i=0;i<wifi.size();i++){
+      if(strcmp(wifi[i]["ssid"],"NONE")){ //Si la base no es NONE que es la que pongo cuando no hay fichero
         //Comparo el que he leido del json con el que acabao de usar para conectar
-        if (!strcmp(wifi[i]["ssid"],ssid.c_str())) //si ya existe actualizo la password
-          {
+        if (!strcmp(wifi[i]["ssid"],ssid.c_str())){ //si ya existe actualizo la password
           wifi[i]["password"] = password; //si son iguales guardo la password nueva
           Traza.mensaje("Se ha modificado la pass de %s\n",(const char *)wifi[i]["ssid"]);
           nuevo=false;//no es nuevo, ya he guardado el que acabo de usar
           break;
-          }        
         }
-      }//del for
+      }
+    }//del for
 
     //si es nuevo, lo añado al nuevo
-    if(nuevo==true)
-      {
+    if(nuevo==true){
       JsonObject& elemento = nuevoWifi.createNestedObject();
       elemento["ssid"] = ssid;
       elemento["password"] = password;
       Traza.mensaje("Red %s añadida\n",ssid.c_str());
-      }
+    }
 
     //Copio del viejo al nuevo
-    for(uint8_t i=0;i<wifi.size();i++)
-      {
+    for(uint8_t i=0;i<wifi.size();i++){
       JsonObject& elemento = nuevoWifi.createNestedObject();
       elemento["ssid"] = wifi[i]["ssid"];
       elemento["password"] = wifi[i]["password"];
       Traza.mensaje("Red %s copiada al nuevo fichero\n",elemento.get<const char*>("ssid"));    
-      }      
-    }//la de parsear el json
-  else//si no pude parsear el original, añado al nuevo la red configurada
-    {
+    }
+  }//la de parsear el json
+  else{ //si no pude parsear el original, añado al nuevo la red configurada
     JsonObject& elemento = nuevoWifi.createNestedObject();
     elemento["ssid"] = ssid;
     elemento["password"] = password;
     Traza.mensaje("Red %s creada en el nuevo fichero\n",ssid);     
-    }
+  }
 
-/************************/
+  //************************
+*/
   nuevoJson.printTo(salida);//pinto el json que he creado
   Traza.mensaje("json creado:\n#%s#\n",salida.c_str());
 
   return salida;  
-  }
+}
+
+#include <esp_wifi.h>
+/**
+ * Output WiFi settings to an object derived from Print interface (like Serial).
+ * @param p Print interface
+ */
+void printDiag(Print& p)
+{
+    const char* modes[] = { "NULL", "STA", "AP", "STA+AP" };
+
+    wifi_mode_t mode;
+    esp_wifi_get_mode(&mode);
+
+    uint8_t primaryChan;
+    wifi_second_chan_t secondChan;
+    esp_wifi_get_channel(&primaryChan, &secondChan);
+
+    p.print("Mode: ");
+    p.println(modes[mode]);
+
+    p.print("Channel: ");
+    p.println(primaryChan);
+    /*
+        p.print("AP id: ");
+        p.println(wifi_station_get_current_ap_id());
+
+        p.print("Status: ");
+        p.println(wifi_station_get_connect_status());
+    */
+
+    wifi_config_t conf;
+    esp_wifi_get_config((wifi_interface_t)WIFI_IF_STA, &conf);
+
+    const char* ssid = reinterpret_cast<const char*>(conf.sta.ssid);
+    p.print("SSID (");
+    p.print(strlen(ssid));
+    p.print("): ");
+    p.println(ssid);
+
+    const char* passphrase = reinterpret_cast<const char*>(conf.sta.password);
+    size_t lenPass=strlen(passphrase);
+    p.print("Passphrase (");
+    p.print(lenPass);
+    p.print("): ");
+    for(uint8_t i=0;i<lenPass;i++){
+      if(i<lenPass-3) p.print("*");
+      else p.print(passphrase[i]);
+    }
+    p.println("");
+    //p.println(passphrase);
+
+    p.print("BSSID set: ");
+    p.println(conf.sta.bssid_set);
+}

@@ -189,7 +189,7 @@ String Secuenciador::generaJsonEstado(void){
   if(activado) root["estado"] = 1;
   else root["estado"]=0;
 
-  JsonArray& _planes = root.createNestedArray("planes");
+  JsonArray& _planes = root.createNestedArray("datos");////Planes
   for(int8_t id=0;id<numeroPlanes;id++){
     JsonObject& _plan = _planes.createNestedObject(); 
     _plan["id"] = id;

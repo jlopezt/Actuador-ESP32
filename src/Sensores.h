@@ -37,6 +37,7 @@ class Sensores{
 
         //get
         int getNumSensores(void){return numeroSensores;}//Devuelve el numero de sensores configurados
+        Sensor* getSensor(String nombre);
 
         //set
         void lee(boolean debug=false);//Lee el estado de los sensores

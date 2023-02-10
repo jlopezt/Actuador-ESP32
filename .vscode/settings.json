@@ -1,3 +1,7 @@
 {
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "githubPullRequests.ignoredPullRequestBranches": [
+        "desarrollo"
+    ],
+    "idf.portWin": "COM11"
 }
