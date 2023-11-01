@@ -27,7 +27,7 @@
                 "c:/Users/jlopezt/Documents/PlatformIO/Projects/Actuador-ESP32/lib/WebSockets/src",
                 "C:/Users/jlopezt/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
                 "C:/Users/jlopezt/.platformio/packages/framework-arduinoespressif32/libraries/Ethernet/src",
-                "c:/Users/jlopezt/Documents/PlatformIO/Projects/Actuador-ESP32/lib/ArduinoJson/src",
+                "c:/Users/jlopezt/Documents/PlatformIO/Projects/Actuador-ESP32/lib/ArduinoJson-6.20.1/src",
                 "c:/Users/jlopezt/Documents/PlatformIO/Projects/Actuador-ESP32/lib/ESPAsyncWiFiManager/src",
                 "c:/Users/jlopezt/Documents/PlatformIO/Projects/Actuador-ESP32/lib/ESPAsyncWebServer/src",
                 "c:/Users/jlopezt/Documents/PlatformIO/Projects/Actuador-ESP32/lib/ArduinoMD5",
@@ -276,7 +276,7 @@
                     "c:/Users/jlopezt/Documents/PlatformIO/Projects/Actuador-ESP32/lib/WebSockets/src",
                     "C:/Users/jlopezt/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
                     "C:/Users/jlopezt/.platformio/packages/framework-arduinoespressif32/libraries/Ethernet/src",
-                    "c:/Users/jlopezt/Documents/PlatformIO/Projects/Actuador-ESP32/lib/ArduinoJson/src",
+                    "c:/Users/jlopezt/Documents/PlatformIO/Projects/Actuador-ESP32/lib/ArduinoJson-6.20.1/src",
                     "c:/Users/jlopezt/Documents/PlatformIO/Projects/Actuador-ESP32/lib/ESPAsyncWiFiManager/src",
                     "c:/Users/jlopezt/Documents/PlatformIO/Projects/Actuador-ESP32/lib/ESPAsyncWebServer/src",
                     "c:/Users/jlopezt/Documents/PlatformIO/Projects/Actuador-ESP32/lib/ArduinoMD5",
@@ -505,7 +505,7 @@
                 ]
             },
             "defines": [
-                "PLATFORMIO=60106",
+                "PLATFORMIO=60111",
                 "ARDUINO_ESP32_DEV",
                 "HAVE_CONFIG_H",
                 "MBEDTLS_CONFIG_FILE=\"mbedtls/esp_config.h\"",
@@ -524,8 +524,8 @@
                 "ARDUINO_PARTITION_SimetricoOTAySPIFFS",
                 ""
             ],
-            "cStandard": "c99",
-            "cppStandard": "c++11",
+            "cStandard": "gnu99",
+            "cppStandard": "gnu++11",
             "compilerPath": "C:/Users/jlopezt/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-gcc.exe",
             "compilerArgs": [
                 "-mlongcalls",

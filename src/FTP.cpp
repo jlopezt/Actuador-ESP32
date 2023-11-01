@@ -65,17 +65,20 @@ boolean recuperaDatosFTP(boolean debug)
 /*********************************************/
 boolean parseaConfiguracionFTP(String contenido)
   { 
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,contenido);
   
-  json.printTo(Serial);
-  if (!json.success()) return false;
+  serializeJsonPretty(doc,Serial);
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
         
   Serial.println("parsed json");
 //******************************Parte especifica del json a leer********************************
   //const char *user=(const char *)json["Usuario"];
-  if (json.containsKey("Usuario")) usuarioFTP=String((const char *)json["Usuario"]);
-  if (json.containsKey("Password")) passwordFTP=String((const char *)json["Password"]);
+  if (doc.containsKey("Usuario")) usuarioFTP=doc["Usuario"].as<String>();
+  if (doc.containsKey("Password")) passwordFTP=doc["Password"].as<String>();
 
   Serial.printf("FTP:\nUsuario: %s\nPassword: %s\n",usuarioFTP.c_str(),passwordFTP.c_str()); 
 //************************************************************************************************

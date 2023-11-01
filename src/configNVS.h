@@ -28,8 +28,8 @@ typedef struct valoresNVS{
 /***************************** Prototipos *****************************/
 void inicializaNVS(void);
 boolean leeConfigNVS(configNVS_t *c);
-void escribeConfigNVS(configNVS_t c);
-void escribeConfigNVSDefecto(void);
+int escribeConfigNVS(configNVS_t c);
+int escribeConfigNVSDefecto(void);
 
 String calculaContrasena(configNVS_t c);
 

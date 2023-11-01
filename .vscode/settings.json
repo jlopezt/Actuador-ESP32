@@ -3,5 +3,9 @@
     "githubPullRequests.ignoredPullRequestBranches": [
         "desarrollo"
     ],
-    "idf.portWin": "COM11"
+    "idf.portWin": "COM7",
+    "idf.customExtraVars": {
+        "OPENOCD_SCRIPTS": "C:\\Users\\jlopezt\\.espressif\\tools\\openocd-esp32\\v0.11.0-esp32-20211220/openocd-esp32/share/openocd/scripts",
+        "IDF_CCACHE_ENABLE": "1"
+    }
 }

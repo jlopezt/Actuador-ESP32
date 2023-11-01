@@ -193,22 +193,21 @@ String listaParticiones(void)
   
   esp_partition_iterator_t iterador=esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, NULL); //omito el nombre para sacar todas
 
-  const size_t capacity = 1*JSON_ARRAY_SIZE(15) + JSON_OBJECT_SIZE(25);
-  DynamicJsonBuffer jsonBuffer(capacity);
+  DynamicJsonDocument doc(512);
 
-  JsonObject& json = jsonBuffer.createObject();
+  //JsonObject& json = jsonBuffer.createObject();
   
-  json["particionEjecucion"] = getParticionEjecucion();
-  json["particionProximoArranque"] = getParticionProximoArranque();
-  json["particionProximoUpdate"] = getParticionProximoUpdate();
+  doc["particionEjecucion"] = getParticionEjecucion();
+  doc["particionProximoArranque"] = getParticionProximoArranque();
+  doc["particionProximoUpdate"] = getParticionProximoUpdate();
 
-  JsonArray& particiones = json.createNestedArray("particiones");
+  JsonArray particiones = doc.createNestedArray("particiones");
 
   while(iterador!=NULL)
     {
     particion=esp_partition_get(iterador);
 
-    JsonObject& particionNueva = particiones.createNestedObject();
+    JsonObject particionNueva = particiones.createNestedObject();
     particionNueva["nombre"] = String(particion->label);      
     //tipo
     if(particion->type==0) particionNueva["tipo"] = "app"; 
@@ -227,6 +226,6 @@ String listaParticiones(void)
     iterador=esp_partition_next(iterador);
     }
 
-  json.printTo(salida);
+  serializeJsonPretty(doc,salida);
   return (salida);
   }

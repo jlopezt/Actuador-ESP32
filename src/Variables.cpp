@@ -71,25 +71,30 @@ boolean Variables::recuperaDatos(boolean debug)
 /* configuracio de sensores                  */
 /*********************************************/
 boolean Variables::parseaConfiguracion(String contenido){  
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(contenido.c_str());
+  DynamicJsonDocument doc(2048);
+  DeserializationError err = deserializeJson(doc,contenido);
   //json.printTo(Serial);
-  if (root.success()){
+
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
+  else{
     Serial.println("parsed json");
 //******************************Parte especifica del json a leer********************************
 
-    if(root.containsKey("Variables")){
-      JsonArray& VariablesJson = root["Variables"];
+    if(doc.containsKey("Variables")){
+      JsonArray VariablesJson = doc["Variables"];
     
       numeroVariables=VariablesJson.size();      
     
       for(uint8_t i=0;i<numeroVariables;i++){//For para las variables
-        JsonObject& VariablesJsonVariable = VariablesJson[i];
+        JsonObject VariablesJsonVariable = VariablesJson[i];
 
         Variable* p=(Variable*) new Variable(VariablesJsonVariable);
 
         if(p==NULL) {
-          Serial.printf("Error al asignar memoria a la variable %s\n", VariablesJsonVariable.get<String>("nombre").c_str());
+          Serial.printf("Error al asignar memoria a la variable %s\n", VariablesJsonVariable["nombre"].as<String>().c_str());
           return false;
         }
 
@@ -201,22 +206,18 @@ String Variables::generaJsonEstado(boolean debug){
   Variable* p=pCabeza;
   String salida="";
 
-  const size_t capacity = JSON_ARRAY_SIZE(numeroVariables) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(2) + 3*JSON_OBJECT_SIZE(3);
-  DynamicJsonBuffer jsonBuffer(capacity);
-
-  JsonObject& root = jsonBuffer.createObject();
-
-  JsonArray& variablesJson = root.createNestedArray("datos");////Variables
+  DynamicJsonDocument doc(2*1024);
+  JsonArray variablesJson = doc.createNestedArray("datos");////Variables
 
   while(p!=NULL){
     //Serial.printf("recuperando valores de  %s\n",p->getNombre().c_str());
-    JsonObject& variableJson = variablesJson.createNestedObject();
+    JsonObject variableJson = variablesJson.createNestedObject();
     p->generaJsonEstado(variableJson);
 
     p=p->getSiguiente();
   }
 
-  root.printTo(salida);
+  serializeJsonPretty(doc,salida);
   //Serial.printf("%s\n",salida.c_str());
   return salida;   
 }
@@ -233,11 +234,11 @@ Variable::Variable(JsonObject& _config){
   String _tipo=""; 
 
   Serial.printf("********************************************************\n");
-  _nombre=_config.get<String>("nombre");
-  _unidades=_config.get<String>("unidades");
-  _descripcion=_config.get<String>("descripcion");
-  _sensor=_config.get<String>("sensor");
-  _tipo=_config.get<String>("tipo");
+  _nombre=_config["nombre"].as<String>();
+  _unidades=_config["unidades"].as<String>();
+  _descripcion=_config["descripcion"].as<String>();
+  _sensor=_config["sensor"].as<String>();
+  _tipo=_config["tipo"].as<String>();
   Serial.printf("Valores parseados del JSON: nombre: %s | nombre: %s | descripcion: %s | sensor: %s | tipo: [%s]\n",_nombre.c_str(),_unidades.c_str(),_descripcion.c_str(),_sensor.c_str(),_tipo.c_str());
 Serial.println("Tipo: [" + _tipo + "]");
 
@@ -263,16 +264,16 @@ Serial.println("Tipo: [" + _tipo + "]");
 
   //Cargo los humbrales
   if(_config.containsKey("Humbrales")){
-    JsonArray& HumbralesJson = _config["Humbrales"];
+    JsonArray HumbralesJson = _config["Humbrales"];
 
     numeroHumbrales=HumbralesJson.size();
 
     for(uint8_t i=0;i<numeroHumbrales;i++){//For para los humbrales de una variable
-      JsonObject& humbralJson = HumbralesJson[i];
+      JsonObject humbralJson = HumbralesJson[i];
 
       Humbral* q=(Humbral*) new Humbral(humbralJson);
       if(q==NULL) {
-        Serial.printf("Error al asignar memoria a la variable %s\n", humbralJson.get<String>("nombre").c_str());
+        Serial.printf("Error al asignar memoria a la variable %s\n", humbralJson["nombre"].as<String>().c_str());
         return;
         }   
 
@@ -311,18 +312,18 @@ String Variable::generaJsonEstado(JsonObject& root){
   root["valor"] = valor;
   root["unidades"]=unidades;
 
-  JsonArray& humbralesJson = root.createNestedArray("Humbrales");
+  JsonArray humbralesJson = root.createNestedArray("Humbrales");
 
   Humbral* pMovil=pHumbral;
   while(pMovil!=NULL){
-    JsonObject& humbralJson = humbralesJson.createNestedObject();
+    JsonObject humbralJson = humbralesJson.createNestedObject();
 
     pMovil->generaJsonEstado(humbralJson);
     pMovil=pMovil->getSiguiente();
   }
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
@@ -330,10 +331,10 @@ String Variable::generaJsonEstado(JsonObject& root){
 
 /************************************Humbral**********************************************/
 Humbral::Humbral(JsonObject& _config){
-  String _nombre=_config.get<String>("nombre");
-  String _tipo=_config.get<String>("tipo");
-  float _valor=_config.get<float>("valor");
-  String _mensaje=_config.get<String>("mensaje");
+  String _nombre=_config["nombre"].as<String>();
+  String _tipo=_config["tipo"].as<String>();
+  float _valor=_config["valor"].as<float>();
+  String _mensaje=_config["mensaje"].as<String>();
 
   nombre=_nombre;  
   if(_tipo.equals("superior")) tipo=TIPO_VALOR_ES_SUPERIOR;
@@ -354,7 +355,7 @@ String Humbral::generaJsonEstado(JsonObject& root){
   root["mensaje"]=mensaje;
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   //Serial.printf("%s\n",salida.c_str());
   return salida;  
 };

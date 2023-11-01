@@ -14,23 +14,25 @@ void inicializaPlataforma(boolean debug){
         return;
     }
 
-    if(testHTTP()==200){
+    int test_result=testHTTP();
+    if(test_result==200){
         int ret=asocia();
         Serial.printf("Resultado de la asociacion: %i\n",ret);
     }
+    else Serial.printf("Test plataforma KO: %i\n",test_result);
 }
 
 int asocia(void){
     char DID[17]="";
     sprintf(DID,"%016llx",configNVS.deviceID);
-    String URL=String(URL_PLATAFORMA) + "/asocia/" + configNVS.usuario + "/" + String(DID) + "?nombreServicio=" + configNVS.nombreServicio;
+    String URL=URLPlataforma + "/asocia/" + configNVS.usuario + "/" + String(DID) + "?nombreServicio=" + configNVS.nombreServicio;
     
     return enviaDatosHTTP(URL,"",METODO_POST);
 }
 
 int testHTTP(){    
-    String URL=String(URL_PLATAFORMA) + "/test";
-    
+    String URL=URLPlataforma + "/test";
+    Serial.printf("URL de la plataforma: %s\n",URL.c_str());
     return enviaDatosHTTP(URL,"",METODO_POST);
 }
 
@@ -79,7 +81,7 @@ boolean enviaFicheroConfig(String fichero){
     if(file.startsWith("/")) file.remove(0,1);//Si tiene barra al principio la quito
     file=file.substring(0,file.indexOf('.'));
 
-    String URL=String(URL_PLATAFORMA) + "/configuracion/" + configNVS.usuario + "/" + configNVS.nombreServicio + "/" + file;
+    String URL=URLPlataforma + "/configuracion/" + configNVS.usuario + "/" + configNVS.nombreServicio + "/" + file;
     URL += "?address=" + configNVS.contrasena;
     
     if(leeFichero(fichero, contenido)) 
@@ -98,7 +100,7 @@ boolean enviaFicheroConfig(String fichero){
 /*                                                 */
 /***************************************************/
 boolean leeFicheroConfig(String servicio){
-    String URL = String(URL_PLATAFORMA) + "/configuracion/" + configNVS.usuario + "/" + configNVS.nombreServicio + "/" + servicio;
+    String URL = URLPlataforma + "/configuracion/" + configNVS.usuario + "/" + configNVS.nombreServicio + "/" + servicio;
     URL = URL + "?address=" + configNVS.contrasena;
     Serial.printf("Invoco con \nURL: %s\nservicio: %s\n",URL.c_str(),servicio.c_str());
 

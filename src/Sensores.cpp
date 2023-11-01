@@ -70,10 +70,15 @@ boolean Sensores::recuperaDatos(boolean debug)
 /* configuracio de sensores                  */
 /*********************************************/
 boolean Sensores::parseaConfiguracion(String contenido){  
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(contenido.c_str());
+  DynamicJsonDocument doc(2*1024);
+  DeserializationError err = deserializeJson(doc,contenido);
+
   //json.printTo(Serial);
-  if (root.success()){
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
+  else{
     Serial.println("parsed json");
 //******************************Parte especifica del json a leer********************************
       
@@ -81,18 +86,18 @@ boolean Sensores::parseaConfiguracion(String contenido){
     String _tipo="";
     String _parametros="";
 
-    if(root.containsKey("Sensores")){
-      JsonArray& SensoresJson = root["Sensores"];
+    if(doc.containsKey("Sensores")){
+      JsonArray SensoresJson = doc["Sensores"];
     
       numeroSensores=SensoresJson.size();
       //sensores.sensor=new Sensor[numeroSensores];
     
       for(uint8_t i=0;i<numeroSensores;i++){
-        JsonObject& SensoresJsonSensor = SensoresJson[i];
+        JsonObject SensoresJsonSensor = SensoresJson[i];
 Serial.printf("********************************************************\n");
-        _nombre=SensoresJsonSensor.get<String>("nombre");
-        _tipo=SensoresJsonSensor.get<String>("tipo");
-        if(SensoresJsonSensor.containsKey("parametros")) _parametros=SensoresJsonSensor.get<String>("parametros");
+        _nombre=SensoresJsonSensor["nombre"].as<String>();
+        _tipo=SensoresJsonSensor["tipo"].as<String>();
+        if(SensoresJsonSensor.containsKey("parametros")) _parametros=SensoresJsonSensor["parametros"].as<String>();
         else _parametros="";
 
         uint8_t miTipo=tipoSensor(_tipo);
@@ -281,16 +286,13 @@ String Sensores::generaJsonEstado(boolean debug){
   Sensor* p=pCabeza;
   String salida="";
 
-  const size_t capacity = JSON_ARRAY_SIZE(numeroSensores) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(2) + 3*JSON_OBJECT_SIZE(3);
-  DynamicJsonBuffer jsonBuffer(capacity);
+  DynamicJsonDocument doc(512);
 
-  JsonObject& root = jsonBuffer.createObject();
-
-  JsonArray& medidas = root.createNestedArray("datos");////Medidas
+  JsonArray medidas = doc.createNestedArray("datos");////Medidas
 
   while(p!=NULL){
     //Serial.printf("recuperando valores de  %s\n",p->getNombre().c_str());
-    JsonObject& medida = medidas.createNestedObject();
+    JsonObject medida = medidas.createNestedObject();
     switch (p->getTipo()){
       case TIPO_DS18B20:
         ((SensorDS18B20*)p)->generaJsonEstado(medida);
@@ -320,7 +322,7 @@ String Sensores::generaJsonEstado(boolean debug){
       p=p->getSiguiente();
   }
 
-  root.printTo(salida);
+  serializeJsonPretty(doc,salida);
   //Serial.printf("%s\n",salida.c_str());
   return salida;   
 }
@@ -330,15 +332,13 @@ String Sensores::generaJsonConfiguracion(boolean debug){
   String salida="";
 
   const size_t capacity = JSON_ARRAY_SIZE(numeroSensores) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(2) + 3*JSON_OBJECT_SIZE(3);
-  DynamicJsonBuffer jsonBuffer(capacity);
+  DynamicJsonDocument doc(8*1024);
 
-  JsonObject& root = jsonBuffer.createObject();
-
-  JsonArray& jsonSensores = root.createNestedArray("sensores");
+  JsonArray jsonSensores = doc.createNestedArray("sensores");
 
   while(p!=NULL){
     //Serial.printf("recuperando valores de  %s\n",p->getNombre().c_str());
-    JsonObject& jsonSensor = jsonSensores.createNestedObject();
+    JsonObject jsonSensor = jsonSensores.createNestedObject();
     switch (p->getTipo()){
       case TIPO_DS18B20:
         ((SensorDS18B20*)p)->generaJsonConfiguracion(jsonSensor);
@@ -368,12 +368,12 @@ String Sensores::generaJsonConfiguracion(boolean debug){
       p=p->getSiguiente();
   }
 
-  root.printTo(salida);
+  serializeJsonPretty(doc,salida);
   //Serial.printf("%s\n",salida.c_str());
   return salida;   
 }
 
-/*Devuleve un puntero al sensor identificado por su nombre*/
+/*Devuelve un puntero al sensor identificado por su nombre*/
 Sensor* Sensores::getSensor(String _nombre){
   Sensor* p=pCabeza;
 

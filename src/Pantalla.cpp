@@ -144,7 +144,7 @@ void pantallaMaqEstados(void){
 
   // Encabezado de la pantalla
   face.setTextDatum(ML_DATUM);
-  face.drawString(configNVS,nombreServicio, 0, TOP_ARRIBA_MAQESTADOS/2);
+  face.drawString(configNVS.nombreServicio, 0, TOP_ARRIBA_MAQESTADOS/2);
   
   face.setTextDatum(MR_DATUM);
   face.drawString(String(hora()) + ":" + String(minuto()), MAQESTADOS_W, TOP_ARRIBA_MAQESTADOS/2);

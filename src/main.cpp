@@ -91,7 +91,7 @@ String nombreEtapas[]={"SETUP","INICIO","OTA","SENSORES","ENTRADAS","SECUENCIADO
 int debugMain=0; //por defecto desabilitado
 int debugGlobal=0; //por defecto desabilitado
 int nivelActivo;//Indica si el rele se activa con HIGH o LOW
-
+String URLPlataforma=""; //URL de la plataforma Domoticae
 hw_timer_t *timer = NULL;//Puntero al timer del watchdog
 uint16_t vuelta = 0; //MAX_VUELTAS-100; //vueltas de loop
 int etapa=SETUP;
@@ -336,24 +336,33 @@ boolean inicializaConfiguracion(boolean debug)
  *********************************************/
 boolean parseaConfiguracionGlobal(String contenido)
   {  
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
+  DynamicJsonDocument doc(512);
+  //JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
+  DeserializationError err=deserializeJson(doc,contenido);
   
-  if (json.success()) 
-    {
-    Traza.mensaje("parsed json\n");
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
+
+  Traza.mensaje("parsed json\n");
 //******************************Parte especifica del json a leer********************************
-    if (json.containsKey("NivelActivo")) 
-      {
-      if((int)json["NivelActivo"]==0) nivelActivo=LOW;
-      else nivelActivo=HIGH;
-      }
-    
-    Traza.mensaje("Configuracion leida:\nNivelActivo: %i\n",nivelActivo);
-//************************************************************************************************
-    return true;
+  if (doc.containsKey("NivelActivo")) {
+    if(doc["NivelActivo"].as<int>()==0) nivelActivo=LOW;
+    else nivelActivo=HIGH;
     }
-  return false;  
+
+  if (doc.containsKey("URLPlataforma")) {
+    URLPlataforma = doc["URLPlataforma"].as<String>();
+    if(URLPlataforma.endsWith("/")) {
+      Serial.printf("Acaba en /, lo corto...\n");
+      URLPlataforma=URLPlataforma.substring(0,URLPlataforma.length()-1);
+      Serial.printf("URLPlataforma: %s\n",URLPlataforma.c_str());
+    }
+  }
+  Traza.mensaje("Configuracion leida:\nNivelActivo: %i | URLPlataforma: %s\n",nivelActivo,URLPlataforma.c_str());
+//************************************************************************************************
+  return true;
   }
 /********************************** Funciones de configuracion global **************************************/
 /********************************** Utilidades **************************************/
@@ -382,21 +391,22 @@ String generaJsonConfiguracionNivelActivo(String configActual, int nivelAct)
     return "{\"NivelActivo\": \"" + String(nivelAct) + "\"}";
     }
     
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(configActual.c_str());
-  json.printTo(salida);//pinto el json que he creado
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,configActual);
+  serializeJsonPretty(doc,salida);
   Traza.mensaje("json leido:\n#%s#\n",salida.c_str());
-  if (json.success()) 
-    {
-    Traza.mensaje("parsed json\n");          
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+  }
+
+  Traza.mensaje("parsed json\n");          
 
 //******************************Parte especifica del json a modificar*****************************
-    json["NivelActivo"]=nivelAct;
+  doc["NivelActivo"]=nivelAct;
 //************************************************************************************************
 
-    json.printTo(salida);//pinto el json que he creado
-    Traza.mensaje("json creado:\n#%s#\n",salida.c_str());
-    }//la de parsear el json
+  serializeJsonPretty(doc,salida);
+  Traza.mensaje("json creado:\n#%s#\n",salida.c_str());
 
   return salida;  
   } 
@@ -409,14 +419,11 @@ String generaJsonConfiguracionGlobal(void){
   String salida="";
 
   //Genero el nuevo JSON
-  //7 elementos, 2 arrays de 2 parametros cada uno
-  const size_t capacity = JSON_OBJECT_SIZE(3);
-  DynamicJsonBuffer jsonBufferNuevo(capacity);
-  JsonObject& nuevoJson = jsonBufferNuevo.createObject();      
+  DynamicJsonDocument doc(512);
+  
+  doc["NivelActivo"]=nivelActivo;
 
-  nuevoJson["NivelActivo"]=nivelActivo;
-
-  nuevoJson.printTo(salida);//pinto el json que he creado
+  DeserializationError err = deserializeJson(doc,salida);//pinto el json que he creado
   Traza.mensaje("json creado:\n#%s#\n",salida.c_str());
 
   return salida;  
@@ -440,12 +447,9 @@ String generaJsonInfo(void)
   {
   String salida="";
 
-  const size_t capacity = 1*JSON_ARRAY_SIZE(15) + JSON_OBJECT_SIZE(25);
-  DynamicJsonBuffer jsonBuffer(capacity);
-
-  JsonObject& json = jsonBuffer.createObject();
-    
-  JsonObject& basica = json.createNestedObject("basica");
+  DynamicJsonDocument doc(2*1024);
+   
+  JsonObject basica = doc.createNestedObject("basica");
   //uptime
   char tempcad[20]="";
   sprintf(tempcad,"%lu", (unsigned long)(esp_timer_get_time()/(unsigned long)1000000)); //la funcion esp_timer_get_time() devuelve el contador de microsegundos desde el arranque. rota cada 292.000 años  
@@ -454,30 +458,30 @@ String generaJsonInfo(void)
   basica["fecha"] = getFecha();
   basica["nivelActivo"] = String(nivelActivo);
 
-  JsonArray& listaSalidas = json.createNestedArray("infoSalidas");
+  JsonArray listaSalidas = doc.createNestedArray("infoSalidas");
  
   for(int8_t i=0;i<salidas.getNumSalidas();i++)
     {
-    JsonObject& salidaNueva = listaSalidas.createNestedObject();
+    JsonObject salidaNueva = listaSalidas.createNestedObject();
 
     salidaNueva["id"] = String(i);
     salidaNueva["nombre"] = salidas.getSalida(i).getNombre();
     salidaNueva["estado"] = salidas.getSalida(i).getEstado();
     }
   
-  JsonObject& wifi = json.createNestedObject("wifi");  
+  JsonObject wifi = doc.createNestedObject("wifi");  
   wifi["ssid"] = nombreSSID();     
   wifi["ip"] =  WiFi.localIP().toString();
   wifi["potencia"] = String(WiFi.RSSI());
 
-  JsonObject& mqtt = json.createNestedObject("MQTT");  
+  JsonObject mqtt = doc.createNestedObject("MQTT");  
   mqtt["ipBRoker"] = getIPBroker().toString();     
   mqtt["puertoBroker"] =  getPuertoBroker();
   mqtt["usuario"] = getUsuarioMQTT();
   mqtt["pasword"] = getPasswordMQTT();
   mqtt["topicRoot"] = getTopicRoot();
 
-  JsonObject& hardware = json.createNestedObject("hardware");  
+  JsonObject hardware = doc.createNestedObject("hardware");  
   hardware["FreeHeap"] = String(ESP.getFreeHeap());    
   hardware["ChipId"] =  String(ESP.getChipRevision());
   hardware["SdkVersion"] = String(ESP.getSdkVersion());
@@ -485,7 +489,7 @@ String generaJsonInfo(void)
   hardware["FlashChipSize"] = String(ESP.getFlashChipSize());
   hardware["FlashChipSpeed"] = String(ESP.getFlashChipSpeed());
 
-  json.printTo(salida);
+  serializeJsonPretty(doc,salida);
   return (salida);
   }
 /********************************** Utilidades **************************************/

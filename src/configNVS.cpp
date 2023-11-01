@@ -76,7 +76,7 @@ boolean leeConfigNVS(configNVS_t *c){
   return ret;
 }
 
-void escribeConfigNVS(configNVS_t c){
+int escribeConfigNVS(configNVS_t c){
   size_t ret=0;
 
   ret=prefs.putULong64("DeviceID",c.deviceID);
@@ -95,9 +95,11 @@ void escribeConfigNVS(configNVS_t c){
   c.contrasena=calculaContrasena(c);
   ret=prefs.putString("contrasena",c.contrasena);
   //Serial.printf("Salida de la escritura de contrasena (***...%s): %u\n",c.contrasena.substring(c.contrasena.length()-3).c_str(), ret);
+
+  return (int)ret;
 }
 
-void escribeConfigNVSDefecto(void){
+int escribeConfigNVSDefecto(void){
   configNVS_t c;
 
     /*Inicio de valores por defecto*/
@@ -110,7 +112,7 @@ void escribeConfigNVSDefecto(void){
     c.contrasena="";    
     /*Fin de valores por defecto*/
 
-    escribeConfigNVS(c);
+    return escribeConfigNVS(c);
 }
 
 void resetNVS_WiFi(void){

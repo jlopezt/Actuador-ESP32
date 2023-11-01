@@ -10,7 +10,7 @@
 
 //Defines generales
 #define NOMBRE_FAMILIA   "SmartSite" //"Actuador/Secuenciador (E/S)"
-#define VERSION          "esp32 - ver 7.7.0"//(ESP32 1.0.4|OTA|MQTT|Logic++|Secuenciador|FicherosWeb|Eventos SNTP|Maquina de estados)"
+#define VERSION          "esp32 - ver 7.8.0"//ArduinoJSON6
 
 #define TRUE              1
 #define FALSE             0
@@ -59,7 +59,7 @@
 
 //Incluye pantalla TFT o no
 #define TIENE_PANTALLA 1
-#undef TIENE_PANTALLA //Si esta tapado la incluye, si esta destapado no
+//#undef TIENE_PANTALLA //Si esta tapado la incluye, si esta destapado no
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/
@@ -72,6 +72,7 @@
 extern int debugGlobal; //por defecto desabilitado
 extern int debugMain; //por defecto desabilitado
 extern int nivelActivo;
+extern String URLPlataforma; //URL de la plataforma Domoticae
 /***************************** Variables *****************************/
 
 /************************* Utilidades ***************************/

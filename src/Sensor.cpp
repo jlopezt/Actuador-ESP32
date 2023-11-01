@@ -51,18 +51,18 @@ void SensorDS18B20::inicializa(String _nombre, uint8_t _tipo, String parametros)
 }
 
 boolean SensorDS18B20::parseaConfiguracion(String contenido)  {  
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(contenido.c_str());
-  //json.printTo(Serial);
-  if (!root.success()){
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,contenido);
+
+  if(err){
       Serial.printf("error al parsear parametros de DS18B20\n");
       return false;
     }
 
   Serial.println("parsed json");
 //******************************Parte especifica del json a leer********************************
-  if(!root.containsKey("direccion")) return false; 
-  String _direccion=root.get<String>("direccion");
+  if(!doc.containsKey("direccion")) return false; 
+  String _direccion=doc["direccion"].as<String>();
   convierteDireccionOneWire(_direccion, direccion);
   
   Serial.printf("Configuracion del DS18B20 leida:\nParamteros: %s\ndireccion (str): %s\n",contenido.c_str(),_direccion.c_str());
@@ -107,7 +107,7 @@ String SensorDS18B20::generaJsonEstado(JsonObject& root){
   root["temperatura"] = temperatura;
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
@@ -118,7 +118,7 @@ String SensorDS18B20::generaJsonConfiguracion(JsonObject& root){
   root["direccion"]=getDirecciontoString();  
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   return salida;
 }
 
@@ -155,18 +155,18 @@ void SensorDHT::inicializa(String _nombre, uint8_t _tipo, String parametros){
   }
 
 boolean SensorDHT::parseaConfiguracion(String contenido)  {  
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(contenido.c_str());
-  //json.printTo(Serial);
-  if (!root.success()){
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,contenido);
+
+  if(err){
     Serial.printf("error al parsear parametros de DHT\n");
     return false;
     }
 
   Serial.println("parsed json");
 //******************************Parte especifica del json a leer********************************   
-  if(!root.containsKey("pin")) {Serial.printf("No hay pin en <%s>\n",contenido.c_str());return false;}
-  uint8_t _pin=root.get<int>("pin");
+  if(!doc.containsKey("pin")) {Serial.printf("No hay pin en <%s>\n",contenido.c_str());return false;}
+  uint8_t _pin=doc["pin"].as<int>();
   setPin(_pin);
 
   Serial.printf("Configuracion del DHT leida:\nParamteros: %s\npin (int): %i\n",contenido.c_str(),_pin);
@@ -200,7 +200,7 @@ String SensorDHT::generaJsonEstado(JsonObject& root){
   root["humedad"] = humedad;
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
@@ -211,7 +211,7 @@ String SensorDHT::generaJsonConfiguracion(JsonObject& root){
   root["pin"]=pin;  
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   return salida;
 }
 
@@ -240,18 +240,18 @@ void SensorHDC1080::inicializa(String _nombre, uint8_t _tipo, String parametros)
   }
 
 boolean SensorHDC1080::parseaConfiguracion(String contenido)  {
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(contenido.c_str());
-  //json.printTo(Serial);
-  if (!root.success()){
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,contenido);
+
+  if(err){
       Serial.printf("error al parsear parametros de HDC1080\n");
       return false;
     }
 
   Serial.println("parsed json");
 //******************************Parte especifica del json a leer********************************
-  if(!root.containsKey("direccionI2C")) {Serial.printf("No hay direccionI2C en HDC1080\n");return false;}
-  String _direccionI2CString=root.get<String>("direccionI2C");
+  if(!doc.containsKey("direccionI2C")) {Serial.printf("No hay direccionI2C en HDC1080\n");return false;}
+  String _direccionI2CString=doc["direccionI2C"].as<String>();
   uint8_t _direccionI2C=convierteDireccionI2C(_direccionI2CString);
   setDireccionI2C(_direccionI2C);
 
@@ -293,7 +293,7 @@ String SensorHDC1080::generaJsonEstado(JsonObject& root){
   root["humedad"] = humedad;
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
@@ -305,7 +305,7 @@ String SensorHDC1080::generaJsonConfiguracion(JsonObject& root){
   root["direccion"]="0x" + String(direccionI2C,HEX);
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   return salida;
 }
 /***********************************FIN HDC1080*********************************************/
@@ -327,20 +327,20 @@ void SensorBMP280::inicializa(String _nombre, uint8_t _tipo, String parametros){
   }
 
 boolean SensorBMP280::parseaConfiguracion(String contenido)  {
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(contenido.c_str());
-  //json.printTo(Serial);
-  if (!root.success()){
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,contenido);
+
+  if(err){
       Serial.printf("error al parsear parametros de BMP280\n");
       return false;
     }
 
   Serial.println("parsed json");
 //******************************Parte especifica del json a leer********************************
-  if(!root.containsKey("direccionI2C")) {Serial.printf("No hay direccionI2C en BMP280\n");return false;}
+  if(!doc.containsKey("direccionI2C")) {Serial.printf("No hay direccionI2C en BMP280\n");return false;}
   Serial.printf("Hay direccionI2C en BMP280\n");
   
-  String _direccionI2CString=root.get<String>("direccionI2C");
+  String _direccionI2CString=doc["direccionI2C"].as<String>();
   uint8_t _direccionI2C=convierteDireccionI2C(_direccionI2CString);
   setDireccionI2C(_direccionI2C);
 
@@ -377,7 +377,7 @@ String SensorBMP280::generaJsonEstado(JsonObject& root){
   root["presion"] = presion;
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
@@ -389,7 +389,7 @@ String SensorBMP280::generaJsonConfiguracion(JsonObject& root){
   root["direccion"]="0x" + String(direccionI2C,HEX);
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   return salida;
 }
 
@@ -418,20 +418,20 @@ void SensorBME280::inicializa(String _nombre, uint8_t _tipo, String parametros){
   }
 
 boolean SensorBME280::parseaConfiguracion(String contenido)  {
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(contenido.c_str());
-  //json.printTo(Serial);
-  if (!root.success()){
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,contenido);
+
+  if(err){
       Serial.printf("error al parsear parametros de BME280\n");
       return false;
     }
 
   Serial.println("parsed json");
 //******************************Parte especifica del json a leer********************************
-  if(!root.containsKey("direccionI2C")) {Serial.printf("No hay direccionI2C en BME280\n");return false;}
+  if(!doc.containsKey("direccionI2C")) {Serial.printf("No hay direccionI2C en BME280\n");return false;}
   Serial.printf("Hay direccionI2C en BME280\n");
   
-  String _direccionI2CString=root.get<String>("direccionI2C");
+  String _direccionI2CString=doc["direccionI2C"].as<String>();
   uint8_t _direccionI2C=convierteDireccionI2C(_direccionI2CString);
   setDireccionI2C(_direccionI2C);
 
@@ -480,7 +480,7 @@ String SensorBME280::generaJsonEstado(JsonObject& root){
   root["presion"] = presion;
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
@@ -492,7 +492,7 @@ String SensorBME280::generaJsonConfiguracion(JsonObject& root){
   root["direccion"]="0x" + String(direccionI2C,HEX);
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   return salida;
 }
 /***********************************FIN HDC1080*********************************************/
@@ -513,19 +513,19 @@ void SensorBH1750::inicializa(String _nombre, uint8_t _tipo, String parametros){
   }
 
 boolean SensorBH1750::parseaConfiguracion(String contenido){
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(contenido.c_str());
-  //json.printTo(Serial);
-  if (!root.success()){
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,contenido);
+
+  if(err){
       Serial.printf("error al parsear parametros de BH1750\n");
       return false;
     }
 
   Serial.println("parsed json");
 //******************************Parte especifica del json a leer********************************
-  if(!root.containsKey("direccionI2C")) {Serial.printf("No hay direccionI2C en BH1750\n");return false;}
+  if(!doc.containsKey("direccionI2C")) {Serial.printf("No hay direccionI2C en BH1750\n");return false;}
   
-  String _direccionI2CString=root.get<String>("direccionI2C");
+  String _direccionI2CString=doc["direccionI2C"].as<String>();
   uint8_t _direccionI2C=convierteDireccionI2C(_direccionI2CString);
   setDireccionI2C(_direccionI2C);
 
@@ -564,7 +564,7 @@ String SensorBH1750::generaJsonEstado(JsonObject& root){
   root["luz"] = luz;
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
@@ -575,7 +575,7 @@ String SensorBH1750::generaJsonConfiguracion(JsonObject& root){
   root["direccion"]="0x" + String(direccionI2C,HEX);
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   return salida;
 }
 /***********************************FIN BH1750*********************************************/
@@ -592,10 +592,10 @@ void SensorGL5539::inicializa(String _nombre, uint8_t _tipo, String parametros){
 }
 
 boolean SensorGL5539::parseaConfiguracion(String contenido) {
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(contenido.c_str());
-  //json.printTo(Serial);
-  if (!root.success()){
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,contenido);
+
+  if(err){
       Serial.printf("error al parsear parametros de GL5539\n");
       return false;
     }
@@ -627,7 +627,7 @@ String SensorGL5539::generaJsonEstado(JsonObject& root){
   root["luz"] = luz;
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
@@ -637,7 +637,7 @@ String SensorGL5539::generaJsonConfiguracion(JsonObject& root){
   root["tipo"]="GL5539";
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   return salida;
 }
 /***********************************FIN GL5539*********************************************/
@@ -654,10 +654,10 @@ void SensorHumedadSuelo::inicializa(String _nombre, uint8_t _tipo, String parame
 }
 
 boolean SensorHumedadSuelo::parseaConfiguracion(String contenido) {  
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(contenido.c_str());
-  //json.printTo(Serial);
-  if (!root.success()){
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,contenido);
+
+  if(err){
       Serial.printf("error al parsear parametros de HumedadSuelo\n");
       return false;
     }
@@ -685,7 +685,7 @@ String SensorHumedadSuelo::generaJsonEstado(JsonObject& root){
   root["humedad"] = humedad;
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   //Serial.printf("%s\n",salida.c_str());
   return salida;
 }
@@ -695,7 +695,7 @@ String SensorHumedadSuelo::generaJsonConfiguracion(JsonObject& root){
   root["tipo"]="SOILMOISTURECAPACITIVEV2";
 
   String salida="";
-  root.printTo(salida);
+  serializeJsonPretty(root,salida);
   return salida;
 }
 /***********************************FIN HumedadSuelo*********************************************/

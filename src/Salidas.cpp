@@ -107,18 +107,21 @@ boolean Salidas::recuperaDatos(int debug){
 /* configuracio de las salidas               */
 /*********************************************/
 boolean Salidas::parseaConfiguracion(String contenido){ 
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
+  DynamicJsonDocument doc(4096);
+  DeserializationError err = deserializeJson(doc,contenido);
   
   String cad;
-  json.printTo(cad);//pinto el json que he creado
+  serializeJsonPretty(doc,cad);
   Traza.mensaje("json creado:\n#%s#\n",cad.c_str());
   
-  if (!json.success()) return false;
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
         
   Traza.mensaje("\nparsed json\n");
 //******************************Parte especifica del json a leer********************************
-  JsonArray& Salidas = json["Salidas"];
+  JsonArray Salidas = doc["Salidas"];
   
   //variables teporales para almacenar los valores leidos del json
   String nombre="";
@@ -144,22 +147,22 @@ boolean Salidas::parseaConfiguracion(String contenido){
   salidas.salida=new Salida[numeroSalidas];
 
   for(int8_t i=0;i<numeroSalidas;i++){ 
-    JsonObject& _salida = json["Salidas"][i];
+    JsonObject _salida = doc["Salidas"][i];
 
-    if(_salida.containsKey("nombre")) nombre=_salida.get<String>("nombre");
-    if(_salida.containsKey("tipo")) tipo=_salida.get<int>("tipo");
-    if(_salida.containsKey("GPIO")) pin=_salida.get<int>("GPIO"); else return false;
+    if(_salida.containsKey("nombre")) nombre=_salida["nombre"].as<String>();
+    if(_salida.containsKey("tipo")) tipo=_salida["tipo"].as<int>();
+    if(_salida.containsKey("GPIO")) pin=_salida["GPIO"].as<int>(); else return false;
     if(_salida.containsKey("inicio")){
-      if(_salida.get<String>("inicio")=="on") inicio=1; //Si de inicio debe estar activado o desactivado
+      if(_salida["inicio"].as<String>()=="on") inicio=1; //Si de inicio debe estar activado o desactivado
       else inicio=0;
     }
-    if(_salida.containsKey("modo")) modo=_salida.get<int>("modo");
-    if(_salida.containsKey("anchoPulso")) anchoPulso=_salida.get<int>("anchoPulso");
-    if(_salida.containsKey("controlador")) controlador=_salida.get<int>("controlador");
-    if(_salida.containsKey("valorPWM")) valorPWM=_salida.get<int>("valorPWM");
-    if(_salida.containsKey("canal")) canal=_salida.get<int>("canal");
-    if(_salida.containsKey("frecuencia")) frecuencia=_salida.get<int>("frecuencia");
-    if(_salida.containsKey("resolucion")) resolucion=_salida.get<int>("resolucion");   
+    if(_salida.containsKey("modo")) modo=_salida["modo"].as<int>();
+    if(_salida.containsKey("anchoPulso")) anchoPulso=_salida["anchoPulso"].as<int>();
+    if(_salida.containsKey("controlador")) controlador=_salida["controlador"].as<int>();
+    if(_salida.containsKey("valorPWM")) valorPWM=_salida["valorPWM"].as<int>();
+    if(_salida.containsKey("canal")) canal=_salida["canal"].as<int>();
+    if(_salida.containsKey("frecuencia")) frecuencia=_salida["frecuencia"].as<int>();
+    if(_salida.containsKey("resolucion")) resolucion=_salida["resolucion"].as<int>();   
    
     if(_salida.containsKey("Estados")){
       int8_t est_max=_salida["Estados"].size();//maximo de mensajes en el JSON
@@ -267,17 +270,12 @@ int Salidas::salidasConfiguradas(void){return numeroSalidas;}
 String Salidas::generaJsonEstado(boolean filtro){
   String cad="";
 
-  //const size_t bufferSize = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(8);
-  const size_t bufferSize = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(15);
-
-  DynamicJsonBuffer jsonBuffer(bufferSize);
+  DynamicJsonDocument doc(4*1024);
   
-  JsonObject& root = jsonBuffer.createObject();
-  
-  JsonArray& Salidas = root.createNestedArray("datos");////salidas
+  JsonArray Salidas = doc.createNestedArray("datos");////salidas
   for(int8_t id=0;id<numeroSalidas;id++){
 
-    JsonObject& Salidas_0 = Salidas.createNestedObject();
+    JsonObject Salidas_0 = Salidas.createNestedObject();
     Salidas_0["id"] = id;
     Salidas_0["nombre"] = salida[id].getNombre();
     Salidas_0["pin"] = salida[id].getPin();
@@ -296,7 +294,7 @@ String Salidas::generaJsonEstado(boolean filtro){
     }
   }
     
-  root.printTo(cad);
+  serializeJsonPretty(doc,cad);
   return cad;  
 }  
 String Salidas::generaJsonEstado(void) {return generaJsonEstado(true);}

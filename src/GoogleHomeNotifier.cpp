@@ -86,16 +86,20 @@ boolean recuperaDatosGHN(boolean debug)
 /***********************************************************/
 boolean parseaConfiguracionGHN(String contenido)
   {  
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,contenido);
 
-  if (json.success()) 
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
+  else 
     {
     Traza.mensaje("parsed json\n");
 //******************************Parte especifica del json a leer********************************
-    nombreEquipo=json.get<String>("nombreEquipo");
-    idioma=json.get<String>("idioma");
-    activaGoogleHomeNotifier=json.get<unsigned int>("activaGoogleHomeNotifier");
+    nombreEquipo=doc["nombreEquipo"].as<String>();
+    idioma=doc["idioma"].as<String>();
+    activaGoogleHomeNotifier=doc["activaGoogleHomeNotifier"].as<unsigned int>();
 
     Traza.mensaje("Configuracion leida:\nactivaGoogleHomeNotifier: %i\nnombreEquipo: [%s]\nidioma: [%s]\n",activaGoogleHomeNotifier,nombreEquipo.c_str(),idioma.c_str());
 //************************************************************************************************

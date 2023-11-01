@@ -66,18 +66,21 @@ boolean Entradas::recuperaDatos(int debug){
 /* configuracio de las entradas              */
 /*********************************************/
 boolean Entradas::parseaConfiguracion(String contenido){
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
+  DynamicJsonDocument doc(4096);
+  DeserializationError err = deserializeJson(doc,contenido);
 
   String cad;
-  json.printTo(cad);//pinto el json que he creado
+  serializeJson(doc,cad);
   Traza.mensaje("json leido:\n#%s#\n",cad.c_str());
   
-  if (!json.success()) return false;
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
 
   Traza.mensaje("\nparsed json\n");
   //******************************Parte especifica del json a leer********************************
-  JsonArray& Entradas = json["Entradas"];
+  JsonArray Entradas = doc["Entradas"].as<JsonArray>();
 
   numeroEntradas=(Entradas.size()<MAX_ENTRADAS?Entradas.size():MAX_ENTRADAS);
   Traza.mensaje("Se configurarán %i entradas\n",numeroEntradas);
@@ -92,12 +95,12 @@ boolean Entradas::parseaConfiguracion(String contenido){
     String nombres[2];
     String mensajes[2];
 
-    JsonObject& _entrada = json["Entradas"][i];
+    JsonObject _entrada = doc["Entradas"][i];
           
-    if(_entrada.containsKey("nombre")) nombre=_entrada.get<String>("nombre"); 
-    if(_entrada.containsKey("tipo")) tipo=_entrada.get<String>("tipo"); 
-    if(_entrada.containsKey("GPIO")) pin=_entrada.get<int>("GPIO"); else return false;
-    if(_entrada.containsKey("estadoActivo")) estadoActivo=_entrada.get<int>("estadoActivo");
+    if(_entrada.containsKey("nombre")) nombre=_entrada["nombre"].as<String>(); 
+    if(_entrada.containsKey("tipo")) tipo=_entrada["tipo"].as<String>();
+    if(_entrada.containsKey("GPIO")) pin=_entrada["GPIO"].as<int>(); else return false;
+    if(_entrada.containsKey("estadoActivo")) estadoActivo=_entrada["estadoActivo"].as<int>();
    
     if(_entrada.containsKey("Estados")){
       int8_t est_max=_entrada["Estados"].size();//maximo de mensajes en el JSON
@@ -173,16 +176,12 @@ String Entradas::generaJsonEstado(boolean filtro)
   {
   String cad="";
 
-  //const size_t bufferSize = JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(3);
-  const size_t bufferSize = JSON_ARRAY_SIZE(3) + JSON_OBJECT_SIZE(1) + 3*JSON_OBJECT_SIZE(10);
-  DynamicJsonBuffer jsonBuffer(bufferSize);
+  DynamicJsonDocument doc(4*1024);
   
-  JsonObject& root = jsonBuffer.createObject();
-  
-  JsonArray& Entradas = root.createNestedArray("datos");////entradas
+  JsonArray Entradas = doc.createNestedArray("datos");////entradas
   for(int8_t id=0;id<entradas.getNumEntradas();id++)
     {
-    JsonObject& Entradas_0 = Entradas.createNestedObject(); 
+    JsonObject Entradas_0 = Entradas.createNestedObject(); 
     Entradas_0["id"] = id;
     Entradas_0["nombre"] = entrada[id].getNombre();
     Entradas_0["estado"] = entrada[id].getEstado();
@@ -197,7 +196,8 @@ String Entradas::generaJsonEstado(boolean filtro)
       }
     }
 
-  root.printTo(cad);
+  serializeJsonPretty(doc,cad);
   return cad;  
   }
+  
 String Entradas::generaJsonEstado(void){return generaJsonEstado(true);}

@@ -54,20 +54,23 @@ boolean Secuenciador::recuperaDatos(boolean debug){
 /* configuracio de los reles                 */
 /*********************************************/
 boolean Secuenciador::parseaConfiguracion(String contenido){  
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
-  
+  DynamicJsonDocument doc(16*1024);
+  DeserializationError err = deserializeJson(doc,contenido);
+
   String cad;
-  json.printTo(cad);//pinto el json que he leido
+  serializeJsonPretty(doc,cad);
   Traza.mensaje("json creado:\n#%s#\n",cad.c_str());
   
-  if (!json.success()) return false;
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
         
   Traza.mensaje("\nparsed json\n");
 //******************************Parte especifica del json a leer********************************  
-  if(json.containsKey("estadoInicial")) activado=json.get<int>("estadoInicial");
+  if(doc.containsKey("estadoInicial")) activado=doc["estadoInicial"].as<boolean>();
   
-  JsonArray& Planes = json["Planes"];  
+  JsonArray Planes = doc["Planes"];  
 
   numeroPlanes=(Planes.size()<MAX_PLANES?Planes.size():MAX_PLANES);
   Traza.mensaje("Se configuraran %i planes\n", numeroPlanes);
@@ -81,17 +84,17 @@ boolean Secuenciador::parseaConfiguracion(String contenido){
     uint32_t _intervalos[INTERVALOS_EN_HORA];      //el valor es un campo de bit. los primeros INTERVALOS_EN_HORA son los intervalos de cada hora
     for(uint8_t i=0;i<INTERVALOS_EN_HORA;i++) _intervalos[i]=0;
 
-    JsonObject& _plan = Planes[i];//json["Planes"][i];
+    JsonObject _plan = Planes[i];//json["Planes"][i];
     //leo los valores del json
     _id=i;
-    if(_plan.containsKey("nombre")) _nombre=_plan.get<String>("nombre");
+    if(_plan.containsKey("nombre")) _nombre=_plan["nombre"].as<String>();
     else {
       Traza.mensaje("Plan %i, no contiene campo nombre\n",_id);
       numeroPlanes=0;//Esto aborta la configuracion de los planes!!!!!!!
       return false;
     }
 
-    if(_plan.containsKey("salida")) _salidaAsociada=_plan.get<int>("salida");
+    if(_plan.containsKey("salida")) _salidaAsociada=_plan["salida"].as<int>();
     else {
       Traza.mensaje("Plan %i, no contiene campo salida\n",_id);
       numeroPlanes=0;//Esto aborta la configuracion de los planes!!!!!!!
@@ -105,8 +108,8 @@ boolean Secuenciador::parseaConfiguracion(String contenido){
     else{
       //Intevalos
       for(int8_t j=0;j<INTERVALOS_EN_HORA;j++) {
-        JsonObject& intervalo = _plan["intervalos"][j];//json["Planes"][i]["horas"][j];  
-        if(intervalo.containsKey("valor")) _intervalos[j]=intervalo.get<int>("valor");        
+        JsonObject intervalo = _plan["intervalos"][j];//json["Planes"][i]["horas"][j];  
+        if(intervalo.containsKey("valor")) _intervalos[j]=intervalo["valor"].as<int>();        
       }
     
       //Traza.mensaje("Plan %i: id: %i, nombre: %s, salida: %i\n", i, _id, _nombre.c_str(), _salidaAsociada);
@@ -180,25 +183,21 @@ boolean Secuenciador::getEstado(void){return activado;}
 /***********************************************************/
 String Secuenciador::generaJsonEstado(void){
   String cad="";
-
-  const size_t bufferSize = JSON_ARRAY_SIZE(5) + JSON_OBJECT_SIZE(2) + 5*JSON_OBJECT_SIZE(4);
-  DynamicJsonBuffer jsonBuffer(bufferSize);
+  DynamicJsonDocument doc(512);
   
-  JsonObject& root = jsonBuffer.createObject();
-  
-  if(activado) root["estado"] = 1;
-  else root["estado"]=0;
+  if(activado) doc["estado"] = 1;
+  else doc["estado"]=0;
 
-  JsonArray& _planes = root.createNestedArray("datos");////Planes
+  JsonArray _planes = doc.createNestedArray("datos");////Planes
   for(int8_t id=0;id<numeroPlanes;id++){
-    JsonObject& _plan = _planes.createNestedObject(); 
+    JsonObject _plan = _planes.createNestedObject(); 
     _plan["id"] = id;
     _plan["nombre"] = planes[id].getNombre();
     _plan["salida"] = planes[id].getSalida();
     _plan["estado"] = planes[id].getEstado();
   }
 
-  root.printTo(cad);
+  serializeJsonPretty(doc,cad);
   return cad;  
 }
 /************************* Secuenciador ********************************/

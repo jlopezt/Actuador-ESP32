@@ -132,39 +132,41 @@ boolean configraFichero(String comando);
 /* funcion que lo debe gestionar                */
 /************************************************/
 boolean enrutador(String comando){
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(comando.c_str());
+  DynamicJsonDocument doc(512);
+  
+  DeserializationError err = deserializeJson(doc,comando);
 
-  if (json.success()) 
-    {
-    Traza.mensaje("\ncomando: json parseado\n");
-    String tipo="";
-    String subtipo="";
-//******************************Parte especifica del json a leer********************************
-    if (json.containsKey("tipo"))  tipo = json.get<String>("tipo");
-    if (json.containsKey("subtipo"))  subtipo = json.get<String>("subtipo");
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
 
-    Traza.mensaje("comando leido:\ntipo: %s\nsubtipo: %s\n",tipo.c_str(),subtipo.c_str());
-//************************************************************************************************
+  Traza.mensaje("\ncomando: json parseado\n");
+  String tipo="";
+  String subtipo="";
+  //******************************Parte especifica del json a leer********************************
+  if (doc.containsKey("tipo"))  tipo = doc["tipo"].as<String>();
+  if (doc.containsKey("subtipo"))  subtipo = doc["subtipo"].as<String>();
 
-    if(tipo==TIPO_ACCION){
-        if(subtipo==SUBTIPO_ACCION_SALIDAS) return actuadorSalidas(comando);
-        else if (subtipo==SUBTIPO_ACCION_SECUENCIADOR) return actuadorSecuenciador(comando);
-        else return false;
-    }
-    else if(tipo==TIPO_UTILIDAD){
-        if(subtipo==SUBTIPO_UTILIDAD_PARTICIONES) return utilidadParticiones(comando);
-        else if (subtipo==SUBTIPO_UTILIDAD_RESTART) return utilidadRestart(comando);
-        else if(subtipo==SUBTIPO_UTILIDAD_NVS) return utilidadNVS(comando);
-        else if (subtipo==SUBTIPO_UTILIDAD_INFO) return utilidadInfo(comando);        
-        else return false;
-    }
-    else if(tipo==TIPO_CONFIGURACION){
-        if(subtipo==SUBTIPO_CONFIGURACION_FICHERO)return configraFichero(comando);
-        else return false;
-    }
-    else return false;
-    }
+  Traza.mensaje("comando leido:\ntipo: %s\nsubtipo: %s\n",tipo.c_str(),subtipo.c_str());
+  //************************************************************************************************
+
+  if(tipo==TIPO_ACCION){
+      if(subtipo==SUBTIPO_ACCION_SALIDAS) return actuadorSalidas(comando);
+      else if (subtipo==SUBTIPO_ACCION_SECUENCIADOR) return actuadorSecuenciador(comando);
+      else return false;
+  }
+  else if(tipo==TIPO_UTILIDAD){
+      if(subtipo==SUBTIPO_UTILIDAD_PARTICIONES) return utilidadParticiones(comando);
+      else if (subtipo==SUBTIPO_UTILIDAD_RESTART) return utilidadRestart(comando);
+      else if(subtipo==SUBTIPO_UTILIDAD_NVS) return utilidadNVS(comando);
+      else if (subtipo==SUBTIPO_UTILIDAD_INFO) return utilidadInfo(comando);        
+      else return false;
+  }
+  else if(tipo==TIPO_CONFIGURACION){
+      if(subtipo==SUBTIPO_CONFIGURACION_FICHERO)return configraFichero(comando);
+      else return false;
+  }
 
   Serial.printf("Mal rollo, salgo con error\n");
   return false;
@@ -189,20 +191,22 @@ Atiende estas ordenes
 }
 */
 boolean configraFichero(String comando){
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(comando.c_str());
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,comando);
 
-  if (json.success()) 
-    {
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
+  else {
     Traza.mensaje("\ncomando: json parseado\n");
 
     String orden="";
     uint8_t id=0;
     String valor="";
 //******************************Parte especifica del json a leer********************************
-    if (json.containsKey("orden"))  orden = json.get<String>("orden");
-    //if (json.containsKey("id"))  id = json.get<uint8_t>("id");
-    if (json.containsKey("valor"))  valor = json.get<String>("valor");
+    if (doc.containsKey("orden"))  orden = doc["orden"].as<String>();
+    if (doc.containsKey("valor"))  valor = doc["valor"].as<String>();
 
     Traza.mensaje("configura fichero\ncomando leida:\norden: %s\nid: %02u\nvalor: %s\n",orden.c_str(),id,valor.c_str());
 //************************************************************************************************
@@ -232,10 +236,14 @@ Atiende estas ordenes
 }
 **********************************************************/
 boolean actuadorSalidas(String comando){
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(comando.c_str());
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,comando);
 
-  if (json.success()) 
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
+  else 
     {
     Traza.mensaje("\ncomando: json parseado\n");
 
@@ -243,9 +251,9 @@ boolean actuadorSalidas(String comando){
     uint8_t id=0;
     String valor="";
 //******************************Parte especifica del json a leer********************************
-    if (json.containsKey("orden"))  orden = json.get<String>("orden");
-    if (json.containsKey("id"))  id = json.get<uint8_t>("id");
-    if (json.containsKey("valor"))  valor = json.get<String>("valor");
+    if (doc.containsKey("orden"))  orden = doc["orden"].as<String>();
+    if (doc.containsKey("id"))  id = doc["id"].as<uint8_t>();
+    if (doc.containsKey("valor"))  valor = doc["valor"].as<String>();
 
     Traza.mensaje("Salidas\ncomando leida:\norden: %s\nid: %02u\nvalor: %s\n",orden.c_str(),id,valor.c_str());
 //************************************************************************************************
@@ -268,10 +276,14 @@ return false;
 }
 
 boolean actuadorSecuenciador(String comando){
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(comando.c_str());
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,comando);
 
-  if (json.success()) 
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
+  else 
     {
     Traza.mensaje("\ncomando: json parseado\n");
 
@@ -279,9 +291,7 @@ boolean actuadorSecuenciador(String comando){
     uint8_t id=0;
     String valor="";
 //******************************Parte especifica del json a leer********************************
-    if (json.containsKey("orden"))  orden = json.get<String>("orden");
-    //if (json.containsKey("id"))  id = json.get<uint8_t>("id");
-    //if (json.containsKey("valor"))  valor = json.get<String>("valor");
+    if (doc.containsKey("orden"))  orden = doc["orden"].as<String>();
 
     Traza.mensaje("Secuenciador\ncomando leida:\norden: %s\nid: %02u\nvalor: %s\n",orden.c_str(),id,valor.c_str());
 //************************************************************************************************
@@ -363,10 +373,14 @@ Utilidades:
 
 **************************************************************************/
 boolean utilidadParticiones(String comando){
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(comando.c_str());
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,comando);
 
-  if (json.success()) 
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
+  else 
     {
     Traza.mensaje("\ncomando: json parseado\n");
 
@@ -374,9 +388,8 @@ boolean utilidadParticiones(String comando){
     String id="";
     String valor="";
 //******************************Parte especifica del json a leer********************************
-    if (json.containsKey("orden"))  orden = json.get<String>("orden");
-    //if (json.containsKey("id"))  id = json.get<String>("id");
-    if (json.containsKey("valor"))  valor = json.get<String>("valor");
+    if (doc.containsKey("orden"))  orden = doc["orden"].as<String>();
+    if (doc.containsKey("valor"))  valor = doc["valor"].as<String>();
 
     Traza.mensaje("Utilidad particiones\ncomando leida:\norden: %s\nid: %s\nvalor: %s\n",orden.c_str(),id.c_str(),valor.c_str());
 //************************************************************************************************
@@ -390,10 +403,14 @@ boolean utilidadParticiones(String comando){
 }
 
 boolean utilidadNVS(String comando){
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(comando.c_str());
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,comando);
 
-  if (json.success()) 
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
+  else 
     {
     Traza.mensaje("\ncomando: json parseado\n");
 
@@ -401,9 +418,9 @@ boolean utilidadNVS(String comando){
     String id="";
     String valor="";
 //******************************Parte especifica del json a leer********************************
-    if (json.containsKey("orden"))  orden = json.get<String>("orden");
-    if (json.containsKey("id"))  id = json.get<String>("id");
-    if (json.containsKey("valor"))  valor = json.get<String>("valor");
+    if (doc.containsKey("orden"))  orden = doc["orden"].as<String>();
+    if (doc.containsKey("id"))  id = doc["id"].as<String>();
+    if (doc.containsKey("valor"))  valor = doc["valor"].as<String>();
 
     Traza.mensaje("Utilidad NVS\ncomando leida:\norden: %s\nid: %s\nvalor: %s\n",orden.c_str(),id.c_str(),valor.c_str());
 //************************************************************************************************

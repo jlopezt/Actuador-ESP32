@@ -206,28 +206,32 @@ boolean recuperaDatosMQTT(boolean debug)
 /*********************************************/
 boolean parseaConfiguracionMQTT(String contenido)
   {  
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
+  DynamicJsonDocument doc(1024);
+  DeserializationError err = deserializeJson(doc,contenido);
 
-  if (json.success()) 
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
+  else
     {
     Traza.mensaje("\nparsed json\n");
 //******************************Parte especifica del json a leer********************************
-    if (json.containsKey("modoMQTT"))  modoMQTT=json.get<String>("modoMQTT");
-    ID_MQTT=json.get<String>("ID_MQTT");
-    if (json.containsKey("IPBroker")) IPBroker.fromString(json.get<String>("IPBroker"));
-    if (json.containsKey("BrokerDir")) BrokerDir=json.get<String>("BrokerDir");
-    puertoBroker=json.get<uint16_t>("puerto");
-    timeReconnectMQTT=json.get<uint16_t>("timeReconnectMQTT");
-    usuarioMQTT=json.get<String>("usuarioMQTT");
-    passwordMQTT=json.get<String>("passwordMQTT");
-    topicRoot=json.get<String>("topicRoot");
+    if (doc.containsKey("modoMQTT"))  modoMQTT=doc["modoMQTT"].as<String>();
+    ID_MQTT=doc["ID_MQTT"].as<String>();
+    if (doc.containsKey("IPBroker")) IPBroker.fromString(doc["IPBroker"].as<String>());
+    if (doc.containsKey("BrokerDir")) BrokerDir=doc["BrokerDir"].as<String>();
+    puertoBroker=doc["puerto"].as<uint16_t>();
+    timeReconnectMQTT=doc["timeReconnectMQTT"].as<uint16_t>();
+    usuarioMQTT=doc["usuarioMQTT"].as<String>();
+    passwordMQTT=doc["passwordMQTT"].as<String>();
+    topicRoot=doc["topicRoot"].as<String>();
     topicCompleto=topicRoot + "/" + configNVS.usuario + "/" + configNVS.nombreServicio;
-    publicarMedidas=json.get<int8_t>("publicarMedidas"); 
-    publicarEntradas=json.get<int8_t>("publicarEntradas"); 
-    publicarSalidas=json.get<int8_t>("publicarSalidas");
-    publicarSecuenciador=json.get<int8_t>("publicarSecuenciador");
-    publicarMaquinaEstados=json.get<int8_t>("publicarMaquinaEstados"); 
+    publicarMedidas=doc["publicarMedidas"].as<int8_t>();
+    publicarEntradas=doc["publicarEntradas"].as<int8_t>();
+    publicarSalidas=doc["publicarSalidas"].as<int8_t>();
+    publicarSecuenciador=doc["publicarSecuenciador"].as<int8_t>();
+    publicarMaquinaEstados=doc["publicarMaquinaEstados"].as<int8_t>();
     
     Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nBrokerDir: %s\nIP Puerto del broker: %i\ntimeReconnectMQTT: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nTopic completo: %s\nPublicar Medidas: %i\nPublicar entradas: %i\nPublicar salidas: %i\nPublicar secuenciador: %i\nPublicar maquina estados: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),BrokerDir.c_str(),puertoBroker,timeReconnectMQTT,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),topicCompleto.c_str(),publicarMedidas,publicarEntradas,publicarSalidas,publicarSecuenciador,publicarMaquinaEstados);
 //************************************************************************************************
@@ -290,13 +294,12 @@ void respondeBuzonMQTT(char* topic, byte* payload, unsigned int length){
   Traza.mensaje("Recibido mensaje:\ntopic: %s\npayload: %s\nlength: %i\n\n",topic,mensaje,length);
 
   /**********************Leo el JSON***********************/
-  DynamicJsonBuffer jsonBuffer;///(bufferSize);     
-  JsonObject& root = jsonBuffer.parseObject(mensaje);
-  if (!root.success()) 
-    {
-    Traza.mensaje("No se pudo parsear el JSON\n");
-    return; //si el mensaje es incorrecto sale  
-    }
+  DynamicJsonDocument doc(512);///(bufferSize);     
+  DeserializationError err = deserializeJson(doc,mensaje);
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return;
+  }
 
   //si el json es valido
   enrutador(cad);
@@ -316,23 +319,21 @@ void respondeGenericoMQTT(char* topic, byte* payload, unsigned int length)
   Traza.mensaje("Recibido mensaje:\ntopic: %s\npayload: %s\nlength: %i\n\n",topic,mensaje,length);
 
   /**********************Leo el JSON***********************/
-  const size_t bufferSize = JSON_OBJECT_SIZE(3) + 50;
-  DynamicJsonBuffer jsonBuffer(bufferSize);     
-  JsonObject& root = jsonBuffer.parseObject(mensaje);
-  if (!root.success()) 
-    {
-    Traza.mensaje("No se pudo parsear el JSON\n");
-    return; //si el mensaje es incorrecto sale  
-    }
+  DynamicJsonDocument doc(512);     
+  DeserializationError err = deserializeJson(doc,mensaje);
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return;
+  }
 
   //Leo el rele y el valor a setear
-  if(root.containsKey("id") && root.containsKey("estado"))
+  if(doc.containsKey("id") && doc.containsKey("estado"))
     {
-    int id=root.get<int>("id"); 
+    int id=doc["id"].as<int>(); 
     int estado=0;
-    if(root.get<String>("estado")=="off") estado=0;       
-    else if(root.get<String>("estado")=="on") estado=1;           
-    else if(root.get<String>("estado")=="pulso") estado=2;     
+    if(doc["estado"].as<String>()==String("off")) estado=0;       
+    else if(doc["estado"].as<String>()==String("on")) estado=1;           
+    else if(doc["estado"].as<String>()==String("pulso")) estado=2;     
      
     if(salidas.setSalida(id,estado)==-1) Traza.mensaje("Se intento actuar sobre una salida que no esta en modo manual\n");
     }
@@ -355,18 +356,18 @@ void respondePingMQTT(char* topic, byte* payload, unsigned int length)
 
   /**********************Leo el JSON***********************/
   const size_t bufferSize = JSON_OBJECT_SIZE(3) + 50;
-  DynamicJsonBuffer jsonBuffer(bufferSize);     
-  JsonObject& root = jsonBuffer.parseObject(mensaje);
-  if (!root.success()) 
-    {
-    Traza.mensaje("No se pudo parsear el JSON\n");
-    return; //si el mensaje es incorrecto sale  
-    }
+  DynamicJsonDocument doc(512);     
+  DeserializationError err = deserializeJson(doc,mensaje);
+  
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return;
+  }
 
   //Si tiene IP se pregunta por un elemento en concreto. Compruebo si soy yo.
-  if (root.containsKey("IP")) 
+  if (doc.containsKey("IP")) 
     {
-    if (String(root["IP"].as<char*>())!=getIP(false)) return;
+    if (String(doc["IP"].as<const char*>())!=getIP(false)) return;
     }
 
   //SI no tenia IP o si tenia la mia, respondo

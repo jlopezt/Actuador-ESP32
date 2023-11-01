@@ -174,16 +174,14 @@ void inicializaWebServer(void)
 /*************************************************/  
 void handleNombre(AsyncWebServerRequest *request)
   {
-  const size_t capacity = JSON_OBJECT_SIZE(2);
-  DynamicJsonBuffer jsonBuffer(capacity);
+  DynamicJsonDocument doc(512);
   
-  JsonObject& root = jsonBuffer.createObject();
-  root["nombreFamilia"] = NOMBRE_FAMILIA;
-  root["nombreDispositivo"] = configNVS.nombreServicio;
-  root["version"] = VERSION;
+  doc["nombreFamilia"] = NOMBRE_FAMILIA;
+  doc["nombreDispositivo"] = configNVS.nombreServicio;
+  doc["version"] = VERSION;
   
   String cad="";
-  root.printTo(cad);
+  serializeJsonPretty(doc,cad);
   request->send(200,"text/json",cad);
   }
 
@@ -265,10 +263,11 @@ void handleResetTotal(AsyncWebServerRequest *request){
 /*                                           */ 
 /*********************************************/  
 void handleInicializaNVS(AsyncWebServerRequest *request){
-  String cad="/inicializaNVS?DeviceID=<value>&mDNS=<value>&SSID=<value>&pass=<value>";
+  String cad="/inicializaNVS?DeviceID=<value>&mDNS=<value>&SSID=<value>&pass=<value>&nombreServicio=<value>&usuario=<value>";//&contrasena=<value>";
+  size_t ret=0;
 
   //No hay argumentos, valores por defecto
-  if(request->args()==0) escribeConfigNVSDefecto();
+  if(request->args()==0) ret=escribeConfigNVSDefecto();
   else{
     for (uint8_t i=0; i<request->args(); i++){
       Serial.printf("parametro: %s | valor: %s\n",request->argName(i),request->arg(i));
@@ -286,10 +285,10 @@ void handleInicializaNVS(AsyncWebServerRequest *request){
       else Serial.printf("argumento %s no valido\n",request->argName(i).c_str());
     }
 
-    escribeConfigNVS(configNVS);
+    ret=escribeConfigNVS(configNVS);
   }
 
-  request->send(200, "text/json", "{\"formato\": \"" + cad + "\"}");
+  request->send(200, "text/json", "{\"escrito\":" + String(ret) + ",\"formato\": \"" + cad + "\"}");
 }
 
 /*********************************************/
@@ -861,19 +860,15 @@ void handleSpeechPath(AsyncWebServerRequest *request)
 
 String generaJsonServicios(boolean debug){
   String cad="";
+  DynamicJsonDocument doc(8*1024);
 
-  const size_t capacity = JSON_ARRAY_SIZE(5) + JSON_OBJECT_SIZE(1);
-  DynamicJsonBuffer jsonBuffer(capacity);
-
-  JsonObject& root = jsonBuffer.createObject();
-
-  JsonArray& Servicios = root.createNestedArray("datos");////Servicios
+  JsonArray Servicios = doc.createNestedArray("datos");////Servicios
   if(entradas.getNumEntradas()>0) Servicios.add("Entradas");
   if(salidas.getNumSalidas()>0) Servicios.add("Salidas");
   if(maquinaEstados.getNumEstados()>0) Servicios.add("MaquinaEstados");
   if(secuenciador.getNumPlanes()>0) Servicios.add("Secuenciador");
   if(variables.getNumVariables()>0) Servicios.add("Variables");  
 
-  root.printTo(cad);
+  serializeJsonPretty(doc,cad);
   return cad;  
 }

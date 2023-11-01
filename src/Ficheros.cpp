@@ -203,13 +203,12 @@ String listadoFicheros(String prefix)
   if(!prefix.startsWith("/")) prefix="/" + prefix; Serial.printf("Prefix: %s\n",prefix.c_str());
 
   const size_t capacity = 2*JSON_ARRAY_SIZE(15) + JSON_OBJECT_SIZE(31);
-  DynamicJsonBuffer jsonBuffer(capacity);
+  DynamicJsonDocument doc(1024);
 
-  JsonObject& json = jsonBuffer.createObject();
-  json["padre"] = prefix;
+  doc["padre"] = prefix;
 
-  JsonArray& subdirectorios = json.createNestedArray("subdirectorios");
-  JsonArray& ficheros = json.createNestedArray("ficheros");
+  JsonArray subdirectorios = doc.createNestedArray("subdirectorios");
+  JsonArray ficheros = doc.createNestedArray("ficheros");
 
   File root = SPIFFS.open(prefix);
   
@@ -244,7 +243,7 @@ String listadoFicheros(String prefix)
       }
     else 
       {Serial.printf("Es fichero: %s\n",fichero.c_str());
-      JsonObject& fichero_nuevo = ficheros.createNestedObject();
+      JsonObject fichero_nuevo = ficheros.createNestedObject();
       fichero_nuevo["nombre"] = fichero;
       fichero_nuevo["tamano"] = file.size();
       fichero_nuevo["fechaEdicion"] = horaYfecha(file.getLastWrite());
@@ -252,7 +251,8 @@ String listadoFicheros(String prefix)
 
     file = root.openNextFile();
     }   
-  json.printTo(salida);
+
+  serializeJsonPretty(doc,salida);
   return (salida);
   }  
 

@@ -89,24 +89,27 @@ boolean MaquinaEstados::recuperaDatos(int debug){
 /*********************************************/
 boolean MaquinaEstados::parseaConfiguracion(String contenido)
   {
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject& json = jsonBuffer.parseObject(contenido.c_str());
+  DynamicJsonDocument doc(16*1024);
+  DeserializationError err = deserializeJson(doc,contenido);
 
   String salida;
-  json.printTo(salida);//pinto el json que he leido
+  serializeJsonPretty(doc,salida);
   Traza.mensaje("json cargado:\n#%s#\n",salida.c_str());
   
-  if (!json.success()) return false;
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
 
   Traza.mensaje("\nparsed json\n");
 //******************************Parte especifica del json a leer********************************
-  if(!json.containsKey("Estados"))  return false; 
-  if(!json.containsKey("Transiciones"))  return false; 
-  if(!json.containsKey("Entradas"))  return false; 
-  if(!json.containsKey("Salidas"))  return false; 
+  if(!doc.containsKey("Estados"))  return false; 
+  if(!doc.containsKey("Transiciones"))  return false; 
+  if(!doc.containsKey("Entradas"))  return false; 
+  if(!doc.containsKey("Salidas"))  return false; 
 
   /********************Entradas******************************/
-  JsonArray& E = json["Entradas"];
+  JsonArray E = doc["Entradas"];
   numeroEntradas=(E.size()<entradas.getNumEntradas()?E.size():entradas.getNumEntradas());
   for(uint8_t i=0;i<numeroEntradas;i++) mapeoEntradas[i]=E[i];   
 
@@ -114,7 +117,7 @@ boolean MaquinaEstados::parseaConfiguracion(String contenido)
   for(uint8_t i=0;i<numeroEntradas;i++) Traza.mensaje("orden %i | id general %i\n", i,mapeoEntradas[i]);
   
   /********************Salidas******************************/
-  JsonArray& S = json["Salidas"];
+  JsonArray S = doc["Salidas"].as<JsonArray>();
   numeroSalidas=(S.size()<salidas.getNumSalidas()?S.size():salidas.getNumSalidas());
   for(uint8_t i=0;i<numeroSalidas;i++) mapeoSalidas[i]=S[i];   
 
@@ -122,7 +125,7 @@ boolean MaquinaEstados::parseaConfiguracion(String contenido)
   for(uint8_t i=0;i<numeroSalidas;i++) Traza.mensaje("orden %i | id general %i\n", i,mapeoSalidas[i]);
   
   /********************Estados******************************/
-  JsonArray& Estados = json["Estados"];
+  JsonArray Estados = doc["Estados"].as<JsonArray>();
 
   numeroEstados=(Estados.size()<MAX_ESTADOS?Estados.size():MAX_ESTADOS);
 
@@ -130,12 +133,12 @@ boolean MaquinaEstados::parseaConfiguracion(String contenido)
 
   for(int8_t i=0;i<numeroEstados;i++)
     { 
-    JsonObject& est = Estados[i];   
+    JsonObject est = Estados[i];   
     estados[i].setId(est["id"]); 
     estados[i].setNombre(String((const char *)est["nombre"]));
     estados[i].setTimeOut(est["timeout"]);
 
-    JsonArray& Salidas = est["salidas"];
+    JsonArray Salidas = Estados[i]["salidas"].as<JsonArray>();
     int8_t num_salidas;
     num_salidas=(Salidas.size()<salidas.getNumSalidas()?Salidas.size():salidas.getNumSalidas());
     if(num_salidas!=numeroSalidas) 
@@ -143,7 +146,7 @@ boolean MaquinaEstados::parseaConfiguracion(String contenido)
       Traza.mensaje("Numero de salidas incorrecto en estado %i. definidas %i, esperadas %i\n",i,num_salidas,numeroSalidas);
       return false;
       }
-    for(int8_t s=0;s<num_salidas;s++) estados[i].setValorSalida(s,Salidas.get<int>(s));
+    for(int8_t s=0;s<num_salidas;s++) estados[i].setValorSalida(s,Salidas[s].as<int>());
     }
 
   Traza.mensaje("*************************\nEstados:\n"); 
@@ -160,7 +163,7 @@ boolean MaquinaEstados::parseaConfiguracion(String contenido)
   Traza.mensaje("*************************\n");  
   
   /********************Transiciones******************************/
-  JsonArray& Transiciones = json["Transiciones"];
+  JsonArray Transiciones = doc["Transiciones"].as<JsonArray>();
 
   numeroTransiciones=(Transiciones.size()<MAX_TRANSICIONES?Transiciones.size():MAX_TRANSICIONES);
 
@@ -168,11 +171,11 @@ boolean MaquinaEstados::parseaConfiguracion(String contenido)
 
   for(int8_t i=0;i<numeroTransiciones;i++)
     { 
-    JsonObject& trans = Transiciones[i];   
+    JsonObject trans = Transiciones[i];   
     transiciones[i].setEstadoInicial(trans["inicial"]); 
     transiciones[i].setEstadoFinal(trans["final"]);
     
-    JsonArray& Entradas = trans["entradas"];   
+    JsonArray Entradas = Transiciones[i]["entradas"].as<JsonArray>();   
     int8_t num_entradas;
     num_entradas=(Entradas.size()<entradas.getNumEntradas()?Entradas.size():entradas.getNumEntradas());
     if(num_entradas!=numeroEntradas) 
@@ -181,7 +184,7 @@ boolean MaquinaEstados::parseaConfiguracion(String contenido)
       return false;
       }
     
-    for(int8_t e=0;e<num_entradas;e++) transiciones[i].setValorEntrada(e,Entradas.get<int>(e));//Puede ser -1, significa que no importa el valor
+    for(int8_t e=0;e<num_entradas;e++) transiciones[i].setValorEntrada(e,Entradas[e].as<int>());//Puede ser -1, significa que no importa el valor
     }
 
   Traza.mensaje("*************************\nTransiciones:\n"); 
@@ -341,51 +344,49 @@ String MaquinaEstados::generaJsonEstado(void)
   String cad="";
 
   const size_t bufferSize = 2*JSON_ARRAY_SIZE(4) + 9*JSON_OBJECT_SIZE(3) + 42*JSON_ARRAY_SIZE(4) + JSON_ARRAY_SIZE(42) + JSON_OBJECT_SIZE(1) + 42*JSON_OBJECT_SIZE(3);
-  DynamicJsonBuffer jsonBuffer(bufferSize);
-  
-  JsonObject& root = jsonBuffer.createObject();
+  DynamicJsonDocument doc(8*1024);
   
   if(numeroEstados<=0 || numeroEntradas<=0 || numeroSalidas<=0 || numeroTransiciones<=0){//Si no se han definido la maquina, no hay nada que hacer
-    root.printTo(cad);
+    serializeJsonPretty(doc,cad);
     return cad;
   }
 
-  root["estado"] = maquinaEstados.getNombreEstadoActual();
-  root["numeroEntradas"] = maquinaEstados.getNumEntradas();
-  root["numeroSalidas"] = maquinaEstados.getNumSalidas();
+  doc["estado"] = maquinaEstados.getNombreEstadoActual();
+  doc["numeroEntradas"] = maquinaEstados.getNumEntradas();
+  doc["numeroSalidas"] = maquinaEstados.getNumSalidas();
 
-  JsonArray& Entradas = root.createNestedArray("entradas");
+  JsonArray Entradas = doc.createNestedArray("entradas");
   for(int8_t id=0;id<numeroEntradas;id++){
-    JsonObject& Entradas_0 = Entradas.createNestedObject(); 
+    JsonObject Entradas_0 = Entradas.createNestedObject(); 
     Entradas_0["id"] = id;
     Entradas_0["nombre"] = entradas.getEntrada(mapeoEntradas[id]).getNombre();
     Entradas_0["estado"] = entradas.getEntrada(mapeoEntradas[id]).getEstado();
     Entradas_0["entradaGlobal"] = mapeoEntradas[id];
   }
 
-  JsonArray& Salidas = root.createNestedArray("salidas");
+  JsonArray Salidas = doc.createNestedArray("salidas");
   for(int8_t id=0;id<numeroSalidas;id++){
-    JsonObject& Salidas_0 = Salidas.createNestedObject(); 
+    JsonObject Salidas_0 = Salidas.createNestedObject(); 
     Salidas_0["id"] = id;
     Salidas_0["nombre"] = salidas.getSalida(mapeoSalidas[id]).getNombre();
     Salidas_0["estado"] = salidas.getSalida(mapeoSalidas[id]).getEstado();
     Salidas_0["salidaGlobal"] = mapeoSalidas[id];
     }
   //**************No es estado es configuracion
-  JsonArray& listaTransiciones = root.createNestedArray("transiciones");
+  JsonArray listaTransiciones = doc.createNestedArray("transiciones");
   for(uint8_t regla=0;regla<numeroTransiciones;regla++) //las reglas se evaluan por orden
     {
-    JsonObject& transicionNueva = listaTransiciones.createNestedObject();
+    JsonObject transicionNueva = listaTransiciones.createNestedObject();
    
     transicionNueva["inicial"] = maquinaEstados.estados[maquinaEstados.transiciones[regla].getEstadoInicial()].getNombre();
     transicionNueva["final"] = maquinaEstados.estados[maquinaEstados.transiciones[regla].getEstadoFinal()].getNombre();
-    JsonArray& valorEntradas = transicionNueva.createNestedArray("entradas");
+    JsonArray valorEntradas = transicionNueva.createNestedArray("entradas");
 
     for(uint8_t entradaME=0;entradaME<numeroEntradas;entradaME++) valorEntradas.add(transiciones[regla].getValorEntrada(entradaME));
   }
   //**************No es estado es configuracion
-  
-  root.printTo(cad);
+    
+  serializeJsonPretty(doc,cad);
   return cad;  
   }
 /************************************** Funciones de estado *************************************************/  
