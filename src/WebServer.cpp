@@ -116,6 +116,8 @@ void inicializaWebServer(void)
   serverX.on("/configSalidas", HTTP_GET, handleConfigSalidas); //Servicio de estdo de reles 
   serverX.on("/activaSalida", HTTP_ANY, handleActivaRele); //Servicio de activacion de rele
   serverX.on("/desactivaSalida", HTTP_ANY, handleDesactivaRele);  //Servicio de desactivacion de rele
+  serverX.on("/activaRele", HTTP_ANY, handleActivaRele); //Servicio de activacion de rele
+  serverX.on("/desactivaRele", HTTP_ANY, handleDesactivaRele);  //Servicio de desactivacion de rele
   serverX.on("/fuerzaSalidaManual", HTTP_ANY, handleFuerzaManual);  //Servicio para formar ua salida a modo manual
   serverX.on("/recuperaSalidaManual", HTTP_ANY, handleRecuperaManual);  //Servicio para formar ua salida a modo manual  
   serverX.on("/pulsoSalida", HTTP_ANY, handlePulsoRele);  //Servicio de pulso de rele

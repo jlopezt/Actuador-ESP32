@@ -9,16 +9,18 @@
 #include <SNTP.h>
 
 #ifdef TIENE_PANTALLA
+#define ESPERA_BLOQUEO 10000
 TFT_eSPI tft = TFT_eSPI();  // Invoke library, pins defined in User_Setup.h
 TFT_eSprite face = TFT_eSprite(&tft);
 
-unsigned long tiempoBloqueo=10000;
+unsigned long tiempoBloqueo=ESPERA_BLOQUEO;
 
 void pantallaSecuenciador(void);
 void pantallaMaqEstados(void);
 void initReloj(void);
 void updateReloj(void);
-
+void setTiempoBloqueo(void){tiempoBloqueo=millis()+ESPERA_BLOQUEO;}
+unsigned long getTiempoBloqueo(void){return tiempoBloqueo;}
 /***************************** Comunes ****************************/
 void inicializaPantalla(void){
   // Initialise the screen
@@ -34,7 +36,7 @@ void inicializaPantalla(void){
 }
 
 void actualizaPantalla(void){
-    if(millis()>tiempoBloqueo && 1){
+    if(millis()>tiempoBloqueo){// && 1){
       updateReloj();
       return;
     }

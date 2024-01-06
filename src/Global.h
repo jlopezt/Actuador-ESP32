@@ -10,7 +10,7 @@
 
 //Defines generales
 #define NOMBRE_FAMILIA   "SmartSite" //"Actuador/Secuenciador (E/S)"
-#define VERSION          "esp32 - ver 7.8.0"//ArduinoJSON6
+#define VERSION          "esp32 - ver 7.9.0"//BLE y mejoras asociacion
 
 #define TRUE              1
 #define FALSE             0
@@ -22,7 +22,7 @@
 
 #define MAX_VUELTAS      UINT16_MAX// 32767 
 
-#define URL_PLATAFORMA   "https://prepro.domoticae.es"
+#define URL_PLATAFORMA   "https://prepro.domoticae.com"
 
 //Ficheros de configuracion
 #define FICHERO_ERRORES                  "/Errores.log"
@@ -55,7 +55,9 @@
 #define MAX_SALIDAS       MAX_PINES-MAX_ENTRADAS //numero maximo de salidas
 
 //Funciones de led
-#define LED_BUILTIN                2 //GPIO del led de la placa en los ESP32   
+#ifndef LED_BUILTIN
+#define LED_BUILTIN       2 //GPIO del led de la placa en los ESP32   
+#endif
 
 //Incluye pantalla TFT o no
 #define TIENE_PANTALLA 1

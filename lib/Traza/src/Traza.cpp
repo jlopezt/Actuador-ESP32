@@ -4,13 +4,10 @@ TrazaClass Traza;
 
 void TrazaClass::mensaje(const char *str, ...)
 {
-  int count=0;  
   String cad="";
   
-  for(int i=0; str[i]!='\0';i++)  if(str[i]=='%')  count++;
-  
   va_list argv;
-  va_start(argv, str);//count);
+  va_start(argv, str);
   
   for(int i=0; str[i]!='\0';i++)
     {
@@ -22,6 +19,9 @@ void TrazaClass::mensaje(const char *str, ...)
         flag=false;
         switch(str[++i])
           {
+          case '%':
+            cad += "%";
+            break;
           case 'i':
           case 'd': 
             cad += String(va_arg(argv, int));

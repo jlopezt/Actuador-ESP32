@@ -218,7 +218,8 @@ boolean parseaConfiguracionMQTT(String contenido)
     Traza.mensaje("\nparsed json\n");
 //******************************Parte especifica del json a leer********************************
     if (doc.containsKey("modoMQTT"))  modoMQTT=doc["modoMQTT"].as<String>();
-    ID_MQTT=doc["ID_MQTT"].as<String>();
+    //ID_MQTT=doc["ID_MQTT"].as<String>(); 
+    ID_MQTT=configNVS.nombreServicio;
     if (doc.containsKey("IPBroker")) IPBroker.fromString(doc["IPBroker"].as<String>());
     if (doc.containsKey("BrokerDir")) BrokerDir=doc["BrokerDir"].as<String>();
     puertoBroker=doc["puerto"].as<uint16_t>();
@@ -233,6 +234,8 @@ boolean parseaConfiguracionMQTT(String contenido)
     publicarSecuenciador=doc["publicarSecuenciador"].as<int8_t>();
     publicarMaquinaEstados=doc["publicarMaquinaEstados"].as<int8_t>();
     
+    willMsg = String("¡"+ID_MQTT+" caido!");
+
     Traza.mensaje("Configuracion leida:\nID MQTT: %s\nIP broker: %s\nBrokerDir: %s\nIP Puerto del broker: %i\ntimeReconnectMQTT: %i\nUsuario: %s\nPassword: %s\nTopic root: %s\nTopic completo: %s\nPublicar Medidas: %i\nPublicar entradas: %i\nPublicar salidas: %i\nPublicar secuenciador: %i\nPublicar maquina estados: %i\n",ID_MQTT.c_str(),IPBroker.toString().c_str(),BrokerDir.c_str(),puertoBroker,timeReconnectMQTT,usuarioMQTT.c_str(),passwordMQTT.c_str(),topicRoot.c_str(),topicCompleto.c_str(),publicarMedidas,publicarEntradas,publicarSalidas,publicarSecuenciador,publicarMaquinaEstados);
 //************************************************************************************************
     return true;

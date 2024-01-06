@@ -40,13 +40,22 @@ void gestionaOTA(void) {ArduinoOTA.handle();}
 void inicioOTA(void) {Traza.mensaje("Actualizacion OTA\n");}
   
 void finOTA(void) {Traza.mensaje("Fin actualizacion\n");}
+/*
+void progresoOTA(unsigned int progress, unsigned int total)
+  {
+  String cad="";
+  float avance=100*(float)progress/total;
+
+  Traza.mensaje("progreso: %5.1f %%\r",avance);
+  }
+*/
 
 void progresoOTA(unsigned int progress, unsigned int total)
   {
   String cad="";
   float avance=100*(float)progress/total;
 
-  Traza.mensaje("actualizacion OTA en progreso: %5.1f %%\n",avance);
+  Serial.printf("progreso: % 5.1f %%\r",avance);
   }
 
 void erroresOTA(ota_error_t error)

@@ -223,12 +223,13 @@
 */
 
 /*****************Defindo por mi para LiliGo Relay******************************/
-#define TFT_MISO 22//19
-#define TFT_MOSI 23
+//#define TFT_MISO 22//19  TAPADA LUEGO!!!!
+#define TFT_MOSI 23      // In some display driver board, it might be written as "SDA" and so on.
 #define TFT_SCLK 13//18
 #define TFT_CS   39//15  // Chip select control pin
 #define TFT_DC   27// 5  // Data Command control pin
 #define TFT_RST  26// 4  // Reset pin (could connect to RST pin)
+#define TFT_BL   22  // LED back-light AÑADIDA LUEGO!!!
 /***********************************************/
 
 // For ESP32 Dev board (only tested with GC9A01 display)

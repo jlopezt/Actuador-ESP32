@@ -7,7 +7,7 @@ configNVS_t configNVS;
 
 void inicializaNVS(void){
   if(!prefs.begin("configNVS",false)) Serial.printf("No se pudo iniciar NVS"); // use "config" namespace
-
+/* Lo pone dos veces, aqui y dentro de leeConfigNVS
   if(!prefs.isKey("DeviceID")) Serial.printf("No existe DeviceID\n");
   if(!prefs.isKey("nombreServicio")) Serial.printf("No existe nombreServicio\n");
   if(!prefs.isKey("nombremDNS")) Serial.printf("No existe nombremDNS\n");
@@ -15,7 +15,7 @@ void inicializaNVS(void){
   if(!prefs.isKey("PASS")) Serial.printf("No existe PASS\n");
   if(!prefs.isKey("usuario")) Serial.printf("No existe usuario\n");
   if(!prefs.isKey("contrasena")) Serial.printf("No existe contrasena\n");
-
+*/
   if (!leeConfigNVS(&configNVS)) {
     Serial.printf("error al leer NVS.\nBorrando e inicializando a valores por defecto\n");
     resetNVS_Total();
@@ -96,6 +96,8 @@ int escribeConfigNVS(configNVS_t c){
   ret=prefs.putString("contrasena",c.contrasena);
   //Serial.printf("Salida de la escritura de contrasena (***...%s): %u\n",c.contrasena.substring(c.contrasena.length()-3).c_str(), ret);
 
+  leeConfigNVS(&configNVS);
+
   return (int)ret;
 }
 
@@ -140,6 +142,11 @@ void resetNVS_ID(void){
 
 void resetNVS_Total(void){
   prefs.clear();
+}
+
+void resetNVS_nombreServicio(String nombreServicio){
+  configNVS.nombreServicio=nombreServicio;
+  escribeConfigNVS(configNVS);
 }
 
 String calculaContrasena(configNVS_t c){

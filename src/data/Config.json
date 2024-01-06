@@ -1,4 +1,5 @@
 {
-	"nombre_dispositivo": "Garaje",
+	"nombre_dispositivo": "CONFIGURACION DEPRECADA",
+	"URLPlataforma": "https://prepro.domoticae.com",
 	"NivelActivo":0
 }

@@ -36,6 +36,7 @@ String calculaContrasena(configNVS_t c);
 void escribeNVS_WiFi(configNVS_t c);
 void escribeNVS_ID(configNVS_t c);
 
+void resetNVS_nombreServicio(String nombreServicio);
 void resetNVS_WiFi(void);
 void resetNVS_user(void);
 void resetNVS_ID(void);

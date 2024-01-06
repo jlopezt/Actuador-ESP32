@@ -76,6 +76,7 @@ Utilidades-->
 #define SUBTIPO_UTILIDAD_NVS                 "NVS"
 #define SUBTIPO_UTILIDAD_RESTART             "restart"
 #define SUBTIPO_UTILIDAD_INFO                "info"
+#define SUBTIPO_CONFIGURACION_ASOCIACION     "asociacion"
 #define SUBTIPO_CONFIGURACION_FICHERO        "fichero"
 
 #define ORDEN_ACTUADOR_SALIDAS_ESTADO        "estado"
@@ -89,6 +90,7 @@ Utilidades-->
 #define ORDEN_UTILIDAD_NVS_RESETUSER         "resetUser"
 #define ORDEN_UTILIDAD_NVS_RESETWIFI         "resetWiFi"
 #define ORDEN_UTILIDAD_NVS_RESETID           "resetID"
+#define ORDEN_CONFIGURACION_ASOCIACION_VALIDADO         "validado" //el dispositivo debe solicitar el fichero de configuracion indicado a la plataforma por HTTP
 #define ORDEN_CONFIGURACION_FICHERO_UPLOAD   "upload" //el dispositivo debe solicitar el fichero de configuracion indicado a la plataforma por HTTP
 #define ORDEN_CONFIGURACION_FICHERO_DOWNLOAD "download" //el dispositivo debe enviar el fichero de configuracion indicado a la plataforma por HTTP
 
@@ -122,6 +124,7 @@ boolean utilidadRestart(String comando);
 boolean utilidadNVS(String comando);
 boolean utilidadInfo(String comando);
 
+boolean configraValidado(String comando);
 boolean configraFichero(String comando);
 /***************************** Prototipos *****************************/
 /***************************** Var globales *****************************/
@@ -165,6 +168,7 @@ boolean enrutador(String comando){
   }
   else if(tipo==TIPO_CONFIGURACION){
       if(subtipo==SUBTIPO_CONFIGURACION_FICHERO)return configraFichero(comando);
+      else if(subtipo==SUBTIPO_CONFIGURACION_ASOCIACION)return configraValidado(comando);      
       else return false;
   }
 
@@ -173,6 +177,49 @@ boolean enrutador(String comando){
   }
 
 /****************************** Configuracion ****************************
+Atiende estas ordenes
+{
+    "tipo":"configura",
+    "subtipo":"asociacion",
+    "orden":"validado",
+    "id": 0,
+    "valor": DID
+}
+
+{
+ 	"tipo":"actuador",
+	"subtipo":"secuenciador",
+	"orden":"estado",
+    "id": #,    
+	"valor":"on"/"off"
+}
+*/
+boolean configraValidado(String comando){
+  DynamicJsonDocument doc(512);
+  DeserializationError err = deserializeJson(doc,comando);
+
+  if (err) {
+    Serial.printf("Error deserializando el json %s\n",err.c_str());
+    return false;
+  }
+  else {
+    Traza.mensaje("\ncomando: json parseado\n");
+
+    String orden="";
+    uint8_t id=0;
+    String valor="";
+//******************************Parte especifica del json a leer********************************
+    if (doc.containsKey("orden"))  orden = doc["orden"].as<String>();
+    if (doc.containsKey("valor"))  valor = doc["valor"].as<String>();
+
+    Traza.mensaje("configura validado\ncomando leido:\norden: %s\nid: %02u\nvalor: %s\n",orden.c_str(),id,valor.c_str());
+//************************************************************************************************
+    if(orden==ORDEN_CONFIGURACION_ASOCIACION_VALIDADO) return setEstadoAsociacion(ASOCIADO_VALIDADO);//valor es el sevicio a recuperar
+    else return false;
+    }
+return false;
+}
+/*
 Atiende estas ordenes
 {
  	"tipo":"configura",
@@ -208,7 +255,7 @@ boolean configraFichero(String comando){
     if (doc.containsKey("orden"))  orden = doc["orden"].as<String>();
     if (doc.containsKey("valor"))  valor = doc["valor"].as<String>();
 
-    Traza.mensaje("configura fichero\ncomando leida:\norden: %s\nid: %02u\nvalor: %s\n",orden.c_str(),id,valor.c_str());
+    Traza.mensaje("configura fichero\ncomando leido:\norden: %s\nid: %02u\nvalor: %s\n",orden.c_str(),id,valor.c_str());
 //************************************************************************************************
     if(orden==ORDEN_CONFIGURACION_FICHERO_DOWNLOAD) return leeFicheroConfig(valor);//valor es el sevicio a recuperar
     else if(orden==ORDEN_CONFIGURACION_FICHERO_UPLOAD) return enviaFicheroConfig("/" + valor + ".json"); //fichero a enviar

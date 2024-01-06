@@ -6,7 +6,7 @@
   "xxxpuerto": 8883, 
   "usuarioMQTT": "domoticae", 
   "passwordMQTT": "88716", 
-  "ID_MQTT": "Riego", 
+  "ID_MQTT": "CONFIGURACION DEPRECADA", 
   "topicRoot": "domoticae", 
   "publicarMedidas": 0,
   "publicarEntradas": 1,

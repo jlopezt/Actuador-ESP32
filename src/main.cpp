@@ -33,6 +33,7 @@
 /***************************** Includes *****************************/
 #include <Global.h>
 #include <configNVS.h>
+#include <BLE.h>
 #include <RedWifi.h>
 #include <Sensores.h>
 #include <Variables.h> 
@@ -119,6 +120,10 @@ void setup()
   Traza.mensaje("\n\nInit NVS --------------------------------------------------------------------------\n");
   //NVS - Cargo el ID de device
   inicializaNVS();
+
+  Traza.mensaje("\n\nInit BLE --------------------------------------------------------------------------\n");
+  //BLE - Arranco el servidor de BLE y configuro servico y caracteristicas
+  inicializaBLE();
 
   Traza.mensaje("\n\nInit Ficheros ---------------------------------------------------------------------\n");
   //Ficheros - Lo primero para poder leer los demas ficheros de configuracion
@@ -210,7 +215,7 @@ void setup()
 #endif
 
   compruebaConfiguracion(0);
-  enviaConfiguracion();
+  if(getEstadoAsociacion()==ASOCIADO_VALIDADO) enviaConfiguracion();
   parpadeaLed(2);
   apagaLed();//Por si acaso...
   
@@ -473,6 +478,8 @@ String generaJsonInfo(void)
   wifi["ssid"] = nombreSSID();     
   wifi["ip"] =  WiFi.localIP().toString();
   wifi["potencia"] = String(WiFi.RSSI());
+  wifi["nombre"] = String(WiFi.getHostname());
+  wifi["mac"] = String(WiFi.macAddress());
 
   JsonObject mqtt = doc.createNestedObject("MQTT");  
   mqtt["ipBRoker"] = getIPBroker().toString();     

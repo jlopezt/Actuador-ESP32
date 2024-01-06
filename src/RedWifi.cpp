@@ -183,6 +183,7 @@ boolean inicializaWifi(boolean debug)
   WiFi.mode(WIFI_OFF);
   delay(100);
   WiFi.mode(WIFI_STA);
+  if(configNVS.nombreServicio!="") WiFi.hostname(configNVS.nombreServicio);
 
   if(recuperaDatosWiFi(debug))
     {

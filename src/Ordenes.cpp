@@ -9,10 +9,13 @@
 #define LONG_COMANDO   40
 #define LONG_PARAMETRO 30
 #define LONG_ORDEN     22 //Comando (espacio) Parametros (fin de cadena)
-#define MAX_COMANDOS   40
+#define MAX_COMANDOS   50
 /***************************** Defines *****************************/
 
 /***************************** Includes *****************************/
+#include <SPIFFS.h>
+#include <Time.h>
+
 #include <Global.h>
 #include <Ordenes.h>
 #include <configNVS.h>
@@ -27,9 +30,8 @@
 #include <GoogleHomeNotifier.h>
 #include <MQTT.h>
 #include <Ficheros.h>
-
-#include <SPIFFS.h>
-#include <Time.h>
+#include <Pantalla.h>
+#include <ClienteHTTP.h>
 /***************************** Includes *****************************/
 
 typedef struct 
@@ -453,7 +455,62 @@ void func_comando_leeNVS(int iParametro, char* sParametro, float fParametro)//"d
   configNVS_t c;  
   if(!leeConfigNVS(&c)) Serial.printf("error al leer NVS.\n");
   //else Serial.printf("Datos leidos\nDevice ID : %016llx\nnombre mDNS: %s\nSSID : %s\nPassword : (*****...%s)\nusuario : %s\ncontraseña : (*****...%s)\n",c.deviceID,c.nombremDNS.c_str(),c.SSID.c_str(),c.pass.substring(configNVS.pass.length()-4).c_str(),c.usuario.c_str(),c.contrasena.substring(c.contrasena.length()-4).c_str());
-  else Serial.printf("Datos leidos\nDevice ID : %016llx\nnombre Servicio: %s\nnombre mDNS: %s\nSSID : %s\nPassword : (*****...%s)\nusuario : %s\ncontraseña : (%s)\n",c.deviceID,c.nombreServicio,c.nombremDNS.c_str(),c.SSID.c_str(),c.pass.substring(configNVS.pass.length()-4).c_str(),c.usuario.c_str(),c.contrasena.c_str());  
+  else Serial.printf("Datos leidos\nDevice ID : %016llx\nnombre Servicio: %s\nnombre mDNS: %s\nusuario : %s\ncontraseña : (%s)\nSSID : %s\nPassword : (*****...%s)\n",c.deviceID,c.nombreServicio,c.nombremDNS.c_str(),c.usuario.c_str(),c.contrasena.c_str(),c.SSID.c_str(),c.pass.substring(configNVS.pass.length()-4).c_str());  
+  }  
+
+void func_comando_resetNVS(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  resetNVS_Total();
+  Serial.printf("Valores reseteados.\n");  
+  }  
+
+void func_comando_nombreServicioNVS(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  resetNVS_nombreServicio(String(sParametro));
+  Serial.printf("Valor escrito. nombreServicio=%s\n",sParametro);
+  }
+
+void func_comando_setTiempoBloqueo(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  setTiempoBloqueo();  
+  }
+
+void func_comando_getTiempoBloqueo(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  Serial.printf("Tiempo de bloqueo: %ul ms\n",getTiempoBloqueo());
+  }
+
+void func_comando_getEstadoAsoc(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  uint8_t estado=getEstadoAsociacion();
+  switch (estado){
+    case NO_ASOCIADO:
+      Serial.printf("No asociado\n");
+      break;
+    case ASOCIADO_PENDIENTE_VALIDACION:
+      Serial.printf("Asociado, no validado\n");
+      break;
+    case ASOCIADO_VALIDADO:
+      Serial.printf("Asociado\n");
+      break;
+    }
+  }
+
+void func_comando_setEstadoAsoc(int iParametro, char* sParametro, float fParametro)//"debug")
+  {
+  if(setEstadoAsociacion(iParametro)) Serial.printf("estado configurado\n");
+  uint8_t estado=getEstadoAsociacion();
+  switch (estado){
+    case NO_ASOCIADO:
+      Serial.printf("No asociado\n");
+      break;
+    case ASOCIADO_PENDIENTE_VALIDACION:
+      Serial.printf("Asociado, no validado\n");
+      break;
+    case ASOCIADO_VALIDADO:
+      Serial.printf("Asociado\n");
+      break;
+    }
   }  
 /***************************** FIN funciones para comandos ******************************************/ 
 
@@ -618,6 +675,30 @@ void inicializaOrden(void)
   comandos[i].comando="leeNVS";
   comandos[i].descripcion="Muestra el contenido de NVS";
   comandos[i++].p_func_comando=func_comando_leeNVS;
+
+  comandos[i].comando="resetNVS";
+  comandos[i].descripcion="Resetea el contenido de NVS";
+  comandos[i++].p_func_comando=func_comando_resetNVS;
+
+  comandos[i].comando="NombreServicioNVS";
+  comandos[i].descripcion="Cambia el contenido del nombre de servicio en NVS";
+  comandos[i++].p_func_comando=func_comando_nombreServicioNVS;
+
+  comandos[i].comando="setTiempoBloqueo";
+  comandos[i].descripcion="Configura el tiempo de bloqueo";
+  comandos[i++].p_func_comando=func_comando_setTiempoBloqueo;
+  
+  comandos[i].comando="getTiempoBloqueo";
+  comandos[i].descripcion="Muestra el tiempo de bloqueo";
+  comandos[i++].p_func_comando=func_comando_getTiempoBloqueo;
+
+  comandos[i].comando="getEstadoAsoc";
+  comandos[i].descripcion="Devuelve el estado de activacion";
+  comandos[i++].p_func_comando=func_comando_getEstadoAsoc;
+
+  comandos[i].comando="setEstadoAsoc";
+  comandos[i].descripcion="Configura el estado de activacion";
+  comandos[i++].p_func_comando=func_comando_setEstadoAsoc;
 
   //resto
   for(;i<MAX_COMANDOS;)

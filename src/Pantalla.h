@@ -12,6 +12,9 @@
 void inicializaPantalla(void);
 void actualizaPantalla(void);
 
+void setTiempoBloqueo(void);
+unsigned long getTiempoBloqueo(void);
+
 //extern TFT_eSPI tft;  //definido en Pantalla.cpp
 extern TFT_eSprite face; //definido en Pantalla.cpp
 #endif
